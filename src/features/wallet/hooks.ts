@@ -1,6 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from '@/features/auth/hooks';
-import { chargeWallet, fetchMyWallets, fetchPointBalance, withdraw } from './api';
+import {
+  chargeWallet,
+  createStripeCheckout,
+  fetchMyWallets,
+  fetchPointBalance,
+  fetchTransactionByIdempotencyKey,
+  withdraw,
+} from './api';
 
 export const walletKeys = {
   wallets: (userId: string | undefined) => ['wallets', userId] as const,
@@ -51,4 +58,18 @@ export function useCharge() {
 export function useWithdraw() {
   const invalidate = useInvalidateMoney();
   return useMutation({ mutationFn: withdraw, onSuccess: invalidate });
+}
+
+export function useStripeCheckout() {
+  return useMutation({ mutationFn: createStripeCheckout });
+}
+
+/** Stripe から戻った後、webhook の反映を 2 秒ごとに待つ */
+export function useStripeReturn(sessionId: string | null) {
+  return useQuery({
+    queryKey: ['stripe-return', sessionId],
+    queryFn: () => fetchTransactionByIdempotencyKey(sessionId as string),
+    enabled: !!sessionId,
+    refetchInterval: (q) => (q.state.data ? false : 2_000),
+  });
 }

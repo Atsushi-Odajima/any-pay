@@ -48,3 +48,30 @@ export async function withdraw(input: {
   if (error) throw error;
   return data;
 }
+
+/** Stripe Checkout（テストモード）のセッションを作成し、決済ページ URL を返す */
+export async function createStripeCheckout(input: {
+  amount: number;
+  origin: string;
+}): Promise<string> {
+  const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string }>(
+    'stripe-checkout',
+    {
+      body: input,
+    },
+  );
+  if (error) throw error;
+  if (!data?.url) throw new Error(data?.error ?? 'CHECKOUT_FAILED');
+  return data.url;
+}
+
+/** Stripe の webhook が作った取引（冪等キー = session id）。未反映なら null */
+export async function fetchTransactionByIdempotencyKey(key: string): Promise<Transaction | null> {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('idempotency_key', key)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
