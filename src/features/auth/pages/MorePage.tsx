@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Scale,
   Languages,
+  BookOpen,
 } from 'lucide-react';
 import { useMyMerchant } from '@/features/merchant/hooks';
 import { Avatar, Card, ListRow, PageHeader, Badge, LanguageToggle } from '@/shared/ui';
@@ -111,6 +112,12 @@ export function MorePage() {
         )}
 
         <Card className="p-0">
+          <ListRow
+            icon={<BookOpen className="h-5 w-5" />}
+            title={t('more.guide')}
+            subtitle={t('more.guideSub')}
+            to="/guide"
+          />
           <ListRow
             icon={<Info className="h-5 w-5" />}
             title={t('more.about')}

@@ -93,6 +93,8 @@ export const ja = {
     aboutSub: 'ポートフォリオ用デモ。実際のお金は動きません',
     logout: 'ログアウト',
     language: '表示言語',
+    guide: '説明書',
+    guideSub: 'ユーザー・加盟店・管理者向けの使い方',
   },
   home: {
     recent: '最近の取引',
@@ -544,6 +546,14 @@ export const ja = {
     noMismatch: '不一致はありません',
     noMismatchSub: 'すべての wallet で balance_cache = sum(ledger_entries.amount)',
     mismatches: '{n} 件の不一致',
+  },
+  guide: {
+    title: '説明書',
+    lead: '立場に合わせた説明書を選んでください。表示言語を切り替えると説明書も切り替わります。',
+    toc: '目次',
+    print: '印刷',
+    printHint: '各説明書は右上の「印刷」から A4 で印刷（または PDF 保存）できます。',
+    footer: 'Any Pay はポートフォリオ用のデモです。実際のお金は動きません。',
   },
   pages: {
     notFound: 'ページが見つかりません',

@@ -89,6 +89,8 @@ export const en: Dict = {
     aboutSub: 'Portfolio demo. No real money is involved',
     logout: 'Sign out',
     language: 'Language',
+    guide: 'Guides',
+    guideSub: 'How to use: users, merchants, admins',
   },
   home: {
     recent: 'Recent activity',
@@ -540,6 +542,15 @@ export const en: Dict = {
     noMismatch: 'No mismatches',
     noMismatchSub: 'balance_cache = sum(ledger_entries.amount) for every wallet',
     mismatches: '{n} mismatches',
+  },
+  guide: {
+    title: 'Guides',
+    lead: 'Pick the guide for your role. Switching the display language switches the guides too.',
+    toc: 'Contents',
+    print: 'Print',
+    printHint:
+      'Each guide can be printed in A4 (or saved as a PDF) with the Print button at the top right.',
+    footer: 'Any Pay is a portfolio demo. No real money is involved.',
   },
   pages: {
     notFound: 'Page not found',
