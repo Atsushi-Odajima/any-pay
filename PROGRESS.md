@@ -3,7 +3,7 @@
 > iPhone から読む前提で簡潔に。各フェーズ終了時に更新。
 
 ## 現在地
-- Phase 2 完了。次は Phase 3（QR決済）
+- Phase 3 完了。次は Phase 4（送金・受取・割り勘）
 
 ## 環境メモ（このセッションの制約）
 - Docker / Supabase CLI が使えない環境のため、`supabase init` は `supabase/config.toml` を手書きで代替
@@ -30,3 +30,11 @@
 - 判断メモ：treasury は RPC が依存するため seed ではなく migration で固定 id（`00000000-…-0001`）で作成。`_post_transaction` に `p_subsidy` を持たせ、全店共通クーポンの割引分を treasury → 加盟店に補填する仕訳を同一取引内で書ける設計（Phase 6 で使用）。`withdraw` は `p_wallet_id`（省略可）で加盟店 wallet からの出金にも対応
 - 手動確認：ログイン → ホーム「チャージ」→ 銀行 → 10,000 → チャージする → 完了画面 → 履歴に「チャージ +¥10,000 残高 ¥10,000」
 - 次：Phase 3
+
+## Phase 3 — QR決済 ✅
+- 完了内容：`0003_qr_payments.sql`（`register_merchant`、`create_qr_token`、`pay_with_token`、`create_payment_request` / `get_payment_request` / `cancel_payment_request`、`pay_request`、`pay_static`、共通 `_settle_payment`（レート制限 → クーポン → 記帳 → ポイント → 双方通知）、Realtime publication）。QR ペイロード解析（zod、URL 形式も可）、QR 表示（60秒自動更新・残り秒数・使用済み/期限切れは即再発行）、スキャナ（BarcodeDetector 優先 → zxing、カメラ不可時は手入力フォールバック）、決済確認（動的：金額固定・残り時間 / 静的：金額入力）、加盟店の受付画面（金額 → 動的QR（2秒ポーリングで paid 検知）/ お客様のQRを読む → 金額 → 決済）、店舗登録
+- SQLテスト：失効・偽・使用済み・期限切れトークン、非オーナーの `pay_with_token`、残高不足時にトークン未消費、冪等リプレイ、動的QRの二重支払い / 期限切れ / キャンセル、静的QR、20回/分レート制限、台帳整合
+- 判断メモ：`register_merchant` は Phase 5 予定だったが受付画面の動作に必要なため前倒し（1オーナー1店舗）。`get_payment_request` は支払う側が店名・金額を確認するための security definer RPC（id は推測不能な uuid）。クーポン適用ロジック（`_apply_coupon`）は決済 RPC の引数に含まれるため Phase 3 で実装し、Phase 6 でテスト・UI を追加する。ユーザー提示型の完了検知は `notifications` の Realtime INSERT
+- 手動確認（ブラウザ2窓）：A: `/pay` で QR 表示 → B: その他 → 店舗登録 → 受付「お客様のQRを読む」→ A の QR を読む → 金額 → 決済 → A が自動で完了画面。B: 受付「QRを提示」→ 金額 → A: スキャン → 確認 → 支払う。静的は Phase 5 の印刷ページで
+- 既知の課題：Realtime は Supabase ダッシュボードで `transactions` / `notifications` / `payment_requests` の publication が有効であること（migration で追加済み）
+- 次：Phase 4

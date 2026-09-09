@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router';
-import { User, LogOut, Info, ArrowUpFromLine } from 'lucide-react';
+import { User, LogOut, Info, ArrowUpFromLine, Store } from 'lucide-react';
+import { useMyMerchant } from '@/features/merchant/hooks';
 import { Avatar, Card, ListRow, PageHeader, Badge } from '@/shared/ui';
 import { useMyProfile, useSignOut } from '../hooks';
 
@@ -7,6 +8,7 @@ export function MorePage() {
   const profile = useMyProfile();
   const signOut = useSignOut();
   const navigate = useNavigate();
+  const merchant = useMyMerchant();
 
   return (
     <>
@@ -34,6 +36,24 @@ export function MorePage() {
             title="出金"
             to="/settings/withdraw"
           />
+        </Card>
+
+        <Card className="p-0">
+          {merchant.data ? (
+            <ListRow
+              icon={<Store className="h-5 w-5" />}
+              title="加盟店ダッシュボード"
+              subtitle={merchant.data.name}
+              to="/merchant"
+            />
+          ) : (
+            <ListRow
+              icon={<Store className="h-5 w-5" />}
+              title="店舗を登録する"
+              subtitle="決済の受付・売上管理"
+              to="/merchant/register"
+            />
+          )}
         </Card>
 
         <Card className="p-0">

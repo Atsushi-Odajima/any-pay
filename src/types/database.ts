@@ -588,6 +588,43 @@ export type Database = {
       };
     };
     Functions: {
+      register_merchant: {
+        Args: { p_name: string; p_category?: string | null; p_address?: string | null };
+        Returns: Database['public']['Tables']['merchants']['Row'];
+      };
+      create_qr_token: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      pay_with_token: {
+        Args: { p_token: string; p_amount: number; p_merchant_id: string; p_idempotency_key: string };
+        Returns: Database['public']['Tables']['transactions']['Row'];
+      };
+      create_payment_request: {
+        Args: { p_amount: number; p_memo?: string | null; p_merchant_id?: string | null };
+        Returns: Database['public']['Tables']['payment_requests']['Row'];
+      };
+      get_payment_request: {
+        Args: { p_request_id: string };
+        Returns: Json;
+      };
+      cancel_payment_request: {
+        Args: { p_request_id: string };
+        Returns: Database['public']['Tables']['payment_requests']['Row'];
+      };
+      pay_request: {
+        Args: { p_request_id: string; p_idempotency_key: string; p_user_coupon_id?: string | null };
+        Returns: Database['public']['Tables']['transactions']['Row'];
+      };
+      pay_static: {
+        Args: {
+          p_merchant_id: string;
+          p_amount: number;
+          p_idempotency_key: string;
+          p_user_coupon_id?: string | null;
+        };
+        Returns: Database['public']['Tables']['transactions']['Row'];
+      };
       charge_wallet: {
         Args: { p_amount: number; p_method: string; p_idempotency_key: string };
         Returns: Database['public']['Tables']['transactions']['Row'];

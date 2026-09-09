@@ -16,6 +16,12 @@ import { WithdrawPage } from '@/features/wallet/pages/WithdrawPage';
 import { CompletePage } from '@/features/wallet/pages/CompletePage';
 import { HistoryPage } from '@/features/history/pages/HistoryPage';
 import { TransactionDetailPage } from '@/features/history/pages/TransactionDetailPage';
+import { PayPage } from '@/features/qr/pages/PayPage';
+import { ScanRedirectPage } from '@/features/qr/pages/ScanRedirectPage';
+import { PaymentConfirmPage } from '@/features/payment/pages/PaymentConfirmPage';
+import { MerchantLayout } from '@/features/merchant/layouts/MerchantLayout';
+import { MerchantRegisterPage } from '@/features/merchant/pages/MerchantRegisterPage';
+import { MerchantAcceptRoute } from '@/features/merchant/pages/MerchantAcceptRoute';
 
 export const router = createBrowserRouter(
   isSupabaseConfigured
@@ -43,7 +49,8 @@ export const router = createBrowserRouter(
                   element: <TabLayout />,
                   children: [
                     { path: '/', element: <HomePage /> },
-                    { path: '/pay', element: <PlaceholderPage title="支払う" /> },
+                    { path: '/pay', element: <PayPage /> },
+                    { path: '/merchant/register', element: <MerchantRegisterPage /> },
                     { path: '/send', element: <PlaceholderPage title="送る" /> },
                     { path: '/history', element: <HistoryPage /> },
                     { path: '/history/:id', element: <TransactionDetailPage /> },
@@ -55,7 +62,23 @@ export const router = createBrowserRouter(
                 },
                 {
                   element: <PlainLayout />,
-                  children: [{ path: '/complete/:id', element: <CompletePage /> }],
+                  children: [
+                    { path: '/complete/:id', element: <CompletePage /> },
+                    { path: '/scan', element: <ScanRedirectPage /> },
+                    { path: '/pay/confirm/:mode/:id', element: <PaymentConfirmPage /> },
+                  ],
+                },
+                {
+                  path: '/merchant',
+                  element: <MerchantLayout />,
+                  children: [
+                    { index: true, element: <PlaceholderPage title="店舗ホーム" /> },
+                    { path: 'accept', element: <MerchantAcceptRoute /> },
+                    { path: 'transactions', element: <PlaceholderPage title="決済一覧" /> },
+                    { path: 'qr', element: <PlaceholderPage title="静的QR" /> },
+                    { path: 'coupons', element: <PlaceholderPage title="クーポン" /> },
+                    { path: 'withdraw', element: <PlaceholderPage title="出金" /> },
+                  ],
                 },
               ],
             },
