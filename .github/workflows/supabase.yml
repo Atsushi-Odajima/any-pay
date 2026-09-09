@@ -64,7 +64,11 @@ jobs:
         if: steps.secrets.outputs.ok == 'true' && github.event_name == 'workflow_dispatch' && inputs.seed
         run: supabase db push --include-seed
 
-      # Auth 設定（Phone 有効化・Test OTP など config.toml の [auth] 節）をリモートへ反映
+      # Auth 設定（Site URL・Phone 有効化・Test OTP。config.toml に書いた項目だけ）をリモートへ反映
+      - name: Show auth config diff
+        if: steps.secrets.outputs.ok == 'true'
+        continue-on-error: true
+        run: supabase config diff
       - name: Push auth config (Test OTP)
         if: steps.secrets.outputs.ok == 'true'
         continue-on-error: true

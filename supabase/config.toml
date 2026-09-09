@@ -1,50 +1,25 @@
-# Supabase CLI 設定（`supabase init` 相当）。ローカル実行時は `supabase start`
+# Supabase CLI 設定。
+# `supabase config push`（GitHub Actions）はここに書いた項目をそのままリモートへ上書きするため、
+# 反映したい Auth 設定だけを最小限に書く（ポート等はデフォルトを使う）。
 project_id = "any-pay"
-
-[api]
-enabled = true
-port = 54321
-schemas = ["public", "graphql_public"]
-extra_search_path = ["public", "extensions"]
-max_rows = 1000
-
-[db]
-port = 54322
-shadow_port = 54320
-major_version = 17
 
 [db.seed]
 enabled = true
 sql_paths = ["./seed.sql"]
 
-[realtime]
-enabled = true
-
-[studio]
-enabled = true
-port = 54323
-
 [auth]
-enabled = true
 site_url = "https://any-pay.pages.dev"
 additional_redirect_urls = ["http://localhost:5173", "https://any-pay.pages.dev"]
-jwt_expiry = 3600
-enable_refresh_token_rotation = true
-enable_signup = true
-enable_anonymous_sign_ins = false
 
+# 電話番号 + OTP ログイン。SMS プロバイダ契約なしで動かすため Test OTP を使う
 [auth.sms]
 enable_signup = true
 enable_confirmations = true
-# SMS プロバイダ契約なしでログインするためのテスト用 OTP（本番ダッシュボードでも同じ設定を行う）
+
+# キーは国番号付き・"+" なし（Supabase の保存形式）。seed.sql のユーザーと対応。認証コードはすべて 123456
 [auth.sms.test_otp]
-# キーは国番号付き・"+" なし（Supabase の保存形式）。seed.sql のユーザーと対応
 "819000000001" = "123456"
 "819000000002" = "123456"
 "819000000003" = "123456"
 "819000000011" = "123456"
 "819000000012" = "123456"
-
-[edge_runtime]
-enabled = true
-policy = "oneshot"

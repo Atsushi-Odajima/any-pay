@@ -15,7 +15,9 @@
 ## 自動化メモ（このセッションでできたこと・できなかったこと）
 - この実行環境には Supabase / Cloudflare の鍵がなく、`*.supabase.co` と Cloudflare API への通信もネットワークポリシーで遮断されているため、マイグレーション適用・Test OTP 登録・Pages デプロイは直接実行できなかった
 - 代わりに `.github/workflows/ci.yml`（typecheck / lint / format / Vitest / SQL テスト / build）と `.github/workflows/supabase.yml`（db push / config push / seed / functions deploy / 型差分）を追加。SQL テストは GitHub ランナー同梱の PostgreSQL で動く（非 root 経路も確認済み）
-- Cloudflare Pages 用に `.node-version`（22。Vite 8 は Node 20+ 必須）を追加。`config.toml` の `site_url` と `.env.example` の URL を実プロジェクトに合わせた
+- Cloudflare Pages 用に `.node-version`（22。Vite 8 は Node 20+ 必須）を追加。`config.toml` は `config push` で上書きされる項目だけの最小構成（Site URL・Phone・Test OTP）にし、`.env.example` の URL を実プロジェクトに合わせた
+- GitHub Actions の CI は緑（run #2：typecheck/lint/format/Vitest/build と SQL テストの両ジョブ成功）。Supabase deploy は Secrets 未設定のため全ステップ skip（想定どおり）
+- Cloudflare Pages からのビルドステータスがコミットに付いていない。Pages プロジェクト `any-pay` の GitHub 連携（リポジトリ選択・Production branch = `claude/any-pay-qr-app-ynxxq0`（現在のデフォルトブランチ）・ビルド設定）が完了しているかダッシュボードで確認が必要
 
 ## 環境メモ（このセッションの制約）
 - Docker / Supabase CLI が使えない環境のため、`supabase init` は `supabase/config.toml` を手書きで代替
