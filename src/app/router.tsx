@@ -22,6 +22,11 @@ import { PaymentConfirmPage } from '@/features/payment/pages/PaymentConfirmPage'
 import { MerchantLayout } from '@/features/merchant/layouts/MerchantLayout';
 import { MerchantRegisterPage } from '@/features/merchant/pages/MerchantRegisterPage';
 import { MerchantAcceptRoute } from '@/features/merchant/pages/MerchantAcceptRoute';
+import { SendPage } from '@/features/transfer/pages/SendPage';
+import { ReceivePage } from '@/features/transfer/pages/ReceivePage';
+import { SplitListPage } from '@/features/transfer/pages/SplitListPage';
+import { SplitCreatePage } from '@/features/transfer/pages/SplitCreatePage';
+import { SplitDetailPage } from '@/features/transfer/pages/SplitDetailPage';
 
 export const router = createBrowserRouter(
   isSupabaseConfigured
@@ -51,7 +56,11 @@ export const router = createBrowserRouter(
                     { path: '/', element: <HomePage /> },
                     { path: '/pay', element: <PayPage /> },
                     { path: '/merchant/register', element: <MerchantRegisterPage /> },
-                    { path: '/send', element: <PlaceholderPage title="送る" /> },
+                    { path: '/send', element: <SendPage /> },
+                    { path: '/receive', element: <ReceivePage /> },
+                    { path: '/split', element: <SplitListPage /> },
+                    { path: '/split/new', element: <SplitCreatePage /> },
+                    { path: '/split/:id', element: <SplitDetailPage /> },
                     { path: '/history', element: <HistoryPage /> },
                     { path: '/history/:id', element: <TransactionDetailPage /> },
                     { path: '/charge', element: <ChargePage /> },
