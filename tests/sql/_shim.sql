@@ -69,7 +69,7 @@ end $$;
 -- テスト用ヘルパー
 -- ---------------------------------------------------------------------------
 create schema if not exists tests;
-grant usage on schema tests to anon, authenticated;
+grant usage on schema tests to anon, authenticated, service_role;
 
 -- 指定ユーザーとしてログイン（authenticated ロール + JWT claim）
 create or replace function tests.login(p_user_id uuid) returns void
@@ -137,4 +137,4 @@ begin
   raise notice 'ok - %', p_label;
 end $$;
 
-grant execute on all functions in schema tests to anon, authenticated;
+grant execute on all functions in schema tests to anon, authenticated, service_role;

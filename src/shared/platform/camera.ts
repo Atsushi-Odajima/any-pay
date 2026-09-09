@@ -1,6 +1,6 @@
 // QR スキャン。BarcodeDetector が使える環境（Android Chrome / iOS 17+ Safari）は優先し、
 // それ以外は @zxing/browser でデコードする。Capacitor 化時は本ファイルのみ差し替える。
-import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
+import type { IScannerControls } from '@zxing/browser';
 
 export interface ScanSession {
   stop(): void;
@@ -87,6 +87,8 @@ async function startWithZxing(
   onResult: (text: string) => void,
   onError?: (error: Error) => void,
 ): Promise<ScanSession> {
+  // zxing は約 300KB あるため、カメラを使う画面で初めて読み込む
+  const { BrowserQRCodeReader } = await import('@zxing/browser');
   const reader = new BrowserQRCodeReader(undefined, { delayBetweenScanAttempts: 150 });
   let controls: IScannerControls | null = null;
   controls = await reader.decodeFromConstraints(

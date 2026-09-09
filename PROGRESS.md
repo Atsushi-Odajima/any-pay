@@ -3,7 +3,7 @@
 > iPhone から読む前提で簡潔に。各フェーズ終了時に更新。
 
 ## 現在地
-- Phase 6 完了。次は Phase 7（仕上げ）
+- Phase 8 まで完了（Phase 9 Capacitor は将来）。残りは人間の作業（§11：Supabase プロジェクト作成・Test OTP・Cloudflare Pages・Stripe secrets）
 
 ## 環境メモ（このセッションの制約）
 - Docker / Supabase CLI が使えない環境のため、`supabase init` は `supabase/config.toml` を手書きで代替
@@ -59,3 +59,17 @@
 - 判断メモ：`verify_pin` を例外で失敗させると失敗回数の UPDATE ごと巻き戻るため戻り値で返す設計にした。PIN ゲートはサーバー側で強制（クライアントの生体認証はローカルの再認証のみ）。`pay_with_token` は加盟店が起点なのでユーザーの PIN ゲート対象外。Web Push は未実装（`shared/platform/push.ts` の抽象層のみ）
 - 手動確認：その他 → セキュリティ → PIN 設定 → 支払い時に PIN シートが出る → 5回間違えるとロック。クーポン → 獲得する → 決済確認で選択 → 明細に割引内訳
 - 次：Phase 7
+
+## Phase 7 — 仕上げ ✅
+- 完了内容：`0007_reconcile.sql`（`reconcile_wallets()`：admin のみ、balance_cache と台帳合計の不一致一覧。`ledger_stats()`）、管理者向け突合画面（その他 → 台帳の突合）。`seed.sql`（ユーザー5 = 一般3 + 加盟店オーナー2、加盟店2、クーポン4、チャージ・決済・送金・割り勘の取引）。Playwright（`tests/e2e/payment.spec.ts`：ログイン → チャージ → 静的QR決済 → 履歴。要 Supabase・Test OTP、環境変数がなければ skip）。README（構成図・デモアカウント・設計判断・割り切り一覧・5分手順・iOS化計画）
+- Lighthouse（モバイル・ローカル preview・ログイン画面）：**Performance 93 / Accessibility 100 / Best Practices 100 / SEO 100**。対応：`maximum-scale` 除去、description / robots.txt、コントラスト（ink-400 を明るく）、zxing（約 300KB）の動的 import、店舗・割り勘・クーポン・セキュリティ画面の遅延読み込み。※ Lighthouse 12 では PWA カテゴリが廃止されたため installable は manifest / SW の同梱で担保
+- SQLテスト：seed.sql が投入できる、突合は admin のみ、不一致なし、balance_cache 改ざんの検出
+- 判断メモ：seed の alice を admin 兼用にし、1アカウントで全画面を見られるようにした。Playwright は実環境が必要なため CI では skip される設計
+- 未完了（人間の作業）：Cloudflare Pages デプロイ、本番 Supabase での `supabase gen types` 突き合わせ、デモ URL の README 記載
+- 次：Phase 8
+
+## Phase 8（任意）— Stripe テストモードでチャージ ✅（コードのみ。動作確認は Stripe 鍵設定後）
+- 完了内容：`0008_stripe.sql`（`charge_wallet_for`：`auth.role() = 'service_role'` のみ・authenticated には execute 権限なし・冪等キー = Checkout Session id）。Edge Functions `stripe-checkout`（ユーザー JWT 検証 → Checkout Session 作成 → URL 返却）・`stripe-webhook`（署名検証 → `checkout.session.completed` → `charge_wallet_for`）。チャージ画面に「カード（Stripe テスト決済）」（`VITE_STRIPE_ENABLED=true` のとき表示）、戻りページで webhook 反映を待って完了画面へ
+- SQLテスト：ユーザーは `charge_wallet_for` を呼べない / `charge_wallet` で `stripe` を名乗れない、service_role からの再送は二重計上されない、authenticated が role claim を偽装しても DB ロール権限で拒否
+- 人間の作業：Stripe テストアカウント → `supabase secrets set STRIPE_SECRET_KEY=... STRIPE_WEBHOOK_SECRET=...` → `supabase functions deploy stripe-checkout` / `supabase functions deploy stripe-webhook --no-verify-jwt` → Stripe ダッシュボードで webhook エンドポイント（`https://<ref>.functions.supabase.co/stripe-webhook`、イベント `checkout.session.completed`）→ `.env` に `VITE_STRIPE_ENABLED=true`
+- 次：Phase 9（Capacitor）は将来
