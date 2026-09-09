@@ -87,6 +87,11 @@ const ReconcilePage = lazyPage(
   () => import('@/features/admin/pages/ReconcilePage'),
   'ReconcilePage',
 );
+const GuideIndexPage = lazyPage(
+  () => import('@/features/guide/pages/GuideIndexPage'),
+  'GuideIndexPage',
+);
+const GuidePage = lazyPage(() => import('@/features/guide/pages/GuidePage'), 'GuidePage');
 
 /** 名前付き export のページを React.lazy で遅延読み込みし、Suspense で包む */
 function lazyPage(loader: () => Promise<Record<string, unknown>>, name: string): ComponentType {
@@ -148,6 +153,8 @@ export const router = createBrowserRouter([
                       { path: '/rewards/points', element: <PointsPage /> },
                       { path: '/notifications', element: <NotificationsPage /> },
                       { path: '/admin/reconcile', element: <ReconcilePage /> },
+                      { path: '/guide', element: <GuideIndexPage /> },
+                      { path: '/guide/:id', element: <GuidePage /> },
                     ],
                   },
                   {

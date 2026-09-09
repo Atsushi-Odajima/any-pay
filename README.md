@@ -33,7 +33,7 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 
 ## 機能一覧
 
-**ユーザー**：電話番号 OTP ログイン / オンボーディング（ID・表示名）/ ホーム（残高・ポイント・直近取引・未読バッジ）/ 支払う（ユーザー提示 QR の自動更新・スキャン）/ 決済確認（店名・金額・クーポン・PIN / 生体認証）/ チャージ（銀行・カード・コンビニ ※UI のみ）/ 送る（ID 検索・受取 QR）/ 受け取る / 割り勘（按分・支払い状況）/ 履歴（月別・種別・取引後残高）/ 明細 / クーポン（獲得・利用）/ ポイント履歴 / 通知（Realtime）/ 設定（プロフィール・PIN・生体認証・出金・店舗登録）/ 表示言語（日本語 ⇄ English）
+**ユーザー**：電話番号 OTP ログイン / オンボーディング（ID・表示名）/ ホーム（残高・ポイント・直近取引・未読バッジ）/ 支払う（ユーザー提示 QR の自動更新・スキャン）/ 決済確認（店名・金額・クーポン・PIN / 生体認証）/ チャージ（銀行・カード・コンビニ ※UI のみ）/ 送る（ID 検索・受取 QR）/ 受け取る / 割り勘（按分・支払い状況）/ 履歴（月別・種別・取引後残高）/ 明細 / クーポン（獲得・利用）/ ポイント履歴 / 通知（Realtime）/ 設定（プロフィール・PIN・生体認証・出金・店舗登録）/ 表示言語（日本語 ⇄ English）/ 説明書（ユーザー・加盟店・管理者向け、日英、印刷対応）
 
 **加盟店**：店舗登録 / 店舗ホーム（本日売上・Realtime で即時反映）/ 決済受付（動的 QR 提示・ユーザー QR 読み取り）/ 決済一覧・明細・返金 / 静的 QR 印刷（A4）/ クーポン作成 / 出金
 
@@ -121,6 +121,7 @@ WebAuthn（Face ID / Touch ID）は端末ローカルの再認証ゲートで、
 - 言語は Zustand ストア + `localStorage` に保存し、`<html lang>` も更新する。日付は `Intl.DateTimeFormat`（`ja-JP` / `en-US`、Asia/Tokyo）で言語ごとに整形し、金額は両言語とも `¥1,234` 表記
 - **サーバーは文言を返さない。** RPC のエラーは `INSUFFICIENT_FUNDS` などのコードで `raise exception` し、クライアントが辞書で現在の言語に変換する。zod のバリデーションメッセージも辞書キーで持つ
 - 通知は `notifications.data` に店名・相手・ポイント・残人数などの **構造化データ**を持ち（`0010`：`_notify` が `transactions.metadata` から補完）、クライアントが現在の言語で文面を組み立てる。`title` / `body`（日本語）は互換のために残し、古い通知のフォールバックに使う
+- アプリ内の説明書（その他 → 説明書）は `features/guide/content/{ja,en}.ts` に構造化データ（段落 / 手順 / 箇条書き / 注記 / 表）として持ち、同じコンポーネントで描画する。両言語の節 ID・ブロック構成が一致することを Vitest で検証。A4 印刷（PDF 保存）に対応
 
 ## QR ペイロード仕様
 
@@ -229,7 +230,7 @@ supabase/migrations/   0001_schema … 0010_notification_i18n_data（追記の�
 supabase/functions/    Edge Functions（stripe-checkout / stripe-webhook）
 supabase/seed.sql      デモデータ
 src/app/               ルーター・Provider・レイアウト・ガード
-src/features/          auth / wallet / qr / payment / transfer / history / merchant / rewards / notifications / security / admin
+src/features/          auth / wallet / qr / payment / transfer / history / merchant / rewards / notifications / security / admin / guide（説明書）
 src/shared/ui          汎用コンポーネント
 src/shared/lib         supabase クライアント・金額 / 日付整形・エラー変換・冪等キー
 src/shared/i18n        辞書（ja / en）・言語ストア・useT / tr
