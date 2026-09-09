@@ -588,6 +588,18 @@ export type Database = {
       };
     };
     Functions: {
+      transfer: {
+        Args: { p_to_handle: string; p_amount: number; p_memo: string | null; p_idempotency_key: string };
+        Returns: Database['public']['Tables']['transactions']['Row'];
+      };
+      create_split_request: {
+        Args: { p_total: number; p_members: Json; p_memo?: string | null };
+        Returns: Database['public']['Tables']['split_requests']['Row'];
+      };
+      pay_split: {
+        Args: { p_split_member_id: string; p_idempotency_key: string };
+        Returns: Database['public']['Tables']['transactions']['Row'];
+      };
       register_merchant: {
         Args: { p_name: string; p_category?: string | null; p_address?: string | null };
         Returns: Database['public']['Tables']['merchants']['Row'];
