@@ -5,7 +5,7 @@ begin;
 \i supabase/seed.sql
 
 do $$ begin
-  assert (select count(*) from public.profiles) = 5, 'ユーザー5';
+  assert (select count(*) from public.profiles) = 6, 'ユーザー5 + 管理者 kuro';
   assert (select count(*) from public.merchants) = 2, '加盟店2';
   assert (select count(*) from public.coupons) = 4, 'クーポン4';
   assert (select count(*) from public.transactions) >= 6, '取引あり';

@@ -87,3 +87,10 @@
 - SQLテスト：ユーザーは `charge_wallet_for` を呼べない / `charge_wallet` で `stripe` を名乗れない、service_role からの再送は二重計上されない、authenticated が role claim を偽装しても DB ロール権限で拒否
 - 人間の作業：Stripe テストアカウント → `supabase secrets set STRIPE_SECRET_KEY=... STRIPE_WEBHOOK_SECRET=...` → `supabase functions deploy stripe-checkout` / `supabase functions deploy stripe-webhook --no-verify-jwt` → Stripe ダッシュボードで webhook エンドポイント（`https://<ref>.functions.supabase.co/stripe-webhook`、イベント `checkout.session.completed`）→ `.env` に `VITE_STRIPE_ENABLED=true`
 - 次：Phase 9（Capacitor）は将来
+
+## 運用修正（2026-09-09 デプロイ後）
+- 事象：本番でログイン時に「Database error finding user」。原因は `seed.sql` が `auth.users` に直接 INSERT した行の `confirmation_token` などトークン系カラムが NULL で、GoTrue が string に読めずエラーになる既知の挙動
+- 対処：`0009_admin_login.sql` で NULL を空文字に補正（列の存在をチェックしてから実行）。`seed.sql` も空文字を入れるよう修正し、SQL テスト（phase9）で NULL が残らないことを検証
+- 追加：ID・パスワードでログインできるデモ用管理者 `kuro`（`auth.users` + `auth.identities` + `profiles(role=admin)`）。ログイン画面に「ID・パスワード」タブを追加。ID は `kuro@any-pay.pages.dev` に変換して Supabase の email/password 認証を使う。パスワードは bcrypt ハッシュのみをリポジトリに置く
+- 反映：`supabase/**` の push で Actions「Supabase deploy」が `db push` を実行し 0009 を適用。フロントは Cloudflare Pages が自動ビルド
+- Cloudflare Pages：初回デプロイ成功（`https://fbd6ef3c.any-pay.pages.dev`）。「Create deployment」の「Unable to find a branch」は Production branch が存在しない `main` を指していたため
