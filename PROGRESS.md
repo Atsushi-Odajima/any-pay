@@ -94,3 +94,9 @@
 - 追加：ID・パスワードでログインできるデモ用管理者 `kuro`（`auth.users` + `auth.identities` + `profiles(role=admin)`）。ログイン画面に「ID・パスワード」タブを追加。ID は `kuro@any-pay.pages.dev` に変換して Supabase の email/password 認証を使う。パスワードは bcrypt ハッシュのみをリポジトリに置く
 - 反映：`supabase/**` の push で Actions「Supabase deploy」が `db push` を実行し 0009 を適用。フロントは Cloudflare Pages が自動ビルド
 - Cloudflare Pages：初回デプロイ成功（`https://fbd6ef3c.any-pay.pages.dev`）。「Create deployment」の「Unable to find a branch」は Production branch が存在しない `main` を指していたため
+
+## 運用修正 2（支払うタブのクラッシュ）
+- 事象：実機で「支払う」を開くと "cannot add postgres_changes callbacks ... after subscribe()" でページ全体がクラッシュ
+- 原因：通知の Realtime 購読を常駐リスナーと支払うタブの2か所から **同じチャンネル名**で行っていた。supabase-js の `channel()` は同名の既存チャンネルを返すため、購読済みチャンネルに `.on()` を足して例外になっていた
+- 対処：購読ごとに一意なチャンネル名を使い、購読の失敗は握りつぶす（`features/notifications/realtime.ts`）。ルート全体に `errorElement`（`app/pages/ErrorPage.tsx`）を付け、例外時はスタックトレースではなく「再読み込み / ホームへ」の復帰画面を出す
+- 支払うタブを PayPay 風に刷新：残高 → 白いカード（名前・@handle・QR・残り秒数バー・更新）→ 下部ピルで「QRを見せる / スキャン」切替（`/pay?mode=scan` でスキャンを直接開ける）

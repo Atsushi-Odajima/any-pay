@@ -36,7 +36,11 @@ export function QrCode({
   return (
     <div
       className={cn('flex items-center justify-center rounded-3xl bg-white p-4', className)}
-      style={{ width: size + 32, height: size + 32 }}
+      style={
+        className?.includes('p-0')
+          ? { width: size, height: size }
+          : { width: size + 32, height: size + 32 }
+      }
     >
       {src ? (
         <img src={src} width={size} height={size} alt={label ?? 'QRコード'} className="block" />
