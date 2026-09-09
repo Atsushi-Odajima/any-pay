@@ -92,3 +92,22 @@ input[type='number']::-webkit-outer-spin-button {
     display: none !important;
   }
 }
+
+/* 静的QR印刷（A4） */
+@page {
+  size: A4;
+  margin: 18mm;
+}
+@media print {
+  .print-sheet {
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+    min-height: 240mm;
+    justify-content: center;
+  }
+  nav,
+  header {
+    display: none !important;
+  }
+}
