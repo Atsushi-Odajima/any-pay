@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Check, Clock } from 'lucide-react';
 import { useSession } from '@/features/auth/hooks';
+import { useAuthGate } from '@/features/security/hooks';
+import { PinGate } from '@/features/security/components/PinGate';
 import {
   Avatar,
   Badge,
@@ -17,11 +19,11 @@ import { formatYen } from '@/shared/lib/money';
 import { formatDateTime } from '@/shared/lib/date';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
+import { useT } from '@/shared/i18n';
 import { usePaySplit, useSplit } from '../hooks';
-import { useAuthGate } from '@/features/security/hooks';
-import { PinGate } from '@/features/security/components/PinGate';
 
 export function SplitDetailPage() {
+  const t = useT();
   const { id } = useParams<{ id: string }>();
   const { userId } = useSession();
   const navigate = useNavigate();
@@ -34,8 +36,8 @@ export function SplitDetailPage() {
   if (!split.data) {
     return (
       <>
-        <PageHeader title="割り勘" back="/split" />
-        <EmptyState title="割り勘が見つかりません" />
+        <PageHeader title={t('split.title')} back="/split" />
+        <EmptyState title={t('split.notFound')} />
       </>
     );
   }
@@ -47,20 +49,24 @@ export function SplitDetailPage() {
 
   return (
     <>
-      <PageHeader title="割り勘" back="/split" />
+      <PageHeader title={t('split.title')} back="/split" />
       <div className="flex flex-col gap-4 px-4 pb-6">
         <div className="py-2 text-center">
-          <p className="text-sm text-mist">{s.memo ?? '割り勘'}</p>
+          <p className="text-sm text-mist">{s.memo ?? t('split.fallback')}</p>
           <p className="mt-1 text-4xl font-bold tracking-tight">{formatYen(s.total_amount)}</p>
           <p className="mt-1 text-xs text-mist">
             {formatDateTime(s.created_at)} ·{' '}
             {isCreator
-              ? 'あなたが作成'
-              : `${s.creator?.display_name ?? ''}（@${s.creator?.handle ?? ''}）が作成`}
+              ? t('split.createdByYou')
+              : t('split.createdBy', {
+                  name: `${s.creator?.display_name ?? ''}（@${s.creator?.handle ?? ''}）`,
+                })}
           </p>
           <div className="mt-2">
             <Badge tone={done ? 'success' : 'warn'}>
-              {done ? '全員支払い済み' : `${paidCount}/${s.members.length} 人支払い済み`}
+              {done
+                ? t('split.allPaid')
+                : t('split.paidCount', { paid: paidCount, total: s.members.length })}
             </Badge>
           </div>
         </div>
@@ -68,7 +74,8 @@ export function SplitDetailPage() {
         {mine && !mine.paid_transaction_id && (
           <Card className="flex flex-col gap-3">
             <p className="text-sm">
-              あなたの負担額 <span className="text-lg font-bold">{formatYen(mine.amount)}</span>
+              {t('split.yourShare')}{' '}
+              <span className="text-lg font-bold">{formatYen(mine.amount)}</span>
             </p>
             <ErrorMessage error={pay.error} />
             <Button
@@ -85,7 +92,7 @@ export function SplitDetailPage() {
                         navigate(`/complete/${tx.id}`, {
                           replace: true,
                           state: {
-                            title: '割り勘の支払いが完了しました',
+                            titleKey: 'complete.split',
                             subtitle: s.memo ?? undefined,
                             next: `/split/${s.id}`,
                           },
@@ -97,7 +104,7 @@ export function SplitDetailPage() {
                 )
               }
             >
-              {formatYen(mine.amount)} を支払う
+              {t('split.payButton', { amount: formatYen(mine.amount) })}
             </Button>
           </Card>
         )}
@@ -116,9 +123,9 @@ export function SplitDetailPage() {
               }
               title={
                 <>
-                  {m.profile?.display_name ?? '不明'}
+                  {m.profile?.display_name ?? t('common.unknown')}
                   {m.user_id === userId && (
-                    <span className="ml-1 text-xs text-mist">（あなた）</span>
+                    <span className="ml-1 text-xs text-mist">{t('split.you')}</span>
                   )}
                 </>
               }
@@ -128,11 +135,11 @@ export function SplitDetailPage() {
                   <span className="font-semibold tabular-nums">{formatYen(m.amount)}</span>
                   {m.paid_transaction_id ? (
                     <Badge tone="success">
-                      <Check className="mr-0.5 h-3 w-3" /> 支払い済み
+                      <Check className="mr-0.5 h-3 w-3" /> {t('split.paidBadge')}
                     </Badge>
                   ) : (
                     <Badge tone="neutral">
-                      <Clock className="mr-0.5 h-3 w-3" /> 未払い
+                      <Clock className="mr-0.5 h-3 w-3" /> {t('split.unpaid')}
                     </Badge>
                   )}
                 </span>

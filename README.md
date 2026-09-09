@@ -18,6 +18,7 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 | URL | https://any-pay.pages.dev （Cloudflare Pages。環境変数設定後に有効） |
 | ログイン | 電話番号 + 認証コード（Supabase の **Test OTP**。SMS は送られません）、または管理者用の ID・パスワード |
 | デモアカウント | 下表。認証コードはすべて `123456` |
+| 表示言語 | 日本語 / English。ホーム・ログイン画面右上の「日本語｜EN」または「その他 → 表示言語」で切替（端末に保存） |
 
 | 電話番号 | ID | 役割 |
 |---|---|---|
@@ -32,7 +33,7 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 
 ## 機能一覧
 
-**ユーザー**：電話番号 OTP ログイン / オンボーディング（ID・表示名）/ ホーム（残高・ポイント・直近取引・未読バッジ）/ 支払う（ユーザー提示 QR の自動更新・スキャン）/ 決済確認（店名・金額・クーポン・PIN / 生体認証）/ チャージ（銀行・カード・コンビニ ※UI のみ）/ 送る（ID 検索・受取 QR）/ 受け取る / 割り勘（按分・支払い状況）/ 履歴（月別・種別・取引後残高）/ 明細 / クーポン（獲得・利用）/ ポイント履歴 / 通知（Realtime）/ 設定（プロフィール・PIN・生体認証・出金・店舗登録）
+**ユーザー**：電話番号 OTP ログイン / オンボーディング（ID・表示名）/ ホーム（残高・ポイント・直近取引・未読バッジ）/ 支払う（ユーザー提示 QR の自動更新・スキャン）/ 決済確認（店名・金額・クーポン・PIN / 生体認証）/ チャージ（銀行・カード・コンビニ ※UI のみ）/ 送る（ID 検索・受取 QR）/ 受け取る / 割り勘（按分・支払い状況）/ 履歴（月別・種別・取引後残高）/ 明細 / クーポン（獲得・利用）/ ポイント履歴 / 通知（Realtime）/ 設定（プロフィール・PIN・生体認証・出金・店舗登録）/ 表示言語（日本語 ⇄ English）
 
 **加盟店**：店舗登録 / 店舗ホーム（本日売上・Realtime で即時反映）/ 決済受付（動的 QR 提示・ユーザー QR 読み取り）/ 決済一覧・明細・返金 / 静的 QR 印刷（A4）/ クーポン作成 / 出金
 
@@ -114,6 +115,13 @@ WebAuthn（Face ID / Touch ID）は端末ローカルの再認証ゲートで、
 ### 表示用スナップショット
 `transactions.metadata` に相手の表示名・店名・割引内訳・決済方式などを記録します。相手の profile は RLS で読めないため、また後で表示名が変わっても履歴が変わらないようにするためです。
 
+### 多言語表示（日本語 ⇄ English）
+
+- 外部ライブラリを使わず、`src/shared/i18n/{ja,en}.ts` の辞書と `useT()` / `tr()` で切り替える。`en` は `typeof ja` を型に持つため、**キーの不足はコンパイルエラー**になる（Vitest でもキー集合と `{param}` の一致を検証）
+- 言語は Zustand ストア + `localStorage` に保存し、`<html lang>` も更新する。日付は `Intl.DateTimeFormat`（`ja-JP` / `en-US`、Asia/Tokyo）で言語ごとに整形し、金額は両言語とも `¥1,234` 表記
+- **サーバーは文言を返さない。** RPC のエラーは `INSUFFICIENT_FUNDS` などのコードで `raise exception` し、クライアントが辞書で現在の言語に変換する。zod のバリデーションメッセージも辞書キーで持つ
+- 通知は `notifications.data` に店名・相手・ポイント・残人数などの **構造化データ**を持ち（`0010`：`_notify` が `transactions.metadata` から補完）、クライアントが現在の言語で文面を組み立てる。`title` / `body`（日本語）は互換のために残し、古い通知のフォールバックに使う
+
 ## QR ペイロード仕様
 
 | 形式 | 用途 | 読み取った側の処理 |
@@ -169,6 +177,7 @@ npm run test:e2e                                    # Playwright（要 Supabase�
 - 台帳合計 0 違反・`ledger_entries` の UPDATE / DELETE が拒否される
 - 残高不足、上限超過、失効 / 使用済み / 期限切れトークン、非オーナーの決済、20 回/分
 - 割り勘の検証、返金の逆仕訳、クーポンの補填仕訳、PIN ロックと決済前ゲート、突合
+- 通知 `data` の補完（店名・支払者・メモ・残人数・ポイント）と日本語 title の互換
 
 ## デプロイ
 
@@ -216,13 +225,14 @@ Stripe のテストモードで「本物の決済フロー → webhook → 台�
 ## ディレクトリ構成
 
 ```
-supabase/migrations/   0001_schema … 0008_stripe（追記のみ）
+supabase/migrations/   0001_schema … 0010_notification_i18n_data（追記のみ）
 supabase/functions/    Edge Functions（stripe-checkout / stripe-webhook）
 supabase/seed.sql      デモデータ
 src/app/               ルーター・Provider・レイアウト・ガード
 src/features/          auth / wallet / qr / payment / transfer / history / merchant / rewards / notifications / security / admin
 src/shared/ui          汎用コンポーネント
 src/shared/lib         supabase クライアント・金額 / 日付整形・エラー変換・冪等キー
+src/shared/i18n        辞書（ja / en）・言語ストア・useT / tr
 src/shared/platform    camera / haptics / biometrics / push / storage（Capacitor 差し替え点）
 src/types/database.ts  supabase gen types の出力（db.ts に補助型）
 tests/unit             Vitest

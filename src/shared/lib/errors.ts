@@ -1,41 +1,4 @@
-/** RPC が raise する業務エラーコード → 日本語メッセージ */
-const RPC_MESSAGES: Record<string, string> = {
-  NOT_AUTHENTICATED: 'ログインが必要です',
-  PROFILE_NOT_FOUND: 'プロフィールが見つかりません',
-  INSUFFICIENT_FUNDS: '残高が不足しています',
-  LIMIT_EXCEEDED: '利用上限を超えています',
-  RATE_LIMITED: '短時間に決済が集中しています。しばらく待ってから再度お試しください',
-  INVALID_AMOUNT: '金額が正しくありません',
-  TOKEN_INVALID: 'QRコードが無効です',
-  TOKEN_EXPIRED: 'QRコードの有効期限が切れています',
-  TOKEN_USED: 'このQRコードはすでに使用されています',
-  NOT_MERCHANT_OWNER: 'この店舗の操作権限がありません',
-  MERCHANT_NOT_FOUND: '店舗が見つかりません',
-  REQUEST_NOT_FOUND: '決済リクエストが見つかりません',
-  REQUEST_EXPIRED: '決済リクエストの有効期限が切れています',
-  REQUEST_NOT_OPEN: 'この決済リクエストはすでに処理済みです',
-  USER_NOT_FOUND: '相手が見つかりません',
-  SELF_TRANSFER: '自分自身には送金できません',
-  SPLIT_TOTAL_MISMATCH: '割り勘の合計が一致しません',
-  SPLIT_MEMBER_NOT_FOUND: '割り勘の対象が見つかりません',
-  ALREADY_PAID: 'すでに支払い済みです',
-  ALREADY_REFUNDED: 'すでに返金済みです',
-  NOT_REFUNDABLE: 'この取引は返金できません',
-  COUPON_INVALID: 'クーポンが利用できません',
-  COUPON_USED: 'このクーポンは使用済みです',
-  COUPON_MIN_AMOUNT: 'クーポンの最低利用金額を満たしていません',
-  COUPON_NOT_FOR_MERCHANT: 'この店舗では利用できないクーポンです',
-  COUPON_EXHAUSTED: 'クーポンの配布上限に達しました',
-  COUPON_ALREADY_CLAIMED: 'このクーポンはすでに獲得済みです',
-  PIN_NOT_SET: 'PINが設定されていません',
-  PIN_INVALID: 'PINが正しくありません',
-  PIN_LOCKED: 'PINがロックされています。10分後に再度お試しください',
-  PIN_REQUIRED: '本人確認（PIN）が必要です',
-  PIN_FORMAT: 'PINは4〜6桁の数字で設定してください',
-  HANDLE_TAKEN: 'このIDはすでに使われています',
-  NOT_ADMIN: '管理者権限が必要です',
-  WALLET_NOT_FOUND: 'ウォレットが見つかりません',
-};
+import { getLocale, translate } from '@/shared/i18n';
 
 export class RpcError extends Error {
   readonly code: string;
@@ -46,44 +9,47 @@ export class RpcError extends Error {
   }
 }
 
-/** Supabase Auth（GoTrue）の代表的なメッセージ → 日本語 */
+/** Supabase Auth（GoTrue）の代表的なメッセージ → 辞書キー */
 const AUTH_MESSAGES: Array<[RegExp, string]> = [
-  [/Invalid login credentials/i, 'ID またはパスワードが違います'],
-  [
-    /Database error finding user/i,
-    'ユーザー情報の読み込みに失敗しました（サーバー側の設定を確認してください）',
-  ],
-  [/Email not confirmed/i, 'メールアドレスが確認されていません'],
-  [
-    /Token has expired|otp_expired/i,
-    '認証コードの有効期限が切れています。もう一度送信してください',
-  ],
-  [/Invalid token|otp/i, '認証コードが正しくありません'],
-  [/rate limit|too many requests/i, 'リクエストが多すぎます。しばらく待ってから再度お試しください'],
-  [/Signups not allowed/i, '新規登録は無効になっています'],
+  [/Invalid login credentials/i, 'errors.invalidCredentials'],
+  [/Database error finding user/i, 'errors.dbErrorFindingUser'],
+  [/Email not confirmed/i, 'errors.emailNotConfirmed'],
+  [/Token has expired|otp_expired/i, 'errors.otpExpired'],
+  [/Invalid token|otp/i, 'errors.otpInvalid'],
+  [/rate limit|too many requests/i, 'errors.rateLimited'],
+  [/Signups not allowed/i, 'errors.signupDisabled'],
 ];
-
-/** Supabase / PostgREST のエラーを画面表示用の日本語に変換する */
-export function toUserMessage(error: unknown): string {
-  if (error instanceof RpcError) return error.message;
-  if (error && typeof error === 'object' && 'message' in error) {
-    const msg = String((error as { message: unknown }).message);
-    const code = extractCode(msg);
-    if (code) return RPC_MESSAGES[code] ?? msg;
-    const auth = AUTH_MESSAGES.find(([re]) => re.test(msg));
-    if (auth) return auth[1];
-    if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) {
-      return '通信に失敗しました。接続を確認してください';
-    }
-    return msg;
-  }
-  return '予期しないエラーが発生しました';
-}
 
 /** raise exception 'INSUFFICIENT_FUNDS' の message からコードを取り出す */
 export function extractCode(message: string): string | null {
   const m = /^([A-Z][A-Z0-9_]+)$/.exec(message.trim());
   return m?.[1] ?? null;
+}
+
+/** Supabase / PostgREST / Auth のエラーを現在の言語の文言に変換する */
+export function toUserMessage(error: unknown): string {
+  const locale = getLocale();
+  const t = (key: string) => translate(locale, key);
+  if (error instanceof RpcError) return error.message;
+  if (error && typeof error === 'object' && 'message' in error) {
+    const msg = String((error as { message: unknown }).message);
+    const code = extractCode(msg);
+    if (code) {
+      const key = `errors.${code}`;
+      const known = t(key);
+      return known === key ? msg : known;
+    }
+    // 辞書キーがそのまま message に入っている場合（validation.* など）
+    if (/^[a-z]+\.[a-zA-Z.]+$/.test(msg)) {
+      const known = t(msg);
+      if (known !== msg) return known;
+    }
+    const auth = AUTH_MESSAGES.find(([re]) => re.test(msg));
+    if (auth) return t(auth[1]);
+    if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) return t('errors.network');
+    return msg;
+  }
+  return t('errors.unexpected');
 }
 
 export function isRpcCode(error: unknown, code: string): boolean {

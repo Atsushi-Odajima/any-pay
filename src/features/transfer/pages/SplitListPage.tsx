@@ -4,20 +4,22 @@ import { useSession } from '@/features/auth/hooks';
 import { Badge, Button, Card, EmptyState, ListRow, PageHeader, PageLoading } from '@/shared/ui';
 import { formatYen } from '@/shared/lib/money';
 import { formatDate } from '@/shared/lib/date';
+import { useT } from '@/shared/i18n';
 import { useMySplits } from '../hooks';
 
 export function SplitListPage() {
+  const t = useT();
   const { userId } = useSession();
   const splits = useMySplits();
   return (
     <>
       <PageHeader
-        title="割り勘"
+        title={t('split.title')}
         back="/send"
         right={
           <Link to="/split/new">
             <Button size="sm" icon={<Plus className="h-4 w-4" />}>
-              作成
+              {t('split.create')}
             </Button>
           </Link>
         }
@@ -28,11 +30,11 @@ export function SplitListPage() {
         ) : !splits.data || splits.data.length === 0 ? (
           <EmptyState
             icon={<Users className="h-10 w-10" />}
-            title="割り勘はまだありません"
-            description="合計金額とメンバーを指定して作成すると、各メンバーに通知が届きます"
+            title={t('split.empty')}
+            description={t('split.emptySub')}
             action={
               <Link to="/split/new">
-                <Button>割り勘を作成</Button>
+                <Button>{t('split.createButton')}</Button>
               </Link>
             }
           />
@@ -47,8 +49,12 @@ export function SplitListPage() {
                 <ListRow
                   key={s.id}
                   icon={<Users className="h-5 w-5" />}
-                  title={s.memo ?? '割り勘'}
-                  subtitle={`${formatDate(s.created_at)} · ${isCreator ? 'あなたが作成' : `${s.creator?.display_name ?? ''} が作成`} · ${paid}/${s.members.length} 人支払い済み`}
+                  title={s.memo ?? t('split.fallback')}
+                  subtitle={`${formatDate(s.created_at)} · ${
+                    isCreator
+                      ? t('split.createdByYou')
+                      : t('split.createdBy', { name: s.creator?.display_name ?? '' })
+                  } · ${t('split.paidCount', { paid, total: s.members.length })}`}
                   right={
                     <span className="flex flex-col items-end gap-1">
                       <span className="font-semibold tabular-nums">
@@ -59,7 +65,11 @@ export function SplitListPage() {
                           done ? 'success' : mine && !mine.paid_transaction_id ? 'warn' : 'neutral'
                         }
                       >
-                        {done ? '完了' : mine && !mine.paid_transaction_id ? '未払い' : '進行中'}
+                        {done
+                          ? t('split.done')
+                          : mine && !mine.paid_transaction_id
+                            ? t('split.unpaid')
+                            : t('split.inProgress')}
                       </Badge>
                     </span>
                   }

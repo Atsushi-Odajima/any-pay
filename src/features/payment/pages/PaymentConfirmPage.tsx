@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { Store, Clock } from 'lucide-react';
+import { Store, Clock, Ticket } from 'lucide-react';
 import { useMyWallet } from '@/features/wallet/hooks';
+import { useUsableCoupons } from '@/features/rewards/hooks';
+import { previewDiscount } from '@/features/rewards/discount';
+import { CouponCard } from '@/features/rewards/pages/CouponsPage';
+import { useAuthGate } from '@/features/security/hooks';
+import { PinGate } from '@/features/security/components/PinGate';
 import {
   AmountInput,
   Badge,
@@ -11,18 +16,13 @@ import {
   ErrorMessage,
   PageHeader,
   PageLoading,
+  Sheet,
 } from '@/shared/ui';
 import { formatYen } from '@/shared/lib/money';
-import { secondsUntil } from '@/shared/lib/date';
+import { formatCountdown, secondsUntil } from '@/shared/lib/date';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
-import { useUsableCoupons } from '@/features/rewards/hooks';
-import { previewDiscount } from '@/features/rewards/discount';
-import { CouponCard } from '@/features/rewards/pages/CouponsPage';
-import { useAuthGate } from '@/features/security/hooks';
-import { PinGate } from '@/features/security/components/PinGate';
-import { Sheet } from '@/shared/ui';
-import { Ticket } from 'lucide-react';
+import { useT } from '@/shared/i18n';
 import { useMerchant, usePayRequest, usePayStatic, usePaymentRequestView } from '../hooks';
 
 /**
@@ -31,6 +31,7 @@ import { useMerchant, usePayRequest, usePayStatic, usePaymentRequestView } from 
  *   /pay/confirm/static/:id   静的QR（金額入力）
  */
 export function PaymentConfirmPage() {
+  const t = useT();
   const { mode, id } = useParams<{ mode: 'request' | 'static'; id: string }>();
   const navigate = useNavigate();
   const wallet = useMyWallet();
@@ -42,20 +43,19 @@ export function PaymentConfirmPage() {
   const idempotencyKey = useMemo(() => newIdempotencyKey('pay'), []);
   const merchantIdForCoupon = mode === 'request' ? request.data?.merchant_id : id;
   const couponsQuery = useUsableCoupons(merchantIdForCoupon);
-  const coupons = { data: couponsQuery.data ?? [] };
+  const coupons = couponsQuery.data ?? [];
   const [couponId, setCouponId] = useState<string | null>(null);
   const [couponSheet, setCouponSheet] = useState(false);
   const gate = useAuthGate();
 
-  // 動的QRの残り時間
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   if (mode !== 'request' && mode !== 'static') {
-    return <EmptyState title="不正なURLです" />;
+    return <EmptyState title={t('payment.invalidUrl')} />;
   }
   if ((mode === 'request' && request.isPending) || (mode === 'static' && merchant.isPending)) {
     return <PageLoading />;
@@ -63,7 +63,7 @@ export function PaymentConfirmPage() {
   if (mode === 'request' && request.isError) {
     return (
       <>
-        <PageHeader title="支払い" back="/pay" />
+        <PageHeader title={t('payment.title')} back="/pay" />
         <div className="px-4">
           <ErrorMessage error={request.error} />
         </div>
@@ -73,8 +73,8 @@ export function PaymentConfirmPage() {
   if (mode === 'static' && !merchant.data) {
     return (
       <>
-        <PageHeader title="支払い" back="/pay" />
-        <EmptyState title="店舗が見つかりません" />
+        <PageHeader title={t('payment.title')} back="/pay" />
+        <EmptyState title={t('payment.storeNotFound')} />
       </>
     );
   }
@@ -84,7 +84,7 @@ export function PaymentConfirmPage() {
     mode === 'request' ? request.data?.merchant_category : merchant.data?.category;
   const fixedAmount = mode === 'request' ? request.data?.amount : undefined;
   const payAmount = mode === 'request' ? (fixedAmount ?? 0) : (amount ?? 0);
-  const selectedCoupon = coupons.data.find((uc) => uc.id === couponId) ?? null;
+  const selectedCoupon = coupons.find((uc) => uc.id === couponId) ?? null;
   const discount = selectedCoupon ? previewDiscount(selectedCoupon.coupon, payAmount) : 0;
   const finalAmount = payAmount - discount;
   const balance = wallet.data?.balance_cache ?? 0;
@@ -103,23 +103,36 @@ export function PaymentConfirmPage() {
       vibrate('success');
       navigate(`/complete/${tx.id}`, {
         replace: true,
-        state: { title: '支払いが完了しました', subtitle: merchantName, next: '/' },
+        state: { titleKey: 'complete.payment', subtitle: merchantName, next: '/' },
       });
     };
     const onError = () => vibrate('error');
     if (mode === 'request' && id) {
-      payRequest.mutate({ requestId: id, idempotencyKey }, { onSuccess, onError });
+      payRequest.mutate(
+        { requestId: id, idempotencyKey, userCouponId: couponId },
+        { onSuccess, onError },
+      );
     } else if (mode === 'static' && id) {
       payStatic.mutate(
-        { merchantId: id, amount: payAmount, idempotencyKey },
+        { merchantId: id, amount: payAmount, idempotencyKey, userCouponId: couponId },
         { onSuccess, onError },
       );
     }
   };
 
+  const statusBadge = request.data
+    ? request.data.status === 'paid'
+      ? t('payment.paid')
+      : request.data.status === 'cancelled'
+        ? t('payment.cancelled')
+        : secondsLeft === 0
+          ? t('payment.expired')
+          : t('payment.remaining', { time: formatCountdown(secondsLeft ?? 0) })
+    : null;
+
   return (
     <>
-      <PageHeader title="支払い内容の確認" back="/pay" />
+      <PageHeader title={t('payment.confirmTitle')} back="/pay" />
       <div className="flex flex-1 flex-col gap-4 px-4 pb-6">
         <Card className="flex items-center gap-3">
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ink-700">
@@ -129,22 +142,12 @@ export function PaymentConfirmPage() {
             <p className="truncate text-lg font-semibold">{merchantName}</p>
             {merchantCategory && <p className="text-xs text-mist">{merchantCategory}</p>}
           </div>
-          {mode === 'request' && request.data && (
-            <Badge tone={requestClosed ? 'danger' : 'lime'}>
-              {request.data.status === 'paid'
-                ? '支払い済み'
-                : request.data.status === 'cancelled'
-                  ? 'キャンセル'
-                  : secondsLeft === 0
-                    ? '期限切れ'
-                    : `残り ${Math.floor((secondsLeft ?? 0) / 60)}:${String((secondsLeft ?? 0) % 60).padStart(2, '0')}`}
-            </Badge>
-          )}
+          {statusBadge && <Badge tone={requestClosed ? 'danger' : 'lime'}>{statusBadge}</Badge>}
         </Card>
 
         {mode === 'request' ? (
           <div className="py-4 text-center">
-            <p className="text-sm text-mist">お支払い金額</p>
+            <p className="text-sm text-mist">{t('payment.amountLabel')}</p>
             <p className="mt-1 text-5xl font-bold tracking-tight">{formatYen(fixedAmount ?? 0)}</p>
             {request.data?.memo && <p className="mt-2 text-sm text-mist">{request.data.memo}</p>}
           </div>
@@ -152,9 +155,9 @@ export function PaymentConfirmPage() {
           <AmountInput
             value={amount}
             onChange={setAmount}
-            label="お支払い金額を入力"
+            label={t('payment.enterAmount')}
             autoFocus
-            error={insufficient ? '残高が不足しています' : undefined}
+            error={insufficient ? t('validation.insufficient') : undefined}
           />
         )}
 
@@ -166,16 +169,16 @@ export function PaymentConfirmPage() {
           <Ticket className="h-5 w-5 text-lime" />
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-medium">
-              {selectedCoupon ? selectedCoupon.coupon.title : 'クーポンを使う'}
+              {selectedCoupon ? selectedCoupon.coupon.title : t('payment.useCoupon')}
             </span>
             <span className="block text-xs text-mist">
               {selectedCoupon
                 ? discount > 0
                   ? `-${formatYen(discount)}`
-                  : '最低利用金額を満たしていません'
-                : coupons.data.length > 0
-                  ? `利用可能 ${coupons.data.length} 枚`
-                  : '利用できるクーポンはありません'}
+                  : t('payment.couponMin')
+                : coupons.length > 0
+                  ? t('payment.couponAvailable', { n: coupons.length })
+                  : t('payment.noCoupon')}
             </span>
           </span>
         </button>
@@ -185,17 +188,17 @@ export function PaymentConfirmPage() {
             {discount > 0 && (
               <>
                 <div className="flex justify-between text-mist">
-                  <dt>金額</dt>
+                  <dt>{t('payment.amount')}</dt>
                   <dd>{formatYen(payAmount)}</dd>
                 </div>
                 <div className="flex justify-between text-lime">
-                  <dt>クーポン割引</dt>
+                  <dt>{t('payment.discount')}</dt>
                   <dd>-{formatYen(discount)}</dd>
                 </div>
               </>
             )}
             <div className="flex justify-between">
-              <dt className="text-mist">支払い後の残高</dt>
+              <dt className="text-mist">{t('payment.balanceAfter')}</dt>
               <dd className={insufficient ? 'text-danger' : ''}>
                 {formatYen(balance)} → {formatYen(Math.max(0, balance - finalAmount))}
               </dd>
@@ -205,7 +208,7 @@ export function PaymentConfirmPage() {
 
         {mode === 'request' && !requestClosed && (
           <p className="flex items-center justify-center gap-1 text-xs text-mist">
-            <Clock className="h-3.5 w-3.5" /> 店舗提示QRは発行から5分間有効です
+            <Clock className="h-3.5 w-3.5" /> {t('payment.dynamicValid')}
           </p>
         )}
 
@@ -219,19 +222,21 @@ export function PaymentConfirmPage() {
             disabled={payAmount <= 0 || insufficient || requestClosed}
             onClick={submit}
           >
-            {formatYen(finalAmount)} を支払う
+            {t('payment.payButton', { amount: formatYen(finalAmount) })}
           </Button>
         </div>
       </div>
 
-      <Sheet open={couponSheet} onClose={() => setCouponSheet(false)} title="クーポンを選択">
+      <Sheet
+        open={couponSheet}
+        onClose={() => setCouponSheet(false)}
+        title={t('payment.selectCoupon')}
+      >
         <div className="flex max-h-[60dvh] flex-col gap-2 overflow-y-auto">
-          {coupons.data.length === 0 && (
-            <p className="py-4 text-center text-sm text-mist">
-              この店舗で使えるクーポンはありません
-            </p>
+          {coupons.length === 0 && (
+            <p className="py-4 text-center text-sm text-mist">{t('payment.noCouponForStore')}</p>
           )}
-          {coupons.data.map((uc) => (
+          {coupons.map((uc) => (
             <CouponCard
               key={uc.id}
               coupon={uc.coupon}
@@ -250,7 +255,7 @@ export function PaymentConfirmPage() {
                 setCouponSheet(false);
               }}
             >
-              クーポンを使わない
+              {t('payment.noUseCoupon')}
             </Button>
           )}
         </div>

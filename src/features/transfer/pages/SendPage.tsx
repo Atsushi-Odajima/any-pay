@@ -4,6 +4,8 @@ import { QrCode, ScanLine, Users, Download } from 'lucide-react';
 import { useMyWallet } from '@/features/wallet/hooks';
 import { QrScanner } from '@/features/qr/components/QrScanner';
 import { parsePayload, QrPayloadError } from '@/features/qr/payload';
+import { useAuthGate } from '@/features/security/hooks';
+import { PinGate } from '@/features/security/components/PinGate';
 import {
   AmountInput,
   Avatar,
@@ -18,11 +20,10 @@ import {
 import { formatYen, LIMITS } from '@/shared/lib/money';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
+import { useT } from '@/shared/i18n';
 import type { PublicProfile } from '../api';
 import { useProfileByHandle, useTransfer } from '../hooks';
 import { ProfilePicker } from '../components/ProfilePicker';
-import { useAuthGate } from '@/features/security/hooks';
-import { PinGate } from '@/features/security/components/PinGate';
 
 type Step = 'pick' | 'scan' | 'amount' | 'confirm';
 
@@ -48,6 +49,7 @@ function SendFlow({
   initialTo: PublicProfile | null;
   presetMissing: boolean;
 }) {
+  const t = useT();
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
   const wallet = useMyWallet();
@@ -64,11 +66,11 @@ function SendFlow({
     amount === null
       ? undefined
       : amount < 1
-        ? '1円以上を入力してください'
+        ? t('validation.amountMin1')
         : amount > LIMITS.transferMax
-          ? `1回の送金上限は ${formatYen(LIMITS.transferMax)} です`
+          ? t('send.maxPerTime', { amount: formatYen(LIMITS.transferMax) })
           : amount > balance
-            ? '残高が不足しています'
+            ? t('validation.insufficient')
             : undefined;
 
   const submit = () => {
@@ -85,8 +87,8 @@ function SendFlow({
           navigate(`/complete/${tx.id}`, {
             replace: true,
             state: {
-              title: '送金が完了しました',
-              subtitle: `${to.display_name}（@${to.handle}）へ`,
+              titleKey: 'complete.transfer',
+              subtitle: t('send.toSuffix', { name: to.display_name, handle: to.handle }),
               next: '/send',
             },
           });
@@ -96,22 +98,23 @@ function SendFlow({
     );
   };
 
+  const title =
+    step === 'pick' || step === 'scan'
+      ? t('send.title')
+      : step === 'amount'
+        ? t('send.enterAmount')
+        : t('send.confirmTitle');
+
   return (
     <>
       <PageHeader
-        title={
-          step === 'pick' || step === 'scan'
-            ? '送る'
-            : step === 'amount'
-              ? '金額を入力'
-              : '送金内容の確認'
-        }
+        title={title}
         back={step === 'pick' ? undefined : true}
         right={
           step === 'pick' ? (
             <button
               type="button"
-              aria-label="QRを読み取る"
+              aria-label={t('send.scanAria')}
               onClick={() => setStep('scan')}
               className="rounded-full p-2 hover:bg-ink-800"
             >
@@ -129,13 +132,13 @@ function SendFlow({
                 to="/receive"
                 className="flex items-center gap-2 rounded-2xl bg-ink-800 p-4 text-sm font-medium hover:bg-ink-700"
               >
-                <Download className="h-5 w-5 text-lime" /> 受け取る
+                <Download className="h-5 w-5 text-lime" /> {t('send.receive')}
               </Link>
               <Link
                 to="/split"
                 className="flex items-center gap-2 rounded-2xl bg-ink-800 p-4 text-sm font-medium hover:bg-ink-700"
               >
-                <Users className="h-5 w-5 text-lime" /> 割り勘
+                <Users className="h-5 w-5 text-lime" /> {t('send.split')}
               </Link>
             </div>
             <ProfilePicker
@@ -150,7 +153,7 @@ function SendFlow({
               icon={<QrCode className="h-5 w-5" />}
               onClick={() => setStep('scan')}
             >
-              相手の受取QRを読み取る
+              {t('send.scanReceiveQr')}
             </Button>
           </>
         )}
@@ -162,18 +165,18 @@ function SendFlow({
                 try {
                   const p = parsePayload(text);
                   if (p.kind !== 'receive') {
-                    toast.error('受取用QRコードを読み取ってください');
+                    toast.error(t('send.receiveQrOnly'));
                     return;
                   }
                   setParams({ to: p.handle });
                   setStep('pick');
                 } catch (e) {
-                  toast.error(e instanceof QrPayloadError ? e.message : '読み取りに失敗しました');
+                  toast.error(e instanceof QrPayloadError ? e.message : t('pay.readFailed'));
                 }
               }}
             />
             <Button variant="ghost" onClick={() => setStep('pick')}>
-              ID で検索する
+              {t('send.searchById')}
             </Button>
           </>
         )}
@@ -187,7 +190,7 @@ function SendFlow({
             </div>
             {step === 'amount' && (
               <Button size="sm" variant="ghost" onClick={() => setStep('pick')}>
-                変更
+                {t('send.change')}
               </Button>
             )}
           </Card>
@@ -210,15 +213,17 @@ function SendFlow({
               quickAmounts={[500, 1000, 3000, 5000]}
             />
             <Input
-              label="メッセージ（任意）"
-              placeholder="例：ランチ代ありがとう"
+              label={t('send.message')}
+              placeholder={t('send.messagePlaceholder')}
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               maxLength={100}
             />
-            <p className="text-xs text-mist">残高 {formatYen(balance)}</p>
+            <p className="text-xs text-mist">
+              {t('send.balance', { balance: formatYen(balance) })}
+            </p>
             <Button type="submit" size="lg" full disabled={amount === null || !!amountError}>
-              次へ
+              {t('common.next')}
             </Button>
           </form>
         )}
@@ -226,13 +231,13 @@ function SendFlow({
         {step === 'confirm' && to && amount !== null && (
           <>
             <div className="py-4 text-center">
-              <p className="text-sm text-mist">送金額</p>
+              <p className="text-sm text-mist">{t('send.amount')}</p>
               <p className="mt-1 text-5xl font-bold tracking-tight">{formatYen(amount)}</p>
-              {memo && <p className="mt-2 text-sm text-mist">「{memo}」</p>}
+              {memo && <p className="mt-2 text-sm text-mist">“{memo}”</p>}
             </div>
             <Card>
               <div className="flex justify-between text-sm">
-                <span className="text-mist">送金後の残高</span>
+                <span className="text-mist">{t('send.balanceAfter')}</span>
                 <span>{formatYen(balance - amount)}</span>
               </div>
             </Card>
@@ -244,7 +249,7 @@ function SendFlow({
               loading={transfer.isPending || gate.step === 'biometrics'}
               onClick={submit}
             >
-              送金する
+              {t('send.submit')}
             </Button>
           </>
         )}

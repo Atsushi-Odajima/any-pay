@@ -9,10 +9,12 @@ import {
   PageLoading,
 } from '@/shared/ui';
 import { formatYen } from '@/shared/lib/money';
+import { useT } from '@/shared/i18n';
 import { useLedgerStats, useReconcile } from '../hooks';
 
 /** 管理者：balance_cache と台帳合計の突合 */
 export function ReconcilePage() {
+  const t = useT();
   const stats = useLedgerStats();
   const reconcile = useReconcile();
   const refresh = () => {
@@ -22,7 +24,7 @@ export function ReconcilePage() {
   return (
     <>
       <PageHeader
-        title="台帳の突合（管理者）"
+        title={t('admin.title')}
         back="/more"
         right={
           <Button
@@ -31,7 +33,7 @@ export function ReconcilePage() {
             icon={<RefreshCw className="h-4 w-4" />}
             onClick={refresh}
           >
-            再実行
+            {t('admin.rerun')}
           </Button>
         }
       />
@@ -40,42 +42,41 @@ export function ReconcilePage() {
         {stats.data && (
           <Card>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <dt className="text-mist">ウォレット数</dt>
+              <dt className="text-mist">{t('admin.wallets')}</dt>
               <dd className="text-right tabular-nums">{stats.data.wallets}</dd>
-              <dt className="text-mist">取引数</dt>
+              <dt className="text-mist">{t('admin.transactions')}</dt>
               <dd className="text-right tabular-nums">{stats.data.transactions}</dd>
-              <dt className="text-mist">台帳行数</dt>
+              <dt className="text-mist">{t('admin.ledgerRows')}</dt>
               <dd className="text-right tabular-nums">{stats.data.ledger_entries}</dd>
-              <dt className="text-mist">台帳合計（常に 0）</dt>
+              <dt className="text-mist">{t('admin.ledgerSum')}</dt>
               <dd
                 className={`text-right tabular-nums ${stats.data.ledger_sum === 0 ? 'text-lime' : 'text-danger'}`}
               >
                 {formatYen(stats.data.ledger_sum)}
               </dd>
-              <dt className="text-mist">treasury 残高</dt>
+              <dt className="text-mist">{t('admin.treasury')}</dt>
               <dd className="text-right tabular-nums">{formatYen(stats.data.treasury_balance)}</dd>
-              <dt className="text-mist">ユーザー・加盟店残高合計</dt>
+              <dt className="text-mist">{t('admin.userTotal')}</dt>
               <dd className="text-right tabular-nums">
                 {formatYen(stats.data.user_balance_total)}
               </dd>
             </dl>
-            <p className="mt-3 text-xs text-mist">
-              二重記帳のため「treasury 残高 + ユーザー・加盟店残高合計 = 0」が常に成り立ちます。
-            </p>
+            <p className="mt-3 text-xs text-mist">{t('admin.note')}</p>
           </Card>
         )}
         {reconcile.isPending ? (
-          <PageLoading label="突合中…" />
+          <PageLoading label={t('admin.checking')} />
         ) : reconcile.data && reconcile.data.length === 0 ? (
           <EmptyState
             icon={<ShieldCheck className="h-10 w-10 text-lime" />}
-            title="不一致はありません"
-            description="すべての wallet で balance_cache = sum(ledger_entries.amount)"
+            title={t('admin.noMismatch')}
+            description={t('admin.noMismatchSub')}
           />
         ) : reconcile.data ? (
           <Card className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 text-sm text-danger">
-              <AlertTriangle className="h-4 w-4" /> {reconcile.data.length} 件の不一致
+              <AlertTriangle className="h-4 w-4" />{' '}
+              {t('admin.mismatches', { n: reconcile.data.length })}
             </div>
             {reconcile.data.map((r) => (
               <div

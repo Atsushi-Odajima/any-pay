@@ -4,14 +4,15 @@ import { QrCode } from '@/features/qr/components/QrCode';
 import { QrScanner } from '@/features/qr/components/QrScanner';
 import { buildPayload, parsePayload, QrPayloadError } from '@/features/qr/payload';
 import { parseMeta } from '@/features/history/meta';
+import { useTransaction } from '@/features/history/hooks';
 import { AmountInput, Button, Card, ErrorMessage, Input, Segmented, toast } from '@/shared/ui';
 import { formatYen } from '@/shared/lib/money';
-import { secondsUntil } from '@/shared/lib/date';
+import { formatCountdown, secondsUntil } from '@/shared/lib/date';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
 import { playSuccessSound } from '@/shared/platform/sound';
 import { useInvalidateMoney } from '@/features/wallet/hooks';
-import { useTransaction } from '@/features/history/hooks';
+import { useT } from '@/shared/i18n';
 import type { Merchant, Transaction } from '../api';
 import {
   useCancelPaymentRequest,
@@ -23,6 +24,7 @@ import {
 type Mode = 'qr' | 'scan';
 
 export function MerchantAcceptPage({ merchant }: { merchant: Merchant }) {
+  const t = useT();
   const [mode, setMode] = useState<Mode>('qr');
   const [done, setDone] = useState<Transaction | null>(null);
 
@@ -35,8 +37,8 @@ export function MerchantAcceptPage({ merchant }: { merchant: Merchant }) {
         value={mode}
         onChange={setMode}
         options={[
-          { value: 'qr', label: 'QRを提示' },
-          { value: 'scan', label: 'お客様のQRを読む' },
+          { value: 'qr', label: t('merchant.accept.showQr') },
+          { value: 'scan', label: t('merchant.accept.readCustomerQr') },
         ]}
       />
       {mode === 'qr' ? (
@@ -56,6 +58,7 @@ function DynamicQrFlow({
   merchant: Merchant;
   onPaid: (tx: Transaction) => void;
 }) {
+  const t = useT();
   const [amount, setAmount] = useState<number | null>(null);
   const [memo, setMemo] = useState('');
   const [requestId, setRequestId] = useState<string | null>(null);
@@ -66,8 +69,8 @@ function DynamicQrFlow({
 
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -94,13 +97,13 @@ function DynamicQrFlow({
         <AmountInput
           value={amount}
           onChange={setAmount}
-          label="お会計金額"
+          label={t('merchant.accept.amount')}
           autoFocus
           quickAmounts={[500, 1000, 1500, 3000]}
         />
         <Input
-          label="メモ（任意・お客様に表示）"
-          placeholder="例：コーヒー 2点"
+          label={t('merchant.accept.memo')}
+          placeholder={t('merchant.accept.memoPlaceholder')}
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
           maxLength={40}
@@ -113,7 +116,7 @@ function DynamicQrFlow({
           loading={create.isPending}
           disabled={amount === null || amount <= 0}
         >
-          QRコードを表示
+          {t('merchant.accept.showQrButton')}
         </Button>
       </form>
     );
@@ -124,7 +127,7 @@ function DynamicQrFlow({
   const closed = !r || r.status !== 'open' || secondsLeft === 0;
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-sm text-mist">お客様にこのQRを読み取ってもらってください</p>
+      <p className="text-sm text-mist">{t('merchant.accept.showToCustomer')}</p>
       <p className="text-4xl font-bold tracking-tight">{formatYen(r?.amount ?? amount ?? 0)}</p>
       <div className="relative">
         <QrCode
@@ -133,15 +136,15 @@ function DynamicQrFlow({
         />
         {closed && (
           <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/70 text-sm">
-            {r?.status === 'cancelled' ? 'キャンセルしました' : '有効期限切れ'}
+            {r?.status === 'cancelled'
+              ? t('merchant.accept.cancelled')
+              : t('merchant.accept.expired')}
           </div>
         )}
       </div>
       <p className="font-mono text-xs text-mist">
-        {closed
-          ? '—'
-          : `残り ${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`}
-        <span className="ml-2 text-ink-400">（5分有効）</span>
+        {closed ? '—' : t('merchant.accept.remaining', { time: formatCountdown(secondsLeft) })}
+        <span className="ml-2 text-ink-400">{t('merchant.accept.valid5min')}</span>
       </p>
       <ErrorMessage error={cancel.error} />
       <div className="flex w-full gap-3">
@@ -153,7 +156,7 @@ function DynamicQrFlow({
           loading={cancel.isPending}
           onClick={() => cancel.mutate(requestId)}
         >
-          キャンセル
+          {t('merchant.accept.cancel')}
         </Button>
         <Button
           variant="outline"
@@ -161,7 +164,7 @@ function DynamicQrFlow({
           icon={<RotateCcw className="h-4 w-4" />}
           onClick={() => setRequestId(null)}
         >
-          金額を入力し直す
+          {t('merchant.accept.reenter')}
         </Button>
       </div>
     </div>
@@ -176,6 +179,7 @@ function ScanTokenFlow({
   merchant: Merchant;
   onPaid: (tx: Transaction) => void;
 }) {
+  const t = useT();
   const [token, setToken] = useState<string | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
   const pay = usePayWithToken();
@@ -189,18 +193,16 @@ function ScanTokenFlow({
             try {
               const p = parsePayload(text);
               if (p.kind !== 'user_token') {
-                toast.error('お客様の支払い用QR（ユーザー提示QR）を読み取ってください');
+                toast.error(t('merchant.accept.notUserQr'));
                 return;
               }
               setToken(p.token);
             } catch (e) {
-              toast.error(e instanceof QrPayloadError ? e.message : '読み取りに失敗しました');
+              toast.error(e instanceof QrPayloadError ? e.message : t('pay.readFailed'));
             }
           }}
         />
-        <p className="text-center text-xs text-mist">
-          お客様の「支払う」画面のQRコードを枠内に合わせてください
-        </p>
+        <p className="text-center text-xs text-mist">{t('merchant.accept.readHint')}</p>
       </div>
     );
   }
@@ -213,20 +215,17 @@ function ScanTokenFlow({
         if (amount === null || amount <= 0) return;
         pay.mutate(
           { token, amount, merchantId: merchant.id, idempotencyKey },
-          {
-            onSuccess: (tx) => onPaid(tx),
-            onError: () => vibrate('error'),
-          },
+          { onSuccess: (tx) => onPaid(tx), onError: () => vibrate('error') },
         );
       }}
     >
       <Card className="flex items-center gap-2 text-sm">
-        <Check className="h-4 w-4 text-lime" /> QRを読み取りました。金額を入力してください
+        <Check className="h-4 w-4 text-lime" /> {t('merchant.accept.readOk')}
       </Card>
       <AmountInput
         value={amount}
         onChange={setAmount}
-        label="お会計金額"
+        label={t('merchant.accept.amount')}
         autoFocus
         quickAmounts={[500, 1000, 1500, 3000]}
       />
@@ -238,16 +237,19 @@ function ScanTokenFlow({
         loading={pay.isPending}
         disabled={amount === null || amount <= 0}
       >
-        {amount ? `${formatYen(amount)} を決済する` : '決済する'}
+        {amount
+          ? t('merchant.accept.payButton', { amount: formatYen(amount) })
+          : t('merchant.accept.pay')}
       </Button>
       <Button variant="ghost" onClick={() => setToken(null)}>
-        読み取り直す
+        {t('merchant.accept.rescan')}
       </Button>
     </form>
   );
 }
 
 function AcceptDone({ tx, onNext }: { tx: Transaction; onNext: () => void }) {
+  const t = useT();
   useEffect(() => {
     playSuccessSound();
     vibrate('success');
@@ -263,16 +265,16 @@ function AcceptDone({ tx, onNext }: { tx: Transaction; onNext: () => void }) {
           <Check className="h-12 w-12" strokeWidth={3} />
         </div>
       </div>
-      <h2 className="text-xl font-bold">決済を受け付けました</h2>
+      <h2 className="text-xl font-bold">{t('merchant.accept.done')}</h2>
       <p className="text-4xl font-bold tracking-tight">{formatYen(tx.amount)}</p>
       {meta.payer_name && (
         <p className="text-sm text-mist">
           {meta.payer_name}
-          {meta.payer_handle ? `（@${meta.payer_handle}）` : ''}
+          {meta.payer_handle ? ` (@${meta.payer_handle})` : ''}
         </p>
       )}
       <Button size="lg" full className="mt-6" onClick={onNext}>
-        次の会計へ
+        {t('merchant.accept.nextSale')}
       </Button>
     </div>
   );

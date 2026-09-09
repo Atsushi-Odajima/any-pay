@@ -9,10 +9,12 @@ import {
   isBiometricsEnrolled,
   isPlatformAuthenticatorAvailable,
 } from '@/shared/platform/biometrics';
+import { useT } from '@/shared/i18n';
 import { usePinStatus } from '../hooks';
 import { useSecurityStore } from '../store';
 
 export function SecurityPage() {
+  const t = useT();
   const { userId } = useSession();
   const profile = useMyProfile();
   const pin = usePinStatus();
@@ -33,7 +35,7 @@ export function SecurityPage() {
     if (biometricsEnabled) {
       disableBiometrics();
       setBiometricsEnabled(false);
-      toast.info('生体認証をオフにしました');
+      toast.info(t('security.bioOff'));
       return;
     }
     if (!userId) return;
@@ -41,39 +43,41 @@ export function SecurityPage() {
       isBiometricsEnrolled() ||
       (await enrollBiometrics(userId, profile.data?.display_name ?? 'Any Pay'));
     if (!ok) {
-      toast.error('生体認証の登録に失敗しました');
+      toast.error(t('security.bioEnrollFailed'));
       return;
     }
     setBiometricsEnabled(true);
-    toast.success('生体認証をオンにしました');
+    toast.success(t('security.bioOn'));
   };
 
   return (
     <>
-      <PageHeader title="セキュリティ" back="/more" />
+      <PageHeader title={t('security.title')} back="/more" />
       <div className="flex flex-col gap-4 px-4 pb-6">
         <Card className="p-0">
           <ListRow
             icon={<KeyRound className="h-5 w-5" />}
-            title="決済用 PIN"
+            title={t('security.pin')}
             subtitle={
               pin.data?.has_pin
                 ? pin.data.locked_until
-                  ? `ロック中（${formatTime(pin.data.locked_until)} まで）`
-                  : '設定済み・決済と送金の前に確認します'
-                : '未設定・設定すると決済前に本人確認を行います'
+                  ? t('security.pinLocked', { time: formatTime(pin.data.locked_until) })
+                  : t('security.pinSet')
+                : t('security.pinUnset')
             }
-            right={pin.data?.has_pin ? <Badge tone="success">ON</Badge> : <Badge>OFF</Badge>}
+            right={
+              pin.data?.has_pin ? (
+                <Badge tone="success">{t('security.on')}</Badge>
+              ) : (
+                <Badge>{t('security.off')}</Badge>
+              )
+            }
             to="/settings/security/pin"
           />
           <ListRow
             icon={<Fingerprint className="h-5 w-5" />}
-            title="生体認証（Face ID / Touch ID）"
-            subtitle={
-              bioAvailable === false
-                ? 'この端末では利用できません'
-                : '端末側の再認証ゲート。サーバー側の認可には使いません'
-            }
+            title={t('security.biometrics')}
+            subtitle={bioAvailable === false ? t('security.bioUnavailable') : t('security.bioSub')}
             right={
               <button
                 type="button"
@@ -93,11 +97,7 @@ export function SecurityPage() {
         </Card>
         <Card className="flex gap-3 text-xs text-mist">
           <ShieldCheck className="h-5 w-5 shrink-0 text-lime" />
-          <p>
-            PIN はサーバーでハッシュ照合され、決済・送金 RPC
-            は直近5分以内の照合を要求します（サーバー側ゲート）。生体認証は WebAuthn
-            による端末ローカルの再認証で、サーバーの認可には関与しません。
-          </p>
+          <p>{t('security.note')}</p>
         </Card>
       </div>
     </>

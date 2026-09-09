@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { formatYen, parseYen } from '@/shared/lib/money';
+import { useT } from '@/shared/i18n';
 
 interface Props {
   value: number | null;
@@ -17,7 +18,7 @@ interface Props {
 export function AmountInput({
   value,
   onChange,
-  label = '金額',
+  label,
   error,
   max,
   autoFocus,
@@ -25,10 +26,11 @@ export function AmountInput({
   disabled,
 }: Props) {
   const id = useId();
+  const t = useT();
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm text-mist">
-        {label}
+        {label ?? t('ui.amount')}
       </label>
       <div
         className={cn(
@@ -53,7 +55,7 @@ export function AmountInput({
       {error ? (
         <p className="mt-1 text-xs text-danger">{error}</p>
       ) : max ? (
-        <p className="mt-1 text-xs text-mist">上限 {formatYen(max)}</p>
+        <p className="mt-1 text-xs text-mist">{t('ui.limit', { amount: formatYen(max) })}</p>
       ) : null}
       {quickAmounts && (
         <div className="mt-3 flex flex-wrap gap-2">

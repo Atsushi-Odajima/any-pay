@@ -5,8 +5,10 @@ import { buildPayload, buildScanUrl } from '@/features/qr/payload';
 import { Button, PageHeader, PageLoading, toast } from '@/shared/ui';
 import { copyText, shareText } from '@/shared/platform/clipboard';
 import { currentOrigin } from '@/shared/platform/print';
+import { useT } from '@/shared/i18n';
 
 export function ReceivePage() {
+  const t = useT();
   const profile = useMyProfile();
   if (profile.isPending || !profile.data) return <PageLoading />;
   const handle = profile.data.handle;
@@ -15,10 +17,10 @@ export function ReceivePage() {
 
   return (
     <>
-      <PageHeader title="受け取る" back="/send" />
+      <PageHeader title={t('receive.title')} back="/send" />
       <div className="flex flex-col items-center gap-5 px-4 pb-6 pt-4">
-        <p className="text-sm text-mist">このQRを相手に読み取ってもらうと送金画面が開きます</p>
-        <QrCode value={payload} size={220} label="受取用QRコード" />
+        <p className="text-sm text-mist">{t('receive.hint')}</p>
+        <QrCode value={payload} size={220} label={t('receive.qrLabel')} />
         <div className="text-center">
           <p className="text-lg font-semibold">{profile.data.display_name}</p>
           <p className="font-mono text-mist">@{handle}</p>
@@ -30,12 +32,10 @@ export function ReceivePage() {
             icon={<Copy className="h-4 w-4" />}
             onClick={async () => {
               const ok = await copyText(`@${handle}`);
-              toast[ok ? 'success' : 'error'](
-                ok ? 'ID をコピーしました' : 'コピーできませんでした',
-              );
+              toast[ok ? 'success' : 'error'](ok ? t('receive.copied') : t('receive.copyFailed'));
             }}
           >
-            ID をコピー
+            {t('receive.copyId')}
           </Button>
           <Button
             variant="secondary"
@@ -43,19 +43,19 @@ export function ReceivePage() {
             icon={<Share2 className="h-4 w-4" />}
             onClick={async () => {
               const ok = await shareText({
-                title: 'Any Pay で送金',
-                text: `Any Pay で @${handle} に送金`,
+                title: t('receive.shareTitle'),
+                text: t('receive.shareText', { handle }),
                 url,
               });
               if (!ok) {
                 const copied = await copyText(url);
                 toast[copied ? 'success' : 'error'](
-                  copied ? 'リンクをコピーしました' : '共有できませんでした',
+                  copied ? t('receive.linkCopied') : t('receive.shareFailed'),
                 );
               }
             }}
           >
-            リンクを共有
+            {t('receive.shareLink')}
           </Button>
         </div>
       </div>

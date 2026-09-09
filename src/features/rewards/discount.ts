@@ -1,3 +1,5 @@
+import { tr } from '@/shared/i18n';
+
 /** クーポンの割引額プレビュー（サーバーの _apply_coupon と同じ規則。確定値はサーバーが返す） */
 export function previewDiscount(
   coupon: { discount_type: string; value: number; min_amount: number },
@@ -16,9 +18,9 @@ export function describeDiscount(coupon: {
 }): string {
   const base =
     coupon.discount_type === 'fixed'
-      ? `${coupon.value.toLocaleString('ja-JP')}円引き`
-      : `${coupon.value}% OFF`;
+      ? tr('coupons.fixedOff', { amount: coupon.value.toLocaleString('ja-JP') })
+      : tr('coupons.percentOff', { percent: coupon.value });
   return coupon.min_amount > 0
-    ? `${base}（${coupon.min_amount.toLocaleString('ja-JP')}円以上）`
+    ? `${base}${tr('coupons.minAmount', { amount: coupon.min_amount.toLocaleString('ja-JP') })}`
     : base;
 }

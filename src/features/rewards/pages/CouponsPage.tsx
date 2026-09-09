@@ -13,12 +13,14 @@ import {
 } from '@/shared/ui';
 import { formatDate } from '@/shared/lib/date';
 import { toUserMessage } from '@/shared/lib/errors';
+import { useT } from '@/shared/i18n';
 import { describeDiscount } from '../discount';
 import { useAvailableCoupons, useClaimCoupon, useMyCoupons } from '../hooks';
 
 type Tab = 'available' | 'mine';
 
 export function CouponsPage() {
+  const t = useT();
   const [tab, setTab] = useState<Tab>('mine');
   const available = useAvailableCoupons();
   const mine = useMyCoupons();
@@ -27,14 +29,14 @@ export function CouponsPage() {
 
   return (
     <>
-      <PageHeader title="クーポン" back="/more" />
+      <PageHeader title={t('coupons.title')} back="/more" />
       <div className="flex flex-col gap-4 px-4 pb-6">
         <Segmented
           value={tab}
           onChange={setTab}
           options={[
-            { value: 'mine', label: '保有中' },
-            { value: 'available', label: '獲得する' },
+            { value: 'mine', label: t('coupons.mine') },
+            { value: 'available', label: t('coupons.available') },
           ]}
         />
         <ErrorMessage error={claim.error} />
@@ -44,10 +46,10 @@ export function CouponsPage() {
           ) : !mine.data || mine.data.length === 0 ? (
             <EmptyState
               icon={<Ticket className="h-10 w-10" />}
-              title="保有しているクーポンはありません"
+              title={t('coupons.noMine')}
               action={
                 <Button variant="secondary" onClick={() => setTab('available')}>
-                  クーポンを探す
+                  {t('coupons.find')}
                 </Button>
               }
             />
@@ -64,10 +66,7 @@ export function CouponsPage() {
         ) : available.isPending ? (
           <PageLoading />
         ) : !available.data || available.data.length === 0 ? (
-          <EmptyState
-            icon={<Ticket className="h-10 w-10" />}
-            title="配布中のクーポンはありません"
-          />
+          <EmptyState icon={<Ticket className="h-10 w-10" />} title={t('coupons.noAvailable')} />
         ) : (
           <div className="flex flex-col gap-3">
             {available.data.map((c) => (
@@ -77,7 +76,7 @@ export function CouponsPage() {
                 action={
                   claimedIds.has(c.id) ? (
                     <Badge tone="success">
-                      <Check className="mr-0.5 h-3 w-3" /> 獲得済み
+                      <Check className="mr-0.5 h-3 w-3" /> {t('coupons.claimed')}
                     </Badge>
                   ) : (
                     <Button
@@ -85,12 +84,12 @@ export function CouponsPage() {
                       loading={claim.isPending && claim.variables === c.id}
                       onClick={() =>
                         claim.mutate(c.id, {
-                          onSuccess: () => toast.success('クーポンを獲得しました'),
+                          onSuccess: () => toast.success(t('coupons.claimedToast')),
                           onError: (e) => toast.error(toUserMessage(e)),
                         })
                       }
                     >
-                      獲得する
+                      {t('coupons.claim')}
                     </Button>
                   )
                 }
@@ -124,6 +123,7 @@ export function CouponCard({
   selected?: boolean;
   onClick?: () => void;
 }) {
+  const t = useT();
   const body = (
     <Card
       className={`flex items-center gap-3 border ${selected ? 'border-lime' : 'border-transparent'} ${used ? 'opacity-50' : ''}`}
@@ -135,9 +135,11 @@ export function CouponCard({
         <p className="truncate font-semibold">{coupon.title}</p>
         <p className="text-sm text-lime">{describeDiscount(coupon)}</p>
         <p className="text-xs text-mist">
-          {coupon.merchant_id ? (coupon.merchant?.name ?? '店舗限定') : '全店共通'} ·{' '}
-          {formatDate(coupon.valid_until)} まで
-          {used && ' · 使用済み'}
+          {coupon.merchant_id
+            ? (coupon.merchant?.name ?? t('coupons.storeOnly'))
+            : t('coupons.allStores')}{' '}
+          · {t('coupons.until', { date: formatDate(coupon.valid_until) })}
+          {used && ` · ${t('coupons.used')}`}
         </p>
       </div>
       {action}

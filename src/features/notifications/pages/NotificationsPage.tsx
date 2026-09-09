@@ -3,7 +3,9 @@ import { Bell, CheckCheck } from 'lucide-react';
 import { Button, Card, EmptyState, ListRow, PageHeader, PageLoading } from '@/shared/ui';
 import { formatDateTime } from '@/shared/lib/date';
 import { cn } from '@/shared/lib/cn';
+import { useT } from '@/shared/i18n';
 import { useMarkAllRead, useNotifications } from '../hooks';
+import { describeNotification } from '../format';
 
 function linkFor(n: { type: string; data: unknown }): string | undefined {
   const d = (n.data ?? {}) as { transaction_id?: string; split_request_id?: string };
@@ -15,6 +17,7 @@ function linkFor(n: { type: string; data: unknown }): string | undefined {
 }
 
 export function NotificationsPage() {
+  const t = useT();
   const list = useNotifications();
   const markAll = useMarkAllRead();
   const hasUnread = (list.data ?? []).some((n) => n.read_at === null);
@@ -28,7 +31,7 @@ export function NotificationsPage() {
   return (
     <>
       <PageHeader
-        title="通知"
+        title={t('notifications.title')}
         back="/"
         right={
           hasUnread ? (
@@ -38,7 +41,7 @@ export function NotificationsPage() {
               icon={<CheckCheck className="h-4 w-4" />}
               onClick={() => markAll.mutate()}
             >
-              既読
+              {t('notifications.markAll')}
             </Button>
           ) : undefined
         }
@@ -47,19 +50,22 @@ export function NotificationsPage() {
         {list.isPending ? (
           <PageLoading />
         ) : !list.data || list.data.length === 0 ? (
-          <EmptyState icon={<Bell className="h-10 w-10" />} title="通知はありません" />
+          <EmptyState icon={<Bell className="h-10 w-10" />} title={t('notifications.empty')} />
         ) : (
           <Card className="p-0">
-            {list.data.map((n) => (
-              <ListRow
-                key={n.id}
-                icon={<Bell className={cn('h-5 w-5', n.read_at === null && 'text-lime')} />}
-                title={<span className={cn(n.read_at === null && 'font-semibold')}>{n.title}</span>}
-                subtitle={[formatDateTime(n.created_at), n.body].filter(Boolean).join(' · ')}
-                to={linkFor(n)}
-                chevron={false}
-              />
-            ))}
+            {list.data.map((n) => {
+              const { title, body } = describeNotification(n);
+              return (
+                <ListRow
+                  key={n.id}
+                  icon={<Bell className={cn('h-5 w-5', n.read_at === null && 'text-lime')} />}
+                  title={<span className={cn(n.read_at === null && 'font-semibold')}>{title}</span>}
+                  subtitle={[formatDateTime(n.created_at), body].filter(Boolean).join(' · ')}
+                  to={linkFor(n)}
+                  chevron={false}
+                />
+              );
+            })}
           </Card>
         )}
       </div>

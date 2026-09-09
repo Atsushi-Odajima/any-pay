@@ -10,12 +10,15 @@ import {
   Bell,
   ShieldCheck,
   Scale,
+  Languages,
 } from 'lucide-react';
 import { useMyMerchant } from '@/features/merchant/hooks';
-import { Avatar, Card, ListRow, PageHeader, Badge } from '@/shared/ui';
+import { Avatar, Card, ListRow, PageHeader, Badge, LanguageToggle } from '@/shared/ui';
+import { useT } from '@/shared/i18n';
 import { useMyProfile, useSignOut } from '../hooks';
 
 export function MorePage() {
+  const t = useT();
   const profile = useMyProfile();
   const signOut = useSignOut();
   const navigate = useNavigate();
@@ -23,7 +26,7 @@ export function MorePage() {
 
   return (
     <>
-      <PageHeader title="その他" />
+      <PageHeader title={t('more.title')} />
       <div className="flex flex-col gap-4 px-4 pb-6">
         {profile.data && (
           <Card className="flex items-center gap-3">
@@ -37,26 +40,44 @@ export function MorePage() {
         )}
 
         <Card className="p-0">
-          <ListRow icon={<Ticket className="h-5 w-5" />} title="クーポン" to="/rewards/coupons" />
-          <ListRow icon={<Coins className="h-5 w-5" />} title="ポイント" to="/rewards/points" />
-          <ListRow icon={<Bell className="h-5 w-5" />} title="通知" to="/notifications" />
+          <ListRow
+            icon={<Ticket className="h-5 w-5" />}
+            title={t('more.coupons')}
+            to="/rewards/coupons"
+          />
+          <ListRow
+            icon={<Coins className="h-5 w-5" />}
+            title={t('more.points')}
+            to="/rewards/points"
+          />
+          <ListRow
+            icon={<Bell className="h-5 w-5" />}
+            title={t('more.notifications')}
+            to="/notifications"
+          />
         </Card>
 
         <Card className="p-0">
           <ListRow
             icon={<User className="h-5 w-5" />}
-            title="プロフィール"
+            title={t('more.profile')}
             to="/settings/profile"
           />
           <ListRow
             icon={<ShieldCheck className="h-5 w-5" />}
-            title="セキュリティ（PIN・生体認証）"
+            title={t('more.security')}
             to="/settings/security"
           />
           <ListRow
             icon={<ArrowUpFromLine className="h-5 w-5" />}
-            title="出金"
+            title={t('more.withdraw')}
             to="/settings/withdraw"
+          />
+          <ListRow
+            icon={<Languages className="h-5 w-5" />}
+            title={t('more.language')}
+            right={<LanguageToggle />}
+            chevron={false}
           />
         </Card>
 
@@ -64,15 +85,15 @@ export function MorePage() {
           {merchant.data ? (
             <ListRow
               icon={<Store className="h-5 w-5" />}
-              title="加盟店ダッシュボード"
+              title={t('more.merchantDashboard')}
               subtitle={merchant.data.name}
               to="/merchant"
             />
           ) : (
             <ListRow
               icon={<Store className="h-5 w-5" />}
-              title="店舗を登録する"
-              subtitle="決済の受付・売上管理"
+              title={t('more.registerStore')}
+              subtitle={t('more.registerStoreSub')}
               to="/merchant/register"
             />
           )}
@@ -82,8 +103,8 @@ export function MorePage() {
           <Card className="p-0">
             <ListRow
               icon={<Scale className="h-5 w-5" />}
-              title="台帳の突合（管理者）"
-              subtitle="balance_cache と台帳合計の不一致を検出"
+              title={t('more.reconcile')}
+              subtitle={t('more.reconcileSub')}
               to="/admin/reconcile"
             />
           </Card>
@@ -92,12 +113,12 @@ export function MorePage() {
         <Card className="p-0">
           <ListRow
             icon={<Info className="h-5 w-5" />}
-            title="このアプリについて"
-            subtitle="ポートフォリオ用デモ。実際のお金は動きません"
+            title={t('more.about')}
+            subtitle={t('more.aboutSub')}
           />
           <ListRow
             icon={<LogOut className="h-5 w-5" />}
-            title={<span className="text-danger">ログアウト</span>}
+            title={<span className="text-danger">{t('more.logout')}</span>}
             onClick={() =>
               signOut.mutate(undefined, { onSuccess: () => navigate('/login', { replace: true }) })
             }

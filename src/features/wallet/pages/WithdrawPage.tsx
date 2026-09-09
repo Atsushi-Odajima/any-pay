@@ -4,9 +4,11 @@ import { AmountInput, Button, Card, ErrorMessage, PageHeader } from '@/shared/ui
 import { formatYen } from '@/shared/lib/money';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
+import { useT } from '@/shared/i18n';
 import { useMyWallet, useWithdraw } from '../hooks';
 
 export function WithdrawPage() {
+  const t = useT();
   const navigate = useNavigate();
   const wallet = useMyWallet();
   const withdraw = useWithdraw();
@@ -17,14 +19,14 @@ export function WithdrawPage() {
     amount === null
       ? undefined
       : amount < 1
-        ? '1円以上を入力してください'
+        ? t('validation.amountMin1')
         : amount > balance
-          ? '残高が不足しています'
+          ? t('validation.insufficient')
           : undefined;
 
   return (
     <>
-      <PageHeader title="出金" back="/more" />
+      <PageHeader title={t('withdraw.title')} back="/more" />
       <form
         className="flex flex-col gap-5 px-4"
         onSubmit={(e) => {
@@ -35,7 +37,7 @@ export function WithdrawPage() {
             {
               onSuccess: (tx) => {
                 vibrate('success');
-                navigate(`/complete/${tx.id}`, { replace: true, state: { kind: 'withdrawal' } });
+                navigate(`/complete/${tx.id}`, { replace: true });
               },
               onError: () => vibrate('error'),
             },
@@ -43,7 +45,7 @@ export function WithdrawPage() {
         }}
       >
         <Card>
-          <p className="text-xs text-mist">出金可能残高</p>
+          <p className="text-xs text-mist">{t('withdraw.available')}</p>
           <p className="text-2xl font-bold">{formatYen(balance)}</p>
         </Card>
         <AmountInput value={amount} onChange={setAmount} error={error} autoFocus />
@@ -53,11 +55,9 @@ export function WithdrawPage() {
           onClick={() => setAmount(balance)}
           disabled={balance === 0}
         >
-          全額を入力
+          {t('withdraw.all')}
         </Button>
-        <p className="text-xs text-ink-400">
-          ※ デモのため手数料 0 円・即時反映。実際の送金は行われません。
-        </p>
+        <p className="text-xs text-ink-400">{t('withdraw.demoNote')}</p>
         <ErrorMessage error={withdraw.error} />
         <Button
           type="submit"
@@ -66,7 +66,7 @@ export function WithdrawPage() {
           loading={withdraw.isPending}
           disabled={amount === null || !!error}
         >
-          出金する
+          {t('withdraw.submit')}
         </Button>
       </form>
     </>

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from '@/features/auth/hooks';
 import { isBiometricsEnrolled, verifyBiometrics } from '@/shared/platform/biometrics';
 import { fetchPinStatus, setPin, verifyPin } from './api';
+import { tr } from '@/shared/i18n';
 import { AUTH_GATE_TTL_MS, useSecurityStore } from './store';
 
 export const securityKeys = {
@@ -76,7 +77,7 @@ export function useAuthGate() {
         setBioError(null);
         const ok = await verifyBiometrics();
         if (!ok) {
-          setBioError('生体認証に失敗しました');
+          setBioError(tr('security.bioFailed'));
           setStep('idle');
           return;
         }

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { tr } from '@/shared/i18n';
 
 /**
  * QR ペイロード仕様（CLAUDE.md §5）
@@ -17,8 +18,8 @@ export type QrPayload =
   | { kind: 'receive'; handle: string };
 
 export class QrPayloadError extends Error {
-  constructor(message = '対応していないQRコードです') {
-    super(message);
+  constructor(key = 'errors.qrUnsupported') {
+    super(tr(key));
     this.name = 'QrPayloadError';
   }
 }
@@ -68,22 +69,22 @@ export function parsePayload(input: string): QrPayload {
   switch (kind) {
     case 'u': {
       const r = tokenSchema.safeParse(value);
-      if (!r.success) throw new QrPayloadError('QRコードのトークンが不正です');
+      if (!r.success) throw new QrPayloadError('errors.qrTokenInvalid');
       return { kind: 'user_token', token: r.data };
     }
     case 'r': {
       const r = uuidSchema.safeParse(value);
-      if (!r.success) throw new QrPayloadError('決済リクエストIDが不正です');
+      if (!r.success) throw new QrPayloadError('errors.qrRequestInvalid');
       return { kind: 'payment_request', requestId: r.data };
     }
     case 's': {
       const r = uuidSchema.safeParse(value);
-      if (!r.success) throw new QrPayloadError('店舗IDが不正です');
+      if (!r.success) throw new QrPayloadError('errors.qrMerchantInvalid');
       return { kind: 'static_merchant', merchantId: r.data };
     }
     case 'p': {
       const r = handleSchema.safeParse(value);
-      if (!r.success) throw new QrPayloadError('受取IDが不正です');
+      if (!r.success) throw new QrPayloadError('errors.qrHandleInvalid');
       return { kind: 'receive', handle: r.data };
     }
     default:

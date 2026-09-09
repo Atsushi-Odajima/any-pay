@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AtSign, Search } from 'lucide-react';
 import { Avatar, Card, EmptyState, Input, ListRow, Spinner } from '@/shared/ui';
+import { useT } from '@/shared/i18n';
 import type { PublicProfile } from '../api';
 import { useProfileSearch } from '../hooks';
 
@@ -14,15 +15,16 @@ export function ProfilePicker({
   exclude?: string[];
   autoFocus?: boolean;
 }) {
+  const t = useT();
   const [query, setQuery] = useState('');
   const results = useProfileSearch(query);
   const list = (results.data ?? []).filter((p) => !exclude.includes(p.id));
   return (
     <div className="flex flex-col gap-3">
       <Input
-        label="相手の ID で検索"
+        label={t('picker.label')}
         prefix={<AtSign className="h-4 w-4" />}
-        placeholder="taro_yamada"
+        placeholder={t('picker.placeholder')}
         autoCapitalize="none"
         autoCorrect="off"
         autoFocus={autoFocus}
@@ -31,14 +33,14 @@ export function ProfilePicker({
       />
       {query.trim() === '' ? (
         <p className="flex items-center gap-1 text-xs text-mist">
-          <Search className="h-3.5 w-3.5" /> ID の先頭から一致するユーザーを表示します
+          <Search className="h-3.5 w-3.5" /> {t('picker.hint')}
         </p>
       ) : results.isPending ? (
         <div className="flex justify-center py-4 text-mist">
           <Spinner />
         </div>
       ) : list.length === 0 ? (
-        <EmptyState title="見つかりません" description="ID を確認してください" />
+        <EmptyState title={t('picker.notFound')} description={t('picker.notFoundSub')} />
       ) : (
         <Card className="p-0">
           {list.map((p) => (
