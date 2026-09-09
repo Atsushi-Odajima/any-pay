@@ -82,7 +82,7 @@ export async function transfer(input: {
   const { data, error } = await supabase.rpc('transfer', {
     p_to_handle: input.toHandle,
     p_amount: input.amount,
-    p_memo: input.memo ?? null,
+    p_memo: input.memo ?? '',
     p_idempotency_key: input.idempotencyKey,
   });
   if (error) throw error;
@@ -97,7 +97,7 @@ export async function createSplitRequest(input: {
   const { data, error } = await supabase.rpc('create_split_request', {
     p_total: input.total,
     p_members: input.members,
-    p_memo: input.memo ?? null,
+    p_memo: input.memo ?? undefined,
   });
   if (error) throw error;
   return data;

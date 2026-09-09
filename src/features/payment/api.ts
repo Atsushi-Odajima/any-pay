@@ -42,7 +42,7 @@ export async function payRequest(input: {
   const { data, error } = await supabase.rpc('pay_request', {
     p_request_id: input.requestId,
     p_idempotency_key: input.idempotencyKey,
-    p_user_coupon_id: input.userCouponId ?? null,
+    p_user_coupon_id: input.userCouponId ?? undefined,
   });
   if (error) throw error;
   return data;
@@ -58,7 +58,7 @@ export async function payStatic(input: {
     p_merchant_id: input.merchantId,
     p_amount: input.amount,
     p_idempotency_key: input.idempotencyKey,
-    p_user_coupon_id: input.userCouponId ?? null,
+    p_user_coupon_id: input.userCouponId ?? undefined,
   });
   if (error) throw error;
   return data;

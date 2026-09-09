@@ -223,7 +223,7 @@ src/features/          auth / wallet / qr / payment / transfer / history / merch
 src/shared/ui          汎用コンポーネント
 src/shared/lib         supabase クライアント・金額 / 日付整形・エラー変換・冪等キー
 src/shared/platform    camera / haptics / biometrics / push / storage（Capacitor 差し替え点）
-src/types/database.ts  supabase gen types 形式の型
+src/types/database.ts  supabase gen types の出力（db.ts に補助型）
 tests/unit             Vitest
 tests/sql              SQL テスト（ランナー + Supabase 相当のシム）
 tests/e2e              Playwright
