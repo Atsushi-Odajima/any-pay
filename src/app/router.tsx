@@ -10,6 +10,12 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { OnboardingPage } from '@/features/auth/pages/OnboardingPage';
 import { ProfilePage } from '@/features/auth/pages/ProfilePage';
 import { MorePage } from '@/features/auth/pages/MorePage';
+import { HomePage } from '@/features/wallet/pages/HomePage';
+import { ChargePage } from '@/features/wallet/pages/ChargePage';
+import { WithdrawPage } from '@/features/wallet/pages/WithdrawPage';
+import { CompletePage } from '@/features/wallet/pages/CompletePage';
+import { HistoryPage } from '@/features/history/pages/HistoryPage';
+import { TransactionDetailPage } from '@/features/history/pages/TransactionDetailPage';
 
 export const router = createBrowserRouter(
   isSupabaseConfigured
@@ -36,13 +42,20 @@ export const router = createBrowserRouter(
                 {
                   element: <TabLayout />,
                   children: [
-                    { path: '/', element: <PlaceholderPage title="ホーム" /> },
+                    { path: '/', element: <HomePage /> },
                     { path: '/pay', element: <PlaceholderPage title="支払う" /> },
                     { path: '/send', element: <PlaceholderPage title="送る" /> },
-                    { path: '/history', element: <PlaceholderPage title="履歴" /> },
+                    { path: '/history', element: <HistoryPage /> },
+                    { path: '/history/:id', element: <TransactionDetailPage /> },
+                    { path: '/charge', element: <ChargePage /> },
+                    { path: '/settings/withdraw', element: <WithdrawPage /> },
                     { path: '/more', element: <MorePage /> },
                     { path: '/settings/profile', element: <ProfilePage /> },
                   ],
+                },
+                {
+                  element: <PlainLayout />,
+                  children: [{ path: '/complete/:id', element: <CompletePage /> }],
                 },
               ],
             },

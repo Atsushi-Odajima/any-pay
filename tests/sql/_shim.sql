@@ -108,6 +108,14 @@ begin
   return (select id from public.profiles where handle = p_handle);
 end $$;
 
+-- handle から user wallet id を引く（RLS を無視）
+create or replace function tests.wallet_of(p_handle text) returns uuid
+language plpgsql stable security definer as $$
+begin
+  return (select w.id from public.wallets w join public.profiles p on p.id = w.owner_id
+          where p.handle = p_handle and w.kind = 'user');
+end $$;
+
 -- p_sql が p_pattern（正規表現）に一致するエラーを出すことを検証
 create or replace function tests.expect_error(p_sql text, p_pattern text) returns void
 language plpgsql as $$

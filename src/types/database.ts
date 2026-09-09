@@ -588,6 +588,14 @@ export type Database = {
       };
     };
     Functions: {
+      charge_wallet: {
+        Args: { p_amount: number; p_method: string; p_idempotency_key: string };
+        Returns: Database['public']['Tables']['transactions']['Row'];
+      };
+      withdraw: {
+        Args: { p_amount: number; p_idempotency_key: string; p_wallet_id?: string | null };
+        Returns: Database['public']['Tables']['transactions']['Row'];
+      };
       my_wallet_ids: {
         Args: Record<PropertyKey, never>;
         Returns: string[];
