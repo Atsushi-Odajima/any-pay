@@ -10,8 +10,8 @@ jobs:
     name: typecheck / lint / unit / build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
           cache: npm
@@ -29,7 +29,7 @@ jobs:
     name: SQL tests (RPC / 制約 / RLS)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # ubuntu ランナーには PostgreSQL が同梱されている（サービスは停止状態）。initdb で一時クラスタを立てる
       - name: Locate PostgreSQL
         run: |
