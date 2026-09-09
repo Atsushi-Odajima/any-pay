@@ -11,6 +11,7 @@ import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
 import { playSuccessSound } from '@/shared/platform/sound';
 import { useInvalidateMoney } from '@/features/wallet/hooks';
+import { useTransaction } from '@/features/history/hooks';
 import type { Merchant, Transaction } from '../api';
 import {
   useCancelPaymentRequest,
@@ -251,7 +252,9 @@ function AcceptDone({ tx, onNext }: { tx: Transaction; onNext: () => void }) {
     playSuccessSound();
     vibrate('success');
   }, []);
-  const meta = parseMeta(tx.metadata ?? {});
+  // 動的QR経由ではポーリング結果（id と金額のみ）しか無いので、明細を取得して支払者名を出す
+  const detail = useTransaction(tx.metadata ? undefined : tx.id);
+  const meta = parseMeta(detail.data?.metadata ?? tx.metadata ?? {});
   return (
     <div className="flex flex-col items-center gap-4 px-6 pt-10 text-center">
       <div className="relative">
