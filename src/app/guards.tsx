@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { useMyProfile, useSession } from '@/features/auth/hooks';
 import { PageLoading } from '@/shared/ui';
+import { NotificationListener } from '@/features/notifications/NotificationListener';
 
 /** ログイン必須。未ログインは /login へ */
 export function RequireAuth() {
@@ -24,7 +25,12 @@ export function RequireProfile() {
     );
   }
   if (profile.data === null) return <Navigate to="/onboarding" replace />;
-  return <Outlet />;
+  return (
+    <>
+      <NotificationListener />
+      <Outlet />
+    </>
+  );
 }
 
 /** オンボーディング画面用：プロフィール済みならホームへ */

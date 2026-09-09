@@ -16,6 +16,13 @@ import { formatYen } from '@/shared/lib/money';
 import { secondsUntil } from '@/shared/lib/date';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
+import { useUsableCoupons } from '@/features/rewards/hooks';
+import { previewDiscount } from '@/features/rewards/discount';
+import { CouponCard } from '@/features/rewards/pages/CouponsPage';
+import { useAuthGate } from '@/features/security/hooks';
+import { PinGate } from '@/features/security/components/PinGate';
+import { Sheet } from '@/shared/ui';
+import { Ticket } from 'lucide-react';
 import { useMerchant, usePayRequest, usePayStatic, usePaymentRequestView } from '../hooks';
 
 /**
@@ -33,6 +40,12 @@ export function PaymentConfirmPage() {
   const payStatic = usePayStatic();
   const [amount, setAmount] = useState<number | null>(null);
   const idempotencyKey = useMemo(() => newIdempotencyKey('pay'), []);
+  const merchantIdForCoupon = mode === 'request' ? request.data?.merchant_id : id;
+  const couponsQuery = useUsableCoupons(merchantIdForCoupon);
+  const coupons = { data: couponsQuery.data ?? [] };
+  const [couponId, setCouponId] = useState<string | null>(null);
+  const [couponSheet, setCouponSheet] = useState(false);
+  const gate = useAuthGate();
 
   // 動的QRの残り時間
   const [now, setNow] = useState(() => Date.now());
@@ -71,15 +84,21 @@ export function PaymentConfirmPage() {
     mode === 'request' ? request.data?.merchant_category : merchant.data?.category;
   const fixedAmount = mode === 'request' ? request.data?.amount : undefined;
   const payAmount = mode === 'request' ? (fixedAmount ?? 0) : (amount ?? 0);
+  const selectedCoupon = coupons.data.find((uc) => uc.id === couponId) ?? null;
+  const discount = selectedCoupon ? previewDiscount(selectedCoupon.coupon, payAmount) : 0;
+  const finalAmount = payAmount - discount;
   const balance = wallet.data?.balance_cache ?? 0;
   const secondsLeft = request.data ? secondsUntil(request.data.expires_at, now) : null;
   const requestClosed = request.data ? request.data.status !== 'open' || secondsLeft === 0 : false;
-  const insufficient = payAmount > balance;
+  const insufficient = finalAmount > balance;
   const pending = payRequest.isPending || payStatic.isPending;
   const error = payRequest.error ?? payStatic.error;
 
   const submit = () => {
     if (payAmount <= 0 || insufficient) return;
+    void gate.run(() => doPay());
+  };
+  const doPay = () => {
     const onSuccess = (tx: { id: string }) => {
       vibrate('success');
       navigate(`/complete/${tx.id}`, {
@@ -139,13 +158,49 @@ export function PaymentConfirmPage() {
           />
         )}
 
-        <Card>
-          <div className="flex justify-between text-sm">
-            <span className="text-mist">支払い後の残高</span>
-            <span className={insufficient ? 'text-danger' : ''}>
-              {formatYen(balance)} → {formatYen(Math.max(0, balance - payAmount))}
+        <button
+          type="button"
+          onClick={() => setCouponSheet(true)}
+          className="flex items-center gap-3 rounded-2xl bg-ink-800 px-4 py-3 text-left hover:bg-ink-700"
+        >
+          <Ticket className="h-5 w-5 text-lime" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-medium">
+              {selectedCoupon ? selectedCoupon.coupon.title : 'クーポンを使う'}
             </span>
-          </div>
+            <span className="block text-xs text-mist">
+              {selectedCoupon
+                ? discount > 0
+                  ? `-${formatYen(discount)}`
+                  : '最低利用金額を満たしていません'
+                : coupons.data.length > 0
+                  ? `利用可能 ${coupons.data.length} 枚`
+                  : '利用できるクーポンはありません'}
+            </span>
+          </span>
+        </button>
+
+        <Card>
+          <dl className="flex flex-col gap-1 text-sm">
+            {discount > 0 && (
+              <>
+                <div className="flex justify-between text-mist">
+                  <dt>金額</dt>
+                  <dd>{formatYen(payAmount)}</dd>
+                </div>
+                <div className="flex justify-between text-lime">
+                  <dt>クーポン割引</dt>
+                  <dd>-{formatYen(discount)}</dd>
+                </div>
+              </>
+            )}
+            <div className="flex justify-between">
+              <dt className="text-mist">支払い後の残高</dt>
+              <dd className={insufficient ? 'text-danger' : ''}>
+                {formatYen(balance)} → {formatYen(Math.max(0, balance - finalAmount))}
+              </dd>
+            </div>
+          </dl>
         </Card>
 
         {mode === 'request' && !requestClosed && (
@@ -155,18 +210,52 @@ export function PaymentConfirmPage() {
         )}
 
         <ErrorMessage error={error} />
+        {gate.bioError && <ErrorMessage error={new Error(gate.bioError)} />}
         <div className="mt-auto">
           <Button
             size="lg"
             full
-            loading={pending}
+            loading={pending || gate.step === 'biometrics'}
             disabled={payAmount <= 0 || insufficient || requestClosed}
             onClick={submit}
           >
-            {formatYen(payAmount)} を支払う
+            {formatYen(finalAmount)} を支払う
           </Button>
         </div>
       </div>
+
+      <Sheet open={couponSheet} onClose={() => setCouponSheet(false)} title="クーポンを選択">
+        <div className="flex max-h-[60dvh] flex-col gap-2 overflow-y-auto">
+          {coupons.data.length === 0 && (
+            <p className="py-4 text-center text-sm text-mist">
+              この店舗で使えるクーポンはありません
+            </p>
+          )}
+          {coupons.data.map((uc) => (
+            <CouponCard
+              key={uc.id}
+              coupon={uc.coupon}
+              selected={uc.id === couponId}
+              onClick={() => {
+                setCouponId(uc.id === couponId ? null : uc.id);
+                setCouponSheet(false);
+              }}
+            />
+          ))}
+          {couponId && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setCouponId(null);
+                setCouponSheet(false);
+              }}
+            >
+              クーポンを使わない
+            </Button>
+          )}
+        </div>
+      </Sheet>
+      <PinGate open={gate.step === 'pin'} onClose={gate.cancel} onVerified={gate.onPinVerified} />
     </>
   );
 }

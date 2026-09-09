@@ -18,6 +18,8 @@ import { formatDateTime } from '@/shared/lib/date';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
 import { usePaySplit, useSplit } from '../hooks';
+import { useAuthGate } from '@/features/security/hooks';
+import { PinGate } from '@/features/security/components/PinGate';
 
 export function SplitDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +28,7 @@ export function SplitDetailPage() {
   const split = useSplit(id);
   const pay = usePaySplit();
   const idempotencyKey = useMemo(() => newIdempotencyKey('split'), []);
+  const gate = useAuthGate();
 
   if (split.isPending) return <PageLoading />;
   if (!split.data) {
@@ -73,22 +76,24 @@ export function SplitDetailPage() {
               full
               loading={pay.isPending}
               onClick={() =>
-                pay.mutate(
-                  { memberId: mine.id, idempotencyKey },
-                  {
-                    onSuccess: (tx) => {
-                      vibrate('success');
-                      navigate(`/complete/${tx.id}`, {
-                        replace: true,
-                        state: {
-                          title: '割り勘の支払いが完了しました',
-                          subtitle: s.memo ?? undefined,
-                          next: `/split/${s.id}`,
-                        },
-                      });
+                gate.run(() =>
+                  pay.mutate(
+                    { memberId: mine.id, idempotencyKey },
+                    {
+                      onSuccess: (tx) => {
+                        vibrate('success');
+                        navigate(`/complete/${tx.id}`, {
+                          replace: true,
+                          state: {
+                            title: '割り勘の支払いが完了しました',
+                            subtitle: s.memo ?? undefined,
+                            next: `/split/${s.id}`,
+                          },
+                        });
+                      },
+                      onError: () => vibrate('error'),
                     },
-                    onError: () => vibrate('error'),
-                  },
+                  ),
                 )
               }
             >
@@ -96,6 +101,7 @@ export function SplitDetailPage() {
             </Button>
           </Card>
         )}
+        <PinGate open={gate.step === 'pin'} onClose={gate.cancel} onVerified={gate.onPinVerified} />
 
         <Card className="p-0">
           {s.members.map((m) => (

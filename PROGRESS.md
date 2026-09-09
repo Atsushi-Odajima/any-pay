@@ -3,7 +3,7 @@
 > iPhone から読む前提で簡潔に。各フェーズ終了時に更新。
 
 ## 現在地
-- Phase 5 完了。次は Phase 6（クーポン・ポイント・通知・セキュリティ）
+- Phase 6 完了。次は Phase 7（仕上げ）
 
 ## 環境メモ（このセッションの制約）
 - Docker / Supabase CLI が使えない環境のため、`supabase init` は `supabase/config.toml` を手書きで代替
@@ -52,3 +52,10 @@
 - 判断メモ：返金の冪等キーは元取引 id から決定的に生成（クライアントがキーを持つ必要がない）。売上サマリは RPC で JST 日付境界を計算（フロントで集計しない）
 - 手動確認：A が決済 → B の店舗ホームに即時トースト＋一覧追加。B: 決済 → 明細 → 全額返金 → A の残高・ポイントが戻り、履歴で打ち消し線
 - 次：Phase 6
+
+## Phase 6 — クーポン・ポイント・通知・セキュリティ ✅
+- 完了内容：`0006_rewards_security.sql`（`pin_attempts` テーブル、`claim_coupon`（max_uses を行ロックで検査）、`set_pin`（bcrypt・変更時は現在の PIN 必須）、`verify_pin`（5回失敗で10分ロック。失敗は例外ではなく `{ok:false, remaining, locked_until}` を返す）、`pin_status`、`_require_pin_verified`（PIN 設定済みユーザーは直近5分以内の照合がないと `pay_request` / `pay_static` / `transfer` / `pay_split` が `PIN_REQUIRED`）。クーポン一覧（獲得する / 保有中）、決済確認でのクーポン選択と割引プレビュー、ポイント履歴、通知一覧（開くと既読）＋常駐 Realtime トースト＋ホームの未読バッジ、セキュリティ設定（PIN 設定/変更、生体認証 ON/OFF）、PIN テンキー、`useAuthGate`（生体認証 → PIN の順にゲート）、加盟店のクーポン作成・削除
+- SQLテスト：クーポン作成の RLS（自店のみ）、獲得の重複/期限/上限、店舗クーポン（加盟店負担・2行仕訳）と全店共通クーポン（treasury 補填・3行仕訳）で割引額が台帳と一致、返金で補填戻し・クーポン復活・ポイント取消、PIN の設定/変更/5回ロック、決済前 PIN ゲート、通知は read_at のみ更新可
+- 判断メモ：`verify_pin` を例外で失敗させると失敗回数の UPDATE ごと巻き戻るため戻り値で返す設計にした。PIN ゲートはサーバー側で強制（クライアントの生体認証はローカルの再認証のみ）。`pay_with_token` は加盟店が起点なのでユーザーの PIN ゲート対象外。Web Push は未実装（`shared/platform/push.ts` の抽象層のみ）
+- 手動確認：その他 → セキュリティ → PIN 設定 → 支払い時に PIN シートが出る → 5回間違えるとロック。クーポン → 獲得する → 決済確認で選択 → 明細に割引内訳
+- 次：Phase 7

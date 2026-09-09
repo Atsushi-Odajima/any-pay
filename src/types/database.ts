@@ -527,6 +527,38 @@ export type Database = {
           },
         ];
       };
+      pin_attempts: {
+        Row: {
+          user_id: string;
+          failed_count: number;
+          locked_until: string | null;
+          verified_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          failed_count?: number;
+          locked_until?: string | null;
+          verified_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          failed_count?: number;
+          locked_until?: string | null;
+          verified_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'pin_attempts_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       notifications: {
         Row: {
           id: string;
@@ -588,6 +620,22 @@ export type Database = {
       };
     };
     Functions: {
+      claim_coupon: {
+        Args: { p_coupon_id: string };
+        Returns: Database['public']['Tables']['user_coupons']['Row'];
+      };
+      set_pin: {
+        Args: { p_pin: string; p_current_pin?: string | null };
+        Returns: boolean;
+      };
+      verify_pin: {
+        Args: { p_pin: string };
+        Returns: Json;
+      };
+      pin_status: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       refund_transaction: {
         Args: { p_transaction_id: string };
         Returns: Database['public']['Tables']['transactions']['Row'];
