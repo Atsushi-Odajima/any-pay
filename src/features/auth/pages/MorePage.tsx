@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { User, LogOut, Info } from 'lucide-react';
+import { User, LogOut, Info, ArrowUpFromLine } from 'lucide-react';
 import { Avatar, Card, ListRow, PageHeader, Badge } from '@/shared/ui';
 import { useMyProfile, useSignOut } from '../hooks';
 
@@ -28,6 +28,11 @@ export function MorePage() {
             icon={<User className="h-5 w-5" />}
             title="プロフィール"
             to="/settings/profile"
+          />
+          <ListRow
+            icon={<ArrowUpFromLine className="h-5 w-5" />}
+            title="出金"
+            to="/settings/withdraw"
           />
         </Card>
 
