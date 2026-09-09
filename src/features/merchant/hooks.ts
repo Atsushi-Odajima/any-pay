@@ -1,14 +1,19 @@
+import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useOutletContext } from 'react-router';
+import { subscribeMerchantTransactions } from '@/features/notifications/realtime';
 import { useSession } from '@/features/auth/hooks';
 import { useInvalidateMoney } from '@/features/wallet/hooks';
-import type { Merchant } from './api';
+import type { Merchant, Transaction } from './api';
 import {
   cancelPaymentRequest,
   createPaymentRequest,
+  fetchMerchantTransactions,
   fetchMyMerchant,
   fetchPaymentRequest,
+  fetchTodaySummary,
   payWithToken,
+  refundTransaction,
   registerMerchant,
 } from './api';
 
@@ -69,4 +74,49 @@ export function usePayWithToken() {
 /** MerchantLayout の Outlet context（店舗情報） */
 export function useMerchantContext(): { merchant: Merchant } {
   return useOutletContext<{ merchant: Merchant }>();
+}
+
+export function useTodaySummary(merchantId: string | undefined) {
+  return useQuery({
+    queryKey: ['merchant', 'today', merchantId],
+    queryFn: () => fetchTodaySummary(merchantId as string),
+    enabled: !!merchantId,
+    refetchInterval: 30_000,
+  });
+}
+
+export function useMerchantTransactions(
+  merchantId: string | undefined,
+  opts: { from?: string; to?: string; limit?: number } = {},
+) {
+  return useQuery({
+    queryKey: ['merchant', 'transactions', merchantId, opts],
+    queryFn: () => fetchMerchantTransactions(merchantId as string, opts),
+    enabled: !!merchantId,
+  });
+}
+
+export function useRefund() {
+  const invalidate = useInvalidateMoney();
+  return useMutation({ mutationFn: refundTransaction, onSuccess: invalidate });
+}
+
+/** 自店の決済 INSERT を Realtime で受け、売上・一覧を即時更新する */
+export function useMerchantTransactionStream(
+  merchantId: string | undefined,
+  onInsert?: (tx: Transaction) => void,
+) {
+  const qc = useQueryClient();
+  const ref = useRef(onInsert);
+  useEffect(() => {
+    ref.current = onInsert;
+  }, [onInsert]);
+  useEffect(() => {
+    if (!merchantId) return;
+    return subscribeMerchantTransactions(merchantId, (tx) => {
+      void qc.invalidateQueries({ queryKey: ['merchant'] });
+      void qc.invalidateQueries({ queryKey: ['wallets'] });
+      ref.current?.(tx);
+    });
+  }, [merchantId, qc]);
 }

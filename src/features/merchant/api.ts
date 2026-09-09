@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { supabase } from '@/shared/lib/supabase';
 import type { Tables } from '@/types/database';
 
@@ -72,6 +73,52 @@ export async function payWithToken(input: {
     p_amount: input.amount,
     p_merchant_id: input.merchantId,
     p_idempotency_key: input.idempotencyKey,
+  });
+  if (error) throw error;
+  return data;
+}
+
+const todaySummarySchema = z.object({
+  sales: z.number(),
+  count: z.number(),
+  refunds: z.number(),
+  refund_count: z.number(),
+  net: z.number(),
+  since: z.string(),
+});
+export type TodaySummary = z.infer<typeof todaySummarySchema>;
+
+export async function fetchTodaySummary(merchantId: string): Promise<TodaySummary> {
+  const { data, error } = await supabase.rpc('merchant_today_summary', {
+    p_merchant_id: merchantId,
+  });
+  if (error) throw error;
+  return todaySummarySchema.parse(data);
+}
+
+export type MerchantTransaction = Transaction;
+
+export async function fetchMerchantTransactions(
+  merchantId: string,
+  opts: { from?: string; to?: string; limit?: number } = {},
+): Promise<MerchantTransaction[]> {
+  let q = supabase
+    .from('transactions')
+    .select('*')
+    .eq('merchant_id', merchantId)
+    .in('type', ['payment', 'refund'])
+    .order('created_at', { ascending: false })
+    .limit(opts.limit ?? 100);
+  if (opts.from) q = q.gte('created_at', opts.from);
+  if (opts.to) q = q.lt('created_at', opts.to);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data;
+}
+
+export async function refundTransaction(transactionId: string): Promise<Transaction> {
+  const { data, error } = await supabase.rpc('refund_transaction', {
+    p_transaction_id: transactionId,
   });
   if (error) throw error;
   return data;

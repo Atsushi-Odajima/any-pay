@@ -588,6 +588,14 @@ export type Database = {
       };
     };
     Functions: {
+      refund_transaction: {
+        Args: { p_transaction_id: string };
+        Returns: Database['public']['Tables']['transactions']['Row'];
+      };
+      merchant_today_summary: {
+        Args: { p_merchant_id: string };
+        Returns: Json;
+      };
       transfer: {
         Args: { p_to_handle: string; p_amount: number; p_memo: string | null; p_idempotency_key: string };
         Returns: Database['public']['Tables']['transactions']['Row'];

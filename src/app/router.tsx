@@ -22,6 +22,11 @@ import { PaymentConfirmPage } from '@/features/payment/pages/PaymentConfirmPage'
 import { MerchantLayout } from '@/features/merchant/layouts/MerchantLayout';
 import { MerchantRegisterPage } from '@/features/merchant/pages/MerchantRegisterPage';
 import { MerchantAcceptRoute } from '@/features/merchant/pages/MerchantAcceptRoute';
+import { MerchantHomePage } from '@/features/merchant/pages/MerchantHomePage';
+import { MerchantTransactionsPage } from '@/features/merchant/pages/MerchantTransactionsPage';
+import { MerchantTransactionDetailPage } from '@/features/merchant/pages/MerchantTransactionDetailPage';
+import { MerchantStaticQrPage } from '@/features/merchant/pages/MerchantStaticQrPage';
+import { MerchantWithdrawPage } from '@/features/merchant/pages/MerchantWithdrawPage';
 import { SendPage } from '@/features/transfer/pages/SendPage';
 import { ReceivePage } from '@/features/transfer/pages/ReceivePage';
 import { SplitListPage } from '@/features/transfer/pages/SplitListPage';
@@ -81,12 +86,13 @@ export const router = createBrowserRouter(
                   path: '/merchant',
                   element: <MerchantLayout />,
                   children: [
-                    { index: true, element: <PlaceholderPage title="店舗ホーム" /> },
+                    { index: true, element: <MerchantHomePage /> },
                     { path: 'accept', element: <MerchantAcceptRoute /> },
-                    { path: 'transactions', element: <PlaceholderPage title="決済一覧" /> },
-                    { path: 'qr', element: <PlaceholderPage title="静的QR" /> },
+                    { path: 'transactions', element: <MerchantTransactionsPage /> },
+                    { path: 'transactions/:id', element: <MerchantTransactionDetailPage /> },
+                    { path: 'qr', element: <MerchantStaticQrPage /> },
                     { path: 'coupons', element: <PlaceholderPage title="クーポン" /> },
-                    { path: 'withdraw', element: <PlaceholderPage title="出金" /> },
+                    { path: 'withdraw', element: <MerchantWithdrawPage /> },
                   ],
                 },
               ],
