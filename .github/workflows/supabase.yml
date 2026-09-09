@@ -23,9 +23,16 @@ on:
         description: 'Edge Functions（Stripe）をデプロイする'
         type: boolean
         default: false
+      commit_types:
+        description: '生成した型（supabase gen types）を src/types/database.ts にコミットする'
+        type: boolean
+        default: false
 
 env:
   SUPABASE_PROJECT_ID: tyrddhwgiasurpchpkhn
+
+permissions:
+  contents: write
 
 jobs:
   deploy:
@@ -100,3 +107,18 @@ jobs:
             /tmp/database.generated.ts
             /tmp/database.types.diff
           if-no-files-found: ignore
+
+      # workflow_dispatch で commit_types=true のとき、生成した型をブランチにコミットする
+      - name: Commit generated types
+        if: steps.secrets.outputs.ok == 'true' && github.event_name == 'workflow_dispatch' && inputs.commit_types
+        run: |
+          cp /tmp/database.generated.ts src/types/database.ts
+          if git diff --quiet -- src/types/database.ts; then
+            echo "型に変更なし"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/types/database.ts
+          git commit -m "chore(types): supabase gen types の出力で src/types/database.ts を更新"
+          git push origin HEAD:${GITHUB_REF_NAME}

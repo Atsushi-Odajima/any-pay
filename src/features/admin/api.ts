@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { supabase } from '@/shared/lib/supabase';
-import type { FunctionReturns } from '@/types/database';
+import type { FunctionReturns } from '@/types/db';
 
 export type ReconcileRow = FunctionReturns<'reconcile_wallets'>[number];
 
