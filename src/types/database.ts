@@ -620,6 +620,22 @@ export type Database = {
       };
     };
     Functions: {
+      reconcile_wallets: {
+        Args: Record<PropertyKey, never>;
+        Returns: Array<{
+          wallet_id: string;
+          kind: Database['public']['Enums']['wallet_kind'];
+          owner_id: string | null;
+          owner_handle: string | null;
+          balance_cache: number;
+          ledger_sum: number;
+          diff: number;
+        }>;
+      };
+      ledger_stats: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       claim_coupon: {
         Args: { p_coupon_id: string };
         Returns: Database['public']['Tables']['user_coupons']['Row'];

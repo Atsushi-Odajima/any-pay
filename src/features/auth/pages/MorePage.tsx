@@ -9,6 +9,7 @@ import {
   Coins,
   Bell,
   ShieldCheck,
+  Scale,
 } from 'lucide-react';
 import { useMyMerchant } from '@/features/merchant/hooks';
 import { Avatar, Card, ListRow, PageHeader, Badge } from '@/shared/ui';
@@ -76,6 +77,17 @@ export function MorePage() {
             />
           )}
         </Card>
+
+        {profile.data?.role === 'admin' && (
+          <Card className="p-0">
+            <ListRow
+              icon={<Scale className="h-5 w-5" />}
+              title="台帳の突合（管理者）"
+              subtitle="balance_cache と台帳合計の不一致を検出"
+              to="/admin/reconcile"
+            />
+          </Card>
+        )}
 
         <Card className="p-0">
           <ListRow
