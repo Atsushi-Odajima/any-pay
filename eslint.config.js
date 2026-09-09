@@ -7,7 +7,14 @@ import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
-    ignores: ['dist', 'dev-dist', 'node_modules', '.tmp', 'src/types/database.ts', 'supabase/functions'],
+    ignores: [
+      'dist',
+      'dev-dist',
+      'node_modules',
+      '.tmp',
+      'src/types/database.ts',
+      'supabase/functions',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
