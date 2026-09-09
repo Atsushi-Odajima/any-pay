@@ -46,6 +46,23 @@ export class RpcError extends Error {
   }
 }
 
+/** Supabase Auth（GoTrue）の代表的なメッセージ → 日本語 */
+const AUTH_MESSAGES: Array<[RegExp, string]> = [
+  [/Invalid login credentials/i, 'ID またはパスワードが違います'],
+  [
+    /Database error finding user/i,
+    'ユーザー情報の読み込みに失敗しました（サーバー側の設定を確認してください）',
+  ],
+  [/Email not confirmed/i, 'メールアドレスが確認されていません'],
+  [
+    /Token has expired|otp_expired/i,
+    '認証コードの有効期限が切れています。もう一度送信してください',
+  ],
+  [/Invalid token|otp/i, '認証コードが正しくありません'],
+  [/rate limit|too many requests/i, 'リクエストが多すぎます。しばらく待ってから再度お試しください'],
+  [/Signups not allowed/i, '新規登録は無効になっています'],
+];
+
 /** Supabase / PostgREST のエラーを画面表示用の日本語に変換する */
 export function toUserMessage(error: unknown): string {
   if (error instanceof RpcError) return error.message;
@@ -53,6 +70,8 @@ export function toUserMessage(error: unknown): string {
     const msg = String((error as { message: unknown }).message);
     const code = extractCode(msg);
     if (code) return RPC_MESSAGES[code] ?? msg;
+    const auth = AUTH_MESSAGES.find(([re]) => re.test(msg));
+    if (auth) return auth[1];
     if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) {
       return '通信に失敗しました。接続を確認してください';
     }

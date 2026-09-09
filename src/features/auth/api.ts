@@ -27,6 +27,17 @@ export async function verifyOtp(phone: string, token: string): Promise<Session> 
   return data.session;
 }
 
+/** 管理者・デモ用の ID / パスワードログイン。ID を固定ドメインのメールに変換して Supabase の email/password 認証を使う */
+export const ADMIN_EMAIL_DOMAIN = 'any-pay.pages.dev';
+
+export async function signInWithPassword(id: string, password: string): Promise<Session> {
+  const email = `${id.trim().toLowerCase()}@${ADMIN_EMAIL_DOMAIN}`;
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  if (!data.session) throw new Error('セッションを取得できませんでした');
+  return data.session;
+}
+
 export async function signOut(): Promise<void> {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;

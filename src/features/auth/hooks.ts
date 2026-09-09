@@ -5,6 +5,7 @@ import {
   fetchMyProfile,
   isHandleAvailable,
   sendOtp,
+  signInWithPassword,
   signOut,
   updateProfile,
   verifyOtp,
@@ -37,6 +38,13 @@ export function useSendOtp() {
 export function useVerifyOtp() {
   return useMutation({
     mutationFn: ({ phone, token }: { phone: string; token: string }) => verifyOtp(phone, token),
+  });
+}
+
+export function useSignInWithPassword() {
+  return useMutation({
+    mutationFn: ({ id, password }: { id: string; password: string }) =>
+      signInWithPassword(id, password),
   });
 }
 

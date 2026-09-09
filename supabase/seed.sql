@@ -5,13 +5,15 @@
 -- =============================================================================
 
 -- auth.users（Supabase の内部テーブル。Phone 認証のテストユーザー）
-insert into auth.users (id, instance_id, aud, role, phone, phone_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, is_anonymous)
+-- トークン系カラムは NULL にしない（NULL だと GoTrue が "Database error finding user" を返す）
+insert into auth.users (id, instance_id, aud, role, phone, phone_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, is_anonymous,
+  confirmation_token, recovery_token, email_change, email_change_token_new, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
 values
-  ('a0000000-0000-4000-8000-000000000001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000001', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false),
-  ('a0000000-0000-4000-8000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000002', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false),
-  ('a0000000-0000-4000-8000-000000000003', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000003', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false),
-  ('a0000000-0000-4000-8000-000000000011', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000011', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false),
-  ('a0000000-0000-4000-8000-000000000012', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000012', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false)
+  ('a0000000-0000-4000-8000-000000000001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000001', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false, '', '', '', '', '', '', '', ''),
+  ('a0000000-0000-4000-8000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000002', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false, '', '', '', '', '', '', '', ''),
+  ('a0000000-0000-4000-8000-000000000003', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000003', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false, '', '', '', '', '', '', '', ''),
+  ('a0000000-0000-4000-8000-000000000011', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000011', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false, '', '', '', '', '', '', '', ''),
+  ('a0000000-0000-4000-8000-000000000012', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '819000000012', now(), '{"provider":"phone","providers":["phone"]}', '{}', now(), now(), false, '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
 
 -- profiles（INSERT トリガーで user wallet が自動作成される）
