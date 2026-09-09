@@ -26,7 +26,7 @@ export async function fetchPinStatus(): Promise<PinStatus> {
 export async function setPin(pin: string, currentPin?: string): Promise<void> {
   const { error } = await supabase.rpc('set_pin', {
     p_pin: pin,
-    p_current_pin: currentPin ?? null,
+    p_current_pin: currentPin ?? undefined,
   });
   if (error) throw error;
 }

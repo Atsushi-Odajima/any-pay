@@ -25,8 +25,8 @@ export async function registerMerchant(input: {
 }): Promise<Merchant> {
   const { data, error } = await supabase.rpc('register_merchant', {
     p_name: input.name,
-    p_category: input.category ?? null,
-    p_address: input.address ?? null,
+    p_category: input.category ?? undefined,
+    p_address: input.address ?? undefined,
   });
   if (error) throw error;
   return data;
@@ -39,7 +39,7 @@ export async function createPaymentRequest(input: {
 }): Promise<PaymentRequest> {
   const { data, error } = await supabase.rpc('create_payment_request', {
     p_amount: input.amount,
-    p_memo: input.memo ?? null,
+    p_memo: input.memo ?? undefined,
     p_merchant_id: input.merchantId,
   });
   if (error) throw error;

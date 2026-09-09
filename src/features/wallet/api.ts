@@ -43,7 +43,7 @@ export async function withdraw(input: {
   const { data, error } = await supabase.rpc('withdraw', {
     p_amount: input.amount,
     p_idempotency_key: input.idempotencyKey,
-    p_wallet_id: input.walletId ?? null,
+    p_wallet_id: input.walletId ?? undefined,
   });
   if (error) throw error;
   return data;

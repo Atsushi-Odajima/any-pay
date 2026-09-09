@@ -6,8 +6,8 @@
 - Phase 8 まで完了（Phase 9 Capacitor は将来）。Supabase プロジェクト（`tyrddhwgiasurpchpkhn`）と Cloudflare Pages（`any-pay`）は作成済み。反映は GitHub Actions に自動化済みで、残りは下の「人間の作業チェックリスト」のみ
 
 ## 人間の作業チェックリスト（2026-09-09 時点）
-1. GitHub → Settings → Secrets and variables → Actions に `SUPABASE_ACCESS_TOKEN`（https://supabase.com/dashboard/account/tokens）と `SUPABASE_DB_PASSWORD` を登録 → Actions「Supabase deploy」を **Run workflow（seed にチェック）** で実行 → マイグレーション・Auth 設定・デモデータが入る
-2. Supabase ダッシュボード → Authentication → Providers → Phone が有効で、Test OTPs に 5 番号が入っているか確認（`config push` が効かなかった場合は手動登録）
+1. ✅ 完了：Secrets 登録 → Actions「Supabase deploy」実行（run #4）。8 本のマイグレーション・seed・Auth 設定（Site URL・Phone 確認・Test OTP 5 件）が本番に反映済み
+2. ✅ 完了（自動反映）：Test OTP は `config push` で登録済み。確認するなら https://supabase.com/dashboard/project/tyrddhwgiasurpchpkhn/auth/providers の Phone
 3. Cloudflare Pages → Settings → Environment variables に `VITE_SUPABASE_URL` と `VITE_SUPABASE_ANON_KEY`（Supabase → Project Settings → API）を設定。Production branch を公開ブランチに合わせて再デプロイ
 4. Supabase → Authentication → URL Configuration の Site URL を Pages の URL に
 5. （任意）Stripe：Secrets に `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` → 「Supabase deploy」を `deploy_functions` で実行 → Stripe に webhook 登録 → Pages の環境変数に `VITE_STRIPE_ENABLED=true`
@@ -21,7 +21,7 @@
 
 ## 環境メモ（このセッションの制約）
 - Docker / Supabase CLI が使えない環境のため、`supabase init` は `supabase/config.toml` を手書きで代替
-- `supabase gen types` はリンク済みプロジェクトが必要なため、`src/types/database.ts` は gen types と同じ形式で手書き。`npm run gen:types` で再生成可能
+- `src/types/database.ts` は当初手書きだったが、本番プロジェクト link 後に `supabase gen types` の出力へ置き換えた。再生成は `npm run gen:types`（ローカル）か Actions「Supabase deploy」の `commit_types`
 - SQL テストはローカルの PostgreSQL 16 で Supabase 相当のロール・`auth.uid()` を再現して実行（`tests/sql/run.sh`）
 
 ## Phase 0 — 足場 ✅
@@ -35,7 +35,7 @@
 - SQLテスト（`npm run test:sql`）：他人の profile / wallet が見えない、wallets / transactions / ledger への直接書き込みが permission denied、`role` / `pin_hash` の直接更新不可、他人 id での profile 作成不可、anon は全テーブル不可
 - 手動確認：Supabase Auth → Phone を有効化し Test OTP（例 `+819000000001` / `123456`）を登録 → `/login` で番号入力 → コード入力 → `/onboarding` で ID と表示名 → ホームへ
 - 判断メモ：Supabase の `postgres` ロールは BYPASSRLS を持つため、`security definer` 関数は RLS を越えて動く（ローカルテストでも superuser で同等）。RLS ポリシー内の wallet 判定は `my_wallet_ids()`（security definer）で一度だけ評価させる
-- 既知の課題：`supabase gen types` は未実行（CLI 無し）。プロジェクト link 後に `npm run gen:types` で差分がないことを確認する
+- 既知の課題：（解消）`src/types/database.ts` は本番プロジェクトから `supabase gen types` で生成したものに置き換え済み（Actions「Supabase deploy」の `commit_types` オプション）。補助型は `src/types/db.ts`
 - 次：Phase 2
 
 ## Phase 2 — 台帳・チャージ・履歴 ✅
