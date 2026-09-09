@@ -4,7 +4,6 @@ import { TabLayout } from './layouts/TabLayout';
 import { PlainLayout } from './layouts/PlainLayout';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ConfigErrorPage } from './pages/ConfigErrorPage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
 import { RequireAuth, RequireNoProfile, RequireProfile } from './guards';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { OnboardingPage } from '@/features/auth/pages/OnboardingPage';
@@ -32,6 +31,12 @@ import { ReceivePage } from '@/features/transfer/pages/ReceivePage';
 import { SplitListPage } from '@/features/transfer/pages/SplitListPage';
 import { SplitCreatePage } from '@/features/transfer/pages/SplitCreatePage';
 import { SplitDetailPage } from '@/features/transfer/pages/SplitDetailPage';
+import { CouponsPage } from '@/features/rewards/pages/CouponsPage';
+import { PointsPage } from '@/features/rewards/pages/PointsPage';
+import { MerchantCouponsPage } from '@/features/rewards/pages/MerchantCouponsPage';
+import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage';
+import { SecurityPage } from '@/features/security/pages/SecurityPage';
+import { PinSetupPage } from '@/features/security/pages/PinSetupPage';
 
 export const router = createBrowserRouter(
   isSupabaseConfigured
@@ -72,6 +77,11 @@ export const router = createBrowserRouter(
                     { path: '/settings/withdraw', element: <WithdrawPage /> },
                     { path: '/more', element: <MorePage /> },
                     { path: '/settings/profile', element: <ProfilePage /> },
+                    { path: '/settings/security', element: <SecurityPage /> },
+                    { path: '/settings/security/pin', element: <PinSetupPage /> },
+                    { path: '/rewards/coupons', element: <CouponsPage /> },
+                    { path: '/rewards/points', element: <PointsPage /> },
+                    { path: '/notifications', element: <NotificationsPage /> },
                   ],
                 },
                 {
@@ -91,7 +101,7 @@ export const router = createBrowserRouter(
                     { path: 'transactions', element: <MerchantTransactionsPage /> },
                     { path: 'transactions/:id', element: <MerchantTransactionDetailPage /> },
                     { path: 'qr', element: <MerchantStaticQrPage /> },
-                    { path: 'coupons', element: <PlaceholderPage title="クーポン" /> },
+                    { path: 'coupons', element: <MerchantCouponsPage /> },
                     { path: 'withdraw', element: <MerchantWithdrawPage /> },
                   ],
                 },

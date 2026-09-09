@@ -1,5 +1,15 @@
 import { useNavigate } from 'react-router';
-import { User, LogOut, Info, ArrowUpFromLine, Store } from 'lucide-react';
+import {
+  User,
+  LogOut,
+  Info,
+  ArrowUpFromLine,
+  Store,
+  Ticket,
+  Coins,
+  Bell,
+  ShieldCheck,
+} from 'lucide-react';
 import { useMyMerchant } from '@/features/merchant/hooks';
 import { Avatar, Card, ListRow, PageHeader, Badge } from '@/shared/ui';
 import { useMyProfile, useSignOut } from '../hooks';
@@ -26,10 +36,21 @@ export function MorePage() {
         )}
 
         <Card className="p-0">
+          <ListRow icon={<Ticket className="h-5 w-5" />} title="クーポン" to="/rewards/coupons" />
+          <ListRow icon={<Coins className="h-5 w-5" />} title="ポイント" to="/rewards/points" />
+          <ListRow icon={<Bell className="h-5 w-5" />} title="通知" to="/notifications" />
+        </Card>
+
+        <Card className="p-0">
           <ListRow
             icon={<User className="h-5 w-5" />}
             title="プロフィール"
             to="/settings/profile"
+          />
+          <ListRow
+            icon={<ShieldCheck className="h-5 w-5" />}
+            title="セキュリティ（PIN・生体認証）"
+            to="/settings/security"
           />
           <ListRow
             icon={<ArrowUpFromLine className="h-5 w-5" />}

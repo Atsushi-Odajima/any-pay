@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { QrCode, Bell, ChevronRight } from 'lucide-react';
 import { useMyProfile } from '@/features/auth/hooks';
 import { useLedger } from '@/features/history/hooks';
+import { useUnreadCount } from '@/features/notifications/hooks';
 import { TransactionRow } from '@/features/history/components/TransactionRow';
 import { Avatar, Card, EmptyState } from '@/shared/ui';
 import { env } from '@/shared/lib/env';
@@ -13,6 +14,7 @@ export function HomePage() {
   const wallet = useMyWallet();
   const points = usePointBalance();
   const recent = useLedger(wallet.data?.id, { limit: 3 });
+  const unread = useUnreadCount();
 
   return (
     <div className="flex flex-col gap-4 px-4 pt-[calc(0.75rem+var(--safe-top))] pb-4">
@@ -31,6 +33,11 @@ export function HomePage() {
           className="relative ml-auto flex h-10 w-10 items-center justify-center rounded-full hover:bg-ink-800"
         >
           <Bell className="h-5 w-5" />
+          {(unread.data ?? 0) > 0 && (
+            <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-lime px-1 text-[10px] font-bold text-ink">
+              {unread.data}
+            </span>
+          )}
         </Link>
       </header>
 

@@ -21,6 +21,8 @@ import { vibrate } from '@/shared/platform/haptics';
 import type { PublicProfile } from '../api';
 import { useProfileByHandle, useTransfer } from '../hooks';
 import { ProfilePicker } from '../components/ProfilePicker';
+import { useAuthGate } from '@/features/security/hooks';
+import { PinGate } from '@/features/security/components/PinGate';
 
 type Step = 'pick' | 'scan' | 'amount' | 'confirm';
 
@@ -55,6 +57,7 @@ function SendFlow({
   const [amount, setAmount] = useState<number | null>(null);
   const [memo, setMemo] = useState('');
   const idempotencyKey = useMemo(() => newIdempotencyKey('transfer'), []);
+  const gate = useAuthGate();
 
   const balance = wallet.data?.balance_cache ?? 0;
   const amountError =
@@ -70,6 +73,10 @@ function SendFlow({
 
   const submit = () => {
     if (!to || amount === null || amountError) return;
+    void gate.run(() => doTransfer());
+  };
+  const doTransfer = () => {
+    if (!to || amount === null) return;
     transfer.mutate(
       { toHandle: to.handle, amount, memo: memo || undefined, idempotencyKey },
       {
@@ -230,12 +237,19 @@ function SendFlow({
               </div>
             </Card>
             <ErrorMessage error={transfer.error} />
-            <Button size="lg" full loading={transfer.isPending} onClick={submit}>
+            {gate.bioError && <ErrorMessage error={new Error(gate.bioError)} />}
+            <Button
+              size="lg"
+              full
+              loading={transfer.isPending || gate.step === 'biometrics'}
+              onClick={submit}
+            >
               送金する
             </Button>
           </>
         )}
       </div>
+      <PinGate open={gate.step === 'pin'} onClose={gate.cancel} onVerified={gate.onPinVerified} />
     </>
   );
 }
