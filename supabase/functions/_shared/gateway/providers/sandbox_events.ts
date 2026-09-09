@@ -3,7 +3,13 @@ import type { ProviderEvent } from '../types.ts';
 
 export interface SandboxEvent {
   id: string;
-  type: 'payment.paid' | 'payment.declined' | 'payment.cancelled' | 'payment.expired' | string;
+  type:
+    | 'payment.paid'
+    | 'payment.pending'
+    | 'payment.declined'
+    | 'payment.cancelled'
+    | 'payment.expired'
+    | string;
   created: number;
   data: {
     id: string;
@@ -24,6 +30,9 @@ export function mapSandboxEvent(event: SandboxEvent): ProviderEvent | null {
   switch (event.type) {
     case 'payment.paid':
       return { ...base, kind: 'completed' };
+    case 'payment.pending':
+      // 受付済み・確定待ち（オーソリのみ、店頭支払い待ち、翌営業日引き落としなど）
+      return { ...base, kind: 'processing' };
     case 'payment.declined':
       return { ...base, kind: 'failed', code: 'PROVIDER_DECLINED' };
     case 'payment.cancelled':

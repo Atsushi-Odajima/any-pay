@@ -810,17 +810,16 @@ export const manualsEn: Manual[] = [
         blocks: [
           {
             type: 'p',
-            text: 'Top-ups flow as request → approval on the provider → signed webhook → ledger posting. Providers are pluggable behind an abstraction; the bundled sandbox (simulated provider) and Stripe test mode are available.',
+            text: 'Top-ups flow as request → approval on the provider → confirmation → balance credited. The bundled sandbox (simulated provider) and Stripe test mode are available. For the technical specification see the payment-provider spec under docs/spec.',
           },
           {
             type: 'list',
             items: [
-              'Components: the Edge Functions charge-methods (available methods), charge-create (creates the request and calls the provider), charge-webhook/<provider> (verifies confirmations and posts to the ledger) and sandbox-gateway (simulated provider).',
+              'What users see: the method list on the top-up screen is built automatically from the configured providers (sandbox / Stripe). If the API is unreachable it falls back to "Demo · instant".',
               'Secrets: SANDBOX_API_KEY / SANDBOX_WEBHOOK_SECRET are generated automatically by the Actions workflow on first deploy. APP_ORIGIN can be overridden as a repository variable. For Stripe, add STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET as GitHub Secrets.',
               'Deployment: pushing changes under supabase/ runs the "Supabase deploy" workflow, which sets the secrets and deploys all four functions every time.',
               "Inspecting state: the charge_requests table in the Table Editor (RLS hides other users' rows; admins use the SQL Editor). provider_ref is the provider-side ID and failure_code the failure reason.",
               'Webhook redelivery: multiple confirmations for the same request still produce one transaction. Try "Resend webhook" on the sandbox result page.',
-              'Adding a real provider: implement ChargeProvider (createPayment / parseWebhook / methods) under supabase/functions/_shared/gateway/providers and register it in registry.ts.',
             ],
           },
           {
