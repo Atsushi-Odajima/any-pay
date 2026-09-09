@@ -15,6 +15,7 @@ import { HomePage } from '@/features/wallet/pages/HomePage';
 import { ChargePage } from '@/features/wallet/pages/ChargePage';
 import { WithdrawPage } from '@/features/wallet/pages/WithdrawPage';
 import { CompletePage } from '@/features/wallet/pages/CompletePage';
+import { StripeReturnPage } from '@/features/wallet/pages/StripeReturnPage';
 import { HistoryPage } from '@/features/history/pages/HistoryPage';
 import { TransactionDetailPage } from '@/features/history/pages/TransactionDetailPage';
 import { PayPage } from '@/features/qr/pages/PayPage';
@@ -150,6 +151,7 @@ export const router = createBrowserRouter(
                   children: [
                     { path: '/complete/:id', element: <CompletePage /> },
                     { path: '/scan', element: <ScanRedirectPage /> },
+                    { path: '/charge/stripe/return', element: <StripeReturnPage /> },
                     { path: '/pay/confirm/:mode/:id', element: <PaymentConfirmPage /> },
                   ],
                 },

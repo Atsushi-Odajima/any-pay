@@ -1,15 +1,18 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Landmark, CreditCard, Store, Check } from 'lucide-react';
+import { Landmark, CreditCard, Store, Check, ExternalLink } from 'lucide-react';
 import { AmountInput, Button, Card, ErrorMessage, ListRow, PageHeader } from '@/shared/ui';
 import { formatYen, LIMITS } from '@/shared/lib/money';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
+import { currentOrigin, navigateExternal } from '@/shared/platform/print';
+import { env } from '@/shared/lib/env';
 import type { ChargeMethod } from '../api';
-import { useCharge, useMyWallet } from '../hooks';
+import { useCharge, useMyWallet, useStripeCheckout } from '../hooks';
 
+type Method = ChargeMethod | 'stripe';
 const METHODS: Array<{
-  value: ChargeMethod;
+  value: Method;
   label: string;
   description: string;
   icon: typeof Landmark;
@@ -17,6 +20,16 @@ const METHODS: Array<{
   { value: 'bank', label: '銀行口座', description: 'デモ：即時反映', icon: Landmark },
   { value: 'card', label: 'クレジットカード', description: 'デモ：即時反映', icon: CreditCard },
   { value: 'convenience', label: 'コンビニ', description: 'デモ：即時反映', icon: Store },
+  ...(env.stripeEnabled
+    ? [
+        {
+          value: 'stripe' as const,
+          label: 'カード（Stripe テスト決済）',
+          description: 'Stripe Checkout → webhook で反映。テストカード 4242…',
+          icon: ExternalLink,
+        },
+      ]
+    : []),
 ];
 
 type Step = 'method' | 'amount' | 'confirm';
@@ -25,8 +38,9 @@ export function ChargePage() {
   const navigate = useNavigate();
   const wallet = useMyWallet();
   const charge = useCharge();
+  const stripe = useStripeCheckout();
   const [step, setStep] = useState<Step>('method');
-  const [method, setMethod] = useState<ChargeMethod>('bank');
+  const [method, setMethod] = useState<Method>('bank');
   const [amount, setAmount] = useState<number | null>(null);
   // 確認画面に入るたびに1つだけ生成し、リトライでは同じキーを使う
   const idempotencyKey = useMemo(() => newIdempotencyKey('charge'), []);
@@ -47,6 +61,13 @@ export function ChargePage() {
 
   const submit = () => {
     if (amount === null || amountError) return;
+    if (method === 'stripe') {
+      stripe.mutate(
+        { amount, origin: currentOrigin() },
+        { onSuccess: (url) => navigateExternal(url), onError: () => vibrate('error') },
+      );
+      return;
+    }
     charge.mutate(
       { amount, method, idempotencyKey },
       {

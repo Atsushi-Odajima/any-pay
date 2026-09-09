@@ -20,3 +20,8 @@ export function isStandaloneDisplay(): boolean {
     return false;
   }
 }
+
+/** 外部 URL へ遷移（Stripe Checkout など）。Capacitor 化時は Browser plugin に差し替える */
+export function navigateExternal(url: string): void {
+  window.location.assign(url);
+}
