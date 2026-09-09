@@ -294,6 +294,15 @@ tests/sql              SQL テスト（ランナー + Supabase 相当のシム�
 tests/e2e              Playwright
 ```
 
+## 仕様書（外部エンジニア向け）
+
+| 対象 | 日本語 | English |
+|---|---|---|
+| 加盟店（POS / レジ側の開発者） | [docs/spec/merchant-integration.ja.md](./docs/spec/merchant-integration.ja.md) | [docs/spec/merchant-integration.en.md](./docs/spec/merchant-integration.en.md) |
+| 決済代行（クレジット / 銀行連携 / その他電子決済によるチャージ） | [docs/spec/payment-provider-integration.ja.md](./docs/spec/payment-provider-integration.ja.md) | [docs/spec/payment-provider-integration.en.md](./docs/spec/payment-provider-integration.en.md) |
+
+アプリ内の「その他 → 説明書」はオペレーター向けの使い方で、技術仕様は上記に集約しています。
+
 ## 進捗
 
 フェーズごとの完了内容・手動確認手順・既知の課題は [PROGRESS.md](./PROGRESS.md) を参照。

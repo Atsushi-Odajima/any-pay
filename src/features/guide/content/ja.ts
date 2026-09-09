@@ -819,17 +819,16 @@ export const manualsJa: Manual[] = [
         blocks: [
           {
             type: 'p',
-            text: 'チャージは「入金リクエスト → プロバイダで承認 → 署名付き webhook → 記帳」の流れで処理されます。プロバイダは抽象層で差し替え可能で、同梱のサンドボックス（模擬プロバイダ）と Stripe テストモードが使えます。',
+            text: 'チャージは「入金リクエスト → プロバイダで承認 → 確定通知 → 残高に反映」の流れで処理されます。同梱のサンドボックス（模擬プロバイダ）と Stripe テストモードが使えます。技術仕様は docs/spec の仕様書（決済代行向け）を参照してください。',
           },
           {
             type: 'list',
             items: [
-              '構成：Edge Functions の charge-methods（利用可能な方式）、charge-create（リクエスト作成とプロバイダ呼び出し）、charge-webhook/<provider>（確定通知の検証と記帳）、sandbox-gateway（模擬プロバイダ）。',
+              '画面での見え方：チャージ画面の方法一覧は、設定済みのプロバイダ（サンドボックス / Stripe）から自動的に組み立てられます。接続できない場合は「デモ · 即時反映」にフォールバックします。',
               'secrets：SANDBOX_API_KEY / SANDBOX_WEBHOOK_SECRET は Actions が初回に自動生成します。APP_ORIGIN は Variables で上書きできます。Stripe を使う場合は STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET を GitHub Secrets に追加します。',
               'デプロイ：supabase/ 配下を push すると Actions「Supabase deploy」が secrets を登録し、4 つの Function を毎回デプロイします。',
               '状態の確認：Table Editor の charge_requests（本人以外は RLS で不可視。管理者は SQL Editor から）。provider_ref がプロバイダ側の ID、failure_code が失敗理由です。',
               'webhook の再送：同じリクエストに確定通知が複数回来ても取引は 1 件です。サンドボックスの結果画面「通知を再送する」で確認できます。',
-              '実プロバイダの追加：supabase/functions/_shared/gateway/providers に ChargeProvider（createPayment / parseWebhook / methods）を実装し、registry.ts に登録します。',
             ],
           },
           {
