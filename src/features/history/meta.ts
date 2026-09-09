@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { Json } from '@/types/database';
+import { tr } from '@/shared/i18n';
 
 /** transactions.metadata の表示用スナップショット（RPC が書く） */
 const metaSchema = z
@@ -32,9 +33,9 @@ export function parseMeta(json: Json): TxMeta {
   return r.success ? r.data : {};
 }
 
-export const CHARGE_METHOD_LABEL: Record<string, string> = {
-  bank: '銀行口座',
-  card: 'クレジットカード',
-  convenience: 'コンビニ',
-  stripe: 'カード（Stripe）',
-};
+const CHARGE_METHODS = new Set(['bank', 'card', 'convenience', 'stripe']);
+
+export function chargeMethodLabel(method: string | undefined): string | undefined {
+  if (!method) return undefined;
+  return CHARGE_METHODS.has(method) ? tr(`tx.chargeMethod.${method}`) : method;
+}

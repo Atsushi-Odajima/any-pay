@@ -3,6 +3,7 @@ import { CameraOff } from 'lucide-react';
 import { isCameraSupported, startQrScan } from '@/shared/platform/camera';
 import { vibrate } from '@/shared/platform/haptics';
 import { Button, Input } from '@/shared/ui';
+import { useT } from '@/shared/i18n';
 
 interface Props {
   onResult: (text: string) => void;
@@ -13,8 +14,9 @@ interface Props {
 
 /** 背面カメラで QR を読み取る。カメラが使えない環境では手入力にフォールバック */
 export function QrScanner({ onResult, once = true, paused = false }: Props) {
+  const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<string | null>(null);
   const [manual, setManual] = useState('');
   const handled = useRef(false);
   const onResultRef = useRef(onResult);
@@ -46,11 +48,7 @@ export function QrScanner({ onResult, once = true, paused = false }: Props) {
       })
       .catch((e: unknown) => {
         const name = e instanceof Error ? e.name : '';
-        setError(
-          name === 'NotAllowedError'
-            ? 'カメラの使用が許可されていません。ブラウザの設定から許可してください'
-            : 'カメラを起動できませんでした',
-        );
+        setErrorKey(name === 'NotAllowedError' ? 'scanner.denied' : 'scanner.failed');
       });
     return () => {
       cancelled = true;
@@ -58,12 +56,12 @@ export function QrScanner({ onResult, once = true, paused = false }: Props) {
     };
   }, [supported, paused, once]);
 
-  if (!supported || error) {
+  if (!supported || errorKey) {
     return (
       <div className="flex flex-col gap-3 rounded-2xl bg-ink-800 p-4">
         <div className="flex items-center gap-2 text-sm text-mist">
           <CameraOff className="h-4 w-4" />
-          {error ?? 'この環境ではカメラを使えません'}
+          {t(errorKey ?? 'scanner.noCamera')}
         </div>
         <form
           className="flex flex-col gap-2"
@@ -73,13 +71,13 @@ export function QrScanner({ onResult, once = true, paused = false }: Props) {
           }}
         >
           <Input
-            label="QRの内容を貼り付け（デモ用）"
+            label={t('scanner.pasteLabel')}
             placeholder="ap1:..."
             value={manual}
             onChange={(e) => setManual(e.target.value)}
           />
           <Button type="submit" variant="secondary">
-            読み取る
+            {t('scanner.read')}
           </Button>
         </form>
       </div>

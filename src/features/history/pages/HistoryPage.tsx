@@ -4,17 +4,14 @@ import { useMyWallet } from '@/features/wallet/hooks';
 import { Card, EmptyState, PageHeader, PageLoading } from '@/shared/ui';
 import { currentMonthKey, monthLabel, monthRange, shiftMonth, formatDate } from '@/shared/lib/date';
 import { cn } from '@/shared/lib/cn';
+import { useT } from '@/shared/i18n';
 import { useLedger } from '../hooks';
 import type { TxType } from '../api';
 import { TransactionRow } from '../components/TransactionRow';
-import { TX_TYPE_LABEL } from '../labels';
-
-const TYPE_FILTERS: Array<{ value: TxType | 'all'; label: string }> = [
-  { value: 'all', label: 'すべて' },
-  ...(Object.keys(TX_TYPE_LABEL) as TxType[]).map((t) => ({ value: t, label: TX_TYPE_LABEL[t] })),
-];
+import { TX_TYPES, txTypeLabel } from '../labels';
 
 export function HistoryPage() {
+  const t = useT();
   const wallet = useMyWallet();
   const [month, setMonth] = useState(currentMonthKey());
   const [type, setType] = useState<TxType | 'all'>('all');
@@ -25,7 +22,6 @@ export function HistoryPage() {
     type: type === 'all' ? undefined : type,
   });
 
-  // 日付ごとにグループ化
   const lines = ledger.data;
   const groups = useMemo(() => {
     const map = new Map<string, NonNullable<typeof lines>>();
@@ -38,13 +34,18 @@ export function HistoryPage() {
     return [...map.entries()];
   }, [lines]);
 
+  const filters: Array<{ value: TxType | 'all'; label: string }> = [
+    { value: 'all', label: t('history.all') },
+    ...TX_TYPES.map((v) => ({ value: v, label: txTypeLabel(v) })),
+  ];
+
   return (
     <>
-      <PageHeader title="履歴" />
+      <PageHeader title={t('history.title')} />
       <div className="flex items-center justify-between px-4 pb-2">
         <button
           type="button"
-          aria-label="前の月"
+          aria-label={t('history.prevMonth')}
           onClick={() => setMonth((m) => shiftMonth(m, -1))}
           className="rounded-full p-2 hover:bg-ink-800"
         >
@@ -53,7 +54,7 @@ export function HistoryPage() {
         <span className="font-semibold">{monthLabel(month)}</span>
         <button
           type="button"
-          aria-label="次の月"
+          aria-label={t('history.nextMonth')}
           disabled={month >= currentMonthKey()}
           onClick={() => setMonth((m) => shiftMonth(m, 1))}
           className="rounded-full p-2 hover:bg-ink-800 disabled:opacity-30"
@@ -62,7 +63,7 @@ export function HistoryPage() {
         </button>
       </div>
       <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-3">
-        {TYPE_FILTERS.map((f) => (
+        {filters.map((f) => (
           <button
             key={f.value}
             type="button"
@@ -80,13 +81,13 @@ export function HistoryPage() {
         {ledger.isPending || wallet.isPending ? (
           <PageLoading />
         ) : groups.length === 0 ? (
-          <EmptyState title="この月の取引はありません" />
+          <EmptyState title={t('history.emptyMonth')} />
         ) : (
-          groups.map(([date, lines]) => (
+          groups.map(([date, rows]) => (
             <section key={date}>
               <h2 className="mb-1 px-1 text-xs font-semibold text-mist">{date}</h2>
               <Card className="p-0">
-                {lines.map((line) => (
+                {rows.map((line) => (
                   <TransactionRow
                     key={line.id}
                     tx={line.transaction}

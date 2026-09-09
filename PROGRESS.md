@@ -100,3 +100,12 @@
 - 原因：通知の Realtime 購読を常駐リスナーと支払うタブの2か所から **同じチャンネル名**で行っていた。supabase-js の `channel()` は同名の既存チャンネルを返すため、購読済みチャンネルに `.on()` を足して例外になっていた
 - 対処：購読ごとに一意なチャンネル名を使い、購読の失敗は握りつぶす（`features/notifications/realtime.ts`）。ルート全体に `errorElement`（`app/pages/ErrorPage.tsx`）を付け、例外時はスタックトレースではなく「再読み込み / ホームへ」の復帰画面を出す
 - 支払うタブを PayPay 風に刷新：残高 → 白いカード（名前・@handle・QR・残り秒数バー・更新）→ 下部ピルで「QRを見せる / スキャン」切替（`/pay?mode=scan` でスキャンを直接開ける）
+
+## 多言語対応（日本語 ⇄ English）
+- 完了内容：全画面（ユーザー / 加盟店 / 管理者 / ログイン / エラー画面）を辞書化し、ホーム・ログイン右上と「その他 → 表示言語」の「日本語｜EN」で即時切替。設定は端末に保存（`anypay:locale`）、`<html lang>` も更新。日付は言語ごとに `Intl` で整形（例：`9/9(水) 21:05` / `Wed, Sep 9 21:05`、月ラベル `2026年9月` / `September 2026`）。RPC のエラーコード・Auth のメッセージ・zod の検証文言・QR 解析エラーも辞書経由
+- 仕組み：`src/shared/i18n/`（`ja.ts` が正、`en.ts` は `Dict = typeof ja` 型で不足キーはコンパイルエラー）。React では `useT()`、React 外（zod / エラー変換 / 通知整形）では `tr()`。`{name}` 形式のパラメータ埋め込み
+- 通知：`0010_notification_i18n_data.sql` で `_notify` が `transactions.metadata` / `split_requests` から店名・支払者・送金者・メモ・残人数・ポイントを `data` に補完。クライアント（`features/notifications/format.ts`）が現在の言語で文面を組み立て、`data` が足りない古い通知はサーバーの日本語 title にフォールバック。RPC 本体は変更していない
+- テスト：Vitest `tests/unit/i18n.test.ts`（キー集合・プレースホルダの一致、翻訳とフォールバック、通知整形、日付の言語追従）、SQL `phase10_notification_data.test.sql`（決済 / 送金 / 割り勘 / 返金の通知 data）
+- 判断メモ：i18n ライブラリを入れず自前の辞書にした（依存を増やさず、型でキー漏れを検出でき、ポートフォリオとして説明しやすい）。金額は両言語とも `¥` 表記で統一。加盟店の受付タブは英語では「Checkout」
+- 手動確認：ログイン画面右上「EN」→ 全体が英語に → ホーム右上「日本語」で戻る。英語のまま決済すると通知一覧も英語で表示される（0010 適用後の通知）
+- 反映：`supabase/**` の push で Actions「Supabase deploy」が 0010 を `db push`。フロントは Cloudflare Pages が自動ビルド

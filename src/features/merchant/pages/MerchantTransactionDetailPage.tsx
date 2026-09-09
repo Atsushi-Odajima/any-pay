@@ -16,10 +16,12 @@ import { formatYen } from '@/shared/lib/money';
 import { formatDateTime } from '@/shared/lib/date';
 import { useTransaction } from '@/features/history/hooks';
 import { parseMeta } from '@/features/history/meta';
-import { PAYMENT_METHOD_LABEL, TX_TYPE_LABEL } from '@/features/history/labels';
+import { paymentMethodLabel, txTypeLabel } from '@/features/history/labels';
+import { useT } from '@/shared/i18n';
 import { useMerchantContext, useRefund } from '../hooks';
 
 export function MerchantTransactionDetailPage() {
+  const t = useT();
   const { id } = useParams<{ id: string }>();
   const { merchant } = useMerchantContext();
   const navigate = useNavigate();
@@ -31,69 +33,73 @@ export function MerchantTransactionDetailPage() {
   if (!tx.data || tx.data.merchant_id !== merchant.id) {
     return (
       <>
-        <PageHeader title="決済明細" back="/merchant/transactions" />
-        <EmptyState title="決済が見つかりません" />
+        <PageHeader title={t('merchant.tx.detail')} back="/merchant/transactions" />
+        <EmptyState title={t('merchant.tx.notFound')} />
       </>
     );
   }
-  const t = tx.data;
-  const meta = parseMeta(t.metadata);
-  const merchantLine = t.ledger.find((l) => l.wallet_id === merchant.wallet_id);
-  const refundable = t.type === 'payment' && t.status === 'completed';
+  const d = tx.data;
+  const meta = parseMeta(d.metadata);
+  const merchantLine = d.ledger.find((l) => l.wallet_id === merchant.wallet_id);
+  const refundable = d.type === 'payment' && d.status === 'completed';
+  const paymentMethod = paymentMethodLabel(meta.payment_method);
 
   return (
     <>
-      <PageHeader title="決済明細" back="/merchant/transactions" />
+      <PageHeader title={t('merchant.tx.detail')} back="/merchant/transactions" />
       <div className="flex flex-col gap-4 px-4 pb-6">
         <div className="py-2 text-center">
-          <p className="text-sm text-mist">{t.type === 'refund' ? '返金' : '売上'}</p>
+          <p className="text-sm text-mist">
+            {d.type === 'refund' ? t('merchant.tx.refund') : t('merchant.tx.sale')}
+          </p>
           <p className="mt-1 text-4xl font-bold tracking-tight">
-            {merchantLine ? formatYen(merchantLine.amount, { sign: true }) : formatYen(t.amount)}
+            {merchantLine ? formatYen(merchantLine.amount, { sign: true }) : formatYen(d.amount)}
           </p>
           <div className="mt-2">
             <Badge
               tone={
-                t.status === 'refunded' ? 'warn' : t.status === 'completed' ? 'success' : 'neutral'
+                d.status === 'refunded' ? 'warn' : d.status === 'completed' ? 'success' : 'neutral'
               }
             >
-              {t.status === 'refunded' ? '返金済み' : t.status === 'completed' ? '完了' : t.status}
+              {t(`history.status.${d.status}`)}
             </Badge>
           </div>
         </div>
         <Card>
           <dl className="divide-y divide-ink-700 text-sm">
-            <Row label="種別" value={TX_TYPE_LABEL[t.type]} />
-            <Row label="日時" value={formatDateTime(t.completed_at ?? t.created_at)} />
+            <Row label={t('merchant.tx.type')} value={txTypeLabel(d.type)} />
             <Row
-              label="お客様"
-              value={`${meta.payer_name ?? '—'}${meta.payer_handle ? `（@${meta.payer_handle}）` : ''}`}
+              label={t('merchant.tx.dateTime')}
+              value={formatDateTime(d.completed_at ?? d.created_at)}
             />
-            {meta.payment_method && (
-              <Row
-                label="決済方式"
-                value={PAYMENT_METHOD_LABEL[meta.payment_method] ?? meta.payment_method}
-              />
-            )}
+            <Row
+              label={t('merchant.tx.customerLabel')}
+              value={`${meta.payer_name ?? '—'}${meta.payer_handle ? ` (@${meta.payer_handle})` : ''}`}
+            />
+            {paymentMethod && <Row label={t('merchant.tx.method')} value={paymentMethod} />}
             {meta.original_amount !== undefined && meta.discount !== undefined && (
               <>
-                <Row label="元の金額" value={formatYen(meta.original_amount)} />
+                <Row label={t('merchant.tx.original')} value={formatYen(meta.original_amount)} />
                 <Row
-                  label={`クーポン割引${meta.coupon_title ? `（${meta.coupon_title}）` : ''}`}
+                  label={`${t('merchant.tx.discount')}${meta.coupon_title ? `（${meta.coupon_title}）` : ''}`}
                   value={`-${formatYen(meta.discount)}`}
                 />
-                <Row label="お客様の支払額" value={formatYen(t.amount)} />
+                <Row label={t('merchant.tx.customerPaid')} value={formatYen(d.amount)} />
                 {meta.subsidy !== undefined && meta.subsidy !== 0 && (
-                  <Row label="プラットフォーム補填" value={formatYen(Math.abs(meta.subsidy))} />
+                  <Row label={t('merchant.tx.subsidy')} value={formatYen(Math.abs(meta.subsidy))} />
                 )}
               </>
             )}
-            {t.memo && <Row label="メモ" value={t.memo} />}
+            {d.memo && <Row label={t('merchant.tx.memo')} value={d.memo} />}
             {merchantLine && (
-              <Row label="取引後の店舗残高" value={formatYen(merchantLine.balance_after)} />
+              <Row
+                label={t('merchant.tx.balanceAfter')}
+                value={formatYen(merchantLine.balance_after)}
+              />
             )}
             {meta.refund_transaction_id && (
               <Row
-                label="返金取引"
+                label={t('merchant.tx.refundTx')}
                 value={
                   <button
                     type="button"
@@ -107,7 +113,7 @@ export function MerchantTransactionDetailPage() {
             )}
             {meta.refund_of && (
               <Row
-                label="元の決済"
+                label={t('merchant.tx.originalTx')}
                 value={
                   <button
                     type="button"
@@ -119,7 +125,10 @@ export function MerchantTransactionDetailPage() {
                 }
               />
             )}
-            <Row label="取引ID" value={<span className="font-mono text-xs">{t.id}</span>} />
+            <Row
+              label={t('merchant.tx.txId')}
+              value={<span className="font-mono text-xs">{d.id}</span>}
+            />
           </dl>
         </Card>
 
@@ -130,35 +139,38 @@ export function MerchantTransactionDetailPage() {
             icon={<RotateCcw className="h-4 w-4" />}
             onClick={() => setConfirm(true)}
           >
-            全額返金する
+            {t('merchant.tx.refundAll')}
           </Button>
         )}
       </div>
 
-      <Sheet open={confirm} onClose={() => setConfirm(false)} title="返金の確認">
+      <Sheet
+        open={confirm}
+        onClose={() => setConfirm(false)}
+        title={t('merchant.tx.refundConfirmTitle')}
+      >
         <p className="text-sm text-mist">
-          {formatYen(t.amount)}{' '}
-          をお客様に返金します。付与したポイントは取り消され、使用したクーポンは復活します。この操作は取り消せません。
+          {t('merchant.tx.refundConfirmBody', { amount: formatYen(d.amount) })}
         </p>
         <ErrorMessage error={refund.error} className="mt-3" />
         <div className="mt-4 flex gap-3">
           <Button variant="secondary" full onClick={() => setConfirm(false)}>
-            やめる
+            {t('merchant.tx.stop')}
           </Button>
           <Button
             variant="danger"
             full
             loading={refund.isPending}
             onClick={() =>
-              refund.mutate(t.id, {
+              refund.mutate(d.id, {
                 onSuccess: () => {
-                  toast.success('返金しました');
+                  toast.success(t('merchant.tx.refundedToast'));
                   setConfirm(false);
                 },
               })
             }
           >
-            返金する
+            {t('merchant.tx.refundButton')}
           </Button>
         </div>
       </Sheet>

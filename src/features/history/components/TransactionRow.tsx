@@ -3,6 +3,7 @@ import { ListRow } from '@/shared/ui';
 import { formatYen } from '@/shared/lib/money';
 import { formatDate, formatTime } from '@/shared/lib/date';
 import { cn } from '@/shared/lib/cn';
+import { useT } from '@/shared/i18n';
 import type { Tables } from '@/types/database';
 import type { TxType } from '../api';
 import { describeTransaction } from '../labels';
@@ -32,6 +33,7 @@ export function TransactionRow({
   to?: string;
   showDate?: boolean;
 }) {
+  const t = useT();
   const direction = amount >= 0 ? 'in' : 'out';
   const { title, subtitle } = describeTransaction(tx, direction);
   const Icon = TX_ICON[tx.type];
@@ -57,7 +59,7 @@ export function TransactionRow({
           </span>
           {balanceAfter !== undefined && (
             <span className="block text-[11px] tabular-nums text-mist">
-              残高 {formatYen(balanceAfter)}
+              {t('history.balanceAfterShort', { amount: formatYen(balanceAfter) })}
             </span>
           )}
         </span>

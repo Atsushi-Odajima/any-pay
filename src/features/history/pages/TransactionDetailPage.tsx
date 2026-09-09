@@ -3,18 +3,13 @@ import { useMyWallets } from '@/features/wallet/hooks';
 import { Badge, Card, EmptyState, PageHeader, PageLoading } from '@/shared/ui';
 import { formatYen } from '@/shared/lib/money';
 import { formatDateTime } from '@/shared/lib/date';
+import { useT } from '@/shared/i18n';
 import { useTransaction } from '../hooks';
-import { CHARGE_METHOD_LABEL, parseMeta } from '../meta';
-import { describeTransaction, TX_TYPE_LABEL } from '../labels';
-
-const STATUS_LABEL = {
-  pending: '処理中',
-  completed: '完了',
-  failed: '失敗',
-  refunded: '返金済み',
-} as const;
+import { chargeMethodLabel, parseMeta } from '../meta';
+import { describeTransaction, paymentMethodLabel, txTypeLabel } from '../labels';
 
 export function TransactionDetailPage() {
+  const t = useT();
   const { id } = useParams<{ id: string }>();
   const tx = useTransaction(id);
   const wallets = useMyWallets();
@@ -23,23 +18,24 @@ export function TransactionDetailPage() {
   if (!tx.data) {
     return (
       <>
-        <PageHeader title="明細" back />
-        <EmptyState title="取引が見つかりません" />
+        <PageHeader title={t('history.detail')} back />
+        <EmptyState title={t('history.notFound')} />
       </>
     );
   }
 
   const myWalletIds = new Set((wallets.data ?? []).map((w) => w.id));
-  // 自分の wallet の台帳行（加盟店オーナーが自店の決済を見る場合は merchant wallet の行）
   const myLines = tx.data.ledger.filter((l) => myWalletIds.has(l.wallet_id));
   const primary = myLines[0];
   const direction = primary && primary.amount > 0 ? 'in' : 'out';
   const { title } = describeTransaction(tx.data, direction);
   const meta = parseMeta(tx.data.metadata);
+  const method = chargeMethodLabel(meta.method);
+  const paymentMethod = paymentMethodLabel(meta.payment_method);
 
   return (
     <>
-      <PageHeader title="明細" back />
+      <PageHeader title={t('history.detail')} back />
       <div className="flex flex-col gap-4 px-4 pb-6">
         <div className="py-4 text-center">
           <p className="text-sm text-mist">{title}</p>
@@ -56,41 +52,52 @@ export function TransactionDetailPage() {
                     : 'neutral'
               }
             >
-              {STATUS_LABEL[tx.data.status]}
+              {t(`history.status.${tx.data.status}`)}
             </Badge>
           </div>
         </div>
 
         <Card>
           <dl className="divide-y divide-ink-700 text-sm">
-            <Row label="種別" value={TX_TYPE_LABEL[tx.data.type]} />
-            <Row label="日時" value={formatDateTime(tx.data.completed_at ?? tx.data.created_at)} />
-            {meta.method && (
-              <Row label="方法" value={CHARGE_METHOD_LABEL[meta.method] ?? meta.method} />
+            <Row label={t('history.type')} value={txTypeLabel(tx.data.type)} />
+            <Row
+              label={t('history.dateTime')}
+              value={formatDateTime(tx.data.completed_at ?? tx.data.created_at)}
+            />
+            {method && <Row label={t('history.method')} value={method} />}
+            {paymentMethod && <Row label={t('history.paymentMethod')} value={paymentMethod} />}
+            {tx.data.merchant?.name && (
+              <Row label={t('history.store')} value={tx.data.merchant.name} />
             )}
-            {meta.payment_method && <Row label="決済方式" value={meta.payment_method} />}
-            {tx.data.merchant?.name && <Row label="店舗" value={tx.data.merchant.name} />}
             {meta.original_amount !== undefined && meta.discount !== undefined && (
               <>
-                <Row label="元の金額" value={formatYen(meta.original_amount)} />
+                <Row label={t('history.originalAmount')} value={formatYen(meta.original_amount)} />
                 <Row
-                  label={`クーポン割引${meta.coupon_title ? `（${meta.coupon_title}）` : ''}`}
+                  label={`${t('history.couponDiscount')}${meta.coupon_title ? `（${meta.coupon_title}）` : ''}`}
                   value={`-${formatYen(meta.discount)}`}
                 />
               </>
             )}
             {meta.points !== undefined && meta.points !== 0 && (
-              <Row label="ポイント" value={`${meta.points > 0 ? '+' : ''}${meta.points} pt`} />
+              <Row
+                label={t('history.points')}
+                value={`${meta.points > 0 ? '+' : ''}${meta.points} pt`}
+              />
             )}
-            {tx.data.memo && <Row label="メモ" value={tx.data.memo} />}
-            {primary && <Row label="取引後残高" value={formatYen(primary.balance_after)} />}
-            <Row label="取引ID" value={<span className="font-mono text-xs">{tx.data.id}</span>} />
+            {tx.data.memo && <Row label={t('history.memo')} value={tx.data.memo} />}
+            {primary && (
+              <Row label={t('history.balanceAfter')} value={formatYen(primary.balance_after)} />
+            )}
+            <Row
+              label={t('history.txId')}
+              value={<span className="font-mono text-xs">{tx.data.id}</span>}
+            />
           </dl>
         </Card>
 
         {myLines.length > 1 && (
           <Card>
-            <p className="mb-2 text-xs text-mist">台帳（自分の wallet 分）</p>
+            <p className="mb-2 text-xs text-mist">{t('history.ledgerMine')}</p>
             {myLines.map((l) => (
               <div key={l.id} className="flex justify-between py-1 text-sm">
                 <span className="font-mono text-xs text-mist">{l.wallet_id.slice(0, 8)}…</span>

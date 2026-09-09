@@ -1,6 +1,7 @@
 import { Delete } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { vibrate } from '@/shared/platform/haptics';
+import { useT } from '@/shared/i18n';
 
 interface Props {
   value: string;
@@ -12,6 +13,7 @@ interface Props {
 
 /** PIN 入力用テンキー（4〜6桁） */
 export function PinPad({ value, onChange, maxLength = 6, disabled, onComplete }: Props) {
+  const t = useT();
   const push = (d: string) => {
     if (disabled || value.length >= maxLength) return;
     vibrate('light');
@@ -29,7 +31,7 @@ export function PinPad({ value, onChange, maxLength = 6, disabled, onComplete }:
           <button
             key={i}
             type="button"
-            aria-label="1文字削除"
+            aria-label={t('security.gate.deleteOne')}
             disabled={disabled}
             onClick={() => onChange(value.slice(0, -1))}
             className="flex h-14 items-center justify-center rounded-2xl text-mist hover:bg-ink-700 active:bg-ink-600"
@@ -64,8 +66,12 @@ export function PinDots({
   max?: number;
   min?: number;
 }) {
+  const t = useT();
   return (
-    <div className="flex items-center justify-center gap-3" aria-label={`${length}桁入力済み`}>
+    <div
+      className="flex items-center justify-center gap-3"
+      aria-label={t('security.gate.entered', { n: length })}
+    >
       {Array.from({ length: max }, (_, i) => (
         <span
           key={i}

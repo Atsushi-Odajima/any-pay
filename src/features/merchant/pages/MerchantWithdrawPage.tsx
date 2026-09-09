@@ -5,9 +5,11 @@ import { formatYen } from '@/shared/lib/money';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
 import { useMyWallets, useWithdraw } from '@/features/wallet/hooks';
+import { useT } from '@/shared/i18n';
 import { useMerchantContext } from '../hooks';
 
 export function MerchantWithdrawPage() {
+  const t = useT();
   const { merchant } = useMerchantContext();
   const navigate = useNavigate();
   const wallets = useMyWallets();
@@ -20,9 +22,9 @@ export function MerchantWithdrawPage() {
     amount === null
       ? undefined
       : amount < 1
-        ? '1円以上を入力してください'
+        ? t('validation.amountMin1')
         : amount > balance
-          ? '店舗残高が不足しています'
+          ? t('merchant.withdraw.insufficient')
           : undefined;
 
   return (
@@ -38,7 +40,7 @@ export function MerchantWithdrawPage() {
               vibrate('success');
               navigate(`/complete/${tx.id}`, {
                 replace: true,
-                state: { title: '売上の出金が完了しました', next: '/merchant' },
+                state: { titleKey: 'complete.merchantWithdraw', next: '/merchant' },
               });
             },
             onError: () => vibrate('error'),
@@ -47,7 +49,7 @@ export function MerchantWithdrawPage() {
       }}
     >
       <Card>
-        <p className="text-xs text-mist">出金可能な店舗残高</p>
+        <p className="text-xs text-mist">{t('merchant.withdraw.available')}</p>
         <p className="text-2xl font-bold">{formatYen(balance)}</p>
       </Card>
       <AmountInput value={amount} onChange={setAmount} error={error} autoFocus />
@@ -57,11 +59,9 @@ export function MerchantWithdrawPage() {
         onClick={() => setAmount(balance)}
         disabled={balance === 0}
       >
-        全額を入力
+        {t('merchant.withdraw.all')}
       </Button>
-      <p className="text-xs text-ink-400">
-        ※ デモのため手数料 0 円・即時反映。返金に備えて残高を残しておくこともできます。
-      </p>
+      <p className="text-xs text-ink-400">{t('merchant.withdraw.demoNote')}</p>
       <ErrorMessage error={withdraw.error} />
       <Button
         type="submit"
@@ -70,7 +70,7 @@ export function MerchantWithdrawPage() {
         loading={withdraw.isPending}
         disabled={amount === null || !!error}
       >
-        出金する
+        {t('merchant.withdraw.submit')}
       </Button>
     </form>
   );

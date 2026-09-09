@@ -12,6 +12,7 @@ import {
   Sheet,
 } from '@/shared/ui';
 import { formatYen, parseYen } from '@/shared/lib/money';
+import { useT } from '@/shared/i18n';
 import type { PublicProfile } from '../api';
 import { useCreateSplit } from '../hooks';
 import { ProfilePicker } from '../components/ProfilePicker';
@@ -22,6 +23,7 @@ interface Member extends PublicProfile {
 }
 
 export function SplitCreatePage() {
+  const t = useT();
   const navigate = useNavigate();
   const create = useCreateSplit();
   const [total, setTotal] = useState<number | null>(null);
@@ -52,17 +54,12 @@ export function SplitCreatePage() {
 
   return (
     <>
-      <PageHeader title="割り勘を作成" back="/split" />
+      <PageHeader title={t('split.createTitle')} back="/split" />
       <div className="flex flex-col gap-4 px-4 pb-6">
-        <AmountInput
-          value={total}
-          onChange={setTotal}
-          label="合計金額（あなたが立て替えた額）"
-          autoFocus
-        />
+        <AmountInput value={total} onChange={setTotal} label={t('split.total')} autoFocus />
         <Input
-          label="メモ（任意）"
-          placeholder="例：9/9 飲み会"
+          label={t('split.memo')}
+          placeholder={t('split.memoPlaceholder')}
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
           maxLength={40}
@@ -70,7 +67,7 @@ export function SplitCreatePage() {
 
         <div>
           <div className="mb-2 flex items-center">
-            <p className="text-sm text-mist">メンバー（あなた以外）</p>
+            <p className="text-sm text-mist">{t('split.members')}</p>
             <Button
               size="sm"
               variant="ghost"
@@ -79,12 +76,12 @@ export function SplitCreatePage() {
               onClick={applyEven}
               disabled={total === null || members.length === 0}
             >
-              均等に按分
+              {t('split.even')}
             </Button>
           </div>
           <Card className="flex flex-col gap-2 p-3">
             {members.length === 0 && (
-              <p className="py-2 text-center text-sm text-mist">メンバーを追加してください</p>
+              <p className="py-2 text-center text-sm text-mist">{t('split.addMembers')}</p>
             )}
             {members.map((m) => (
               <div key={m.id} className="flex items-center gap-2">
@@ -97,7 +94,7 @@ export function SplitCreatePage() {
                   <span className="text-sm text-mist">¥</span>
                   <input
                     inputMode="numeric"
-                    aria-label={`${m.display_name} の金額`}
+                    aria-label={t('split.amountOf', { name: m.display_name })}
                     value={m.amount === null ? '' : m.amount.toLocaleString('ja-JP')}
                     onChange={(e) => {
                       const v = parseYen(e.target.value);
@@ -108,7 +105,7 @@ export function SplitCreatePage() {
                 </span>
                 <button
                   type="button"
-                  aria-label="削除"
+                  aria-label={t('split.remove')}
                   onClick={() => setMembers((ms) => ms.filter((x) => x.id !== m.id))}
                   className="rounded-full p-1.5 text-mist hover:bg-ink-700"
                 >
@@ -122,13 +119,14 @@ export function SplitCreatePage() {
               onClick={() => setPicking(true)}
               disabled={members.length >= 20}
             >
-              メンバーを追加
+              {t('split.addMember')}
             </Button>
           </Card>
           {members.length > 0 && (
             <p className={`mt-2 text-xs ${mismatch ? 'text-danger' : 'text-mist'}`}>
-              メンバー合計 {formatYen(memberSum)} {total !== null && `/ 合計 ${formatYen(total)}`}
-              {mismatch && ' — 合計が一致していません'}
+              {t('split.memberSum', { sum: formatYen(memberSum) })}{' '}
+              {total !== null && t('split.totalOf', { total: formatYen(total) })}
+              {mismatch && t('split.mismatch')}
             </p>
           )}
         </div>
@@ -143,11 +141,11 @@ export function SplitCreatePage() {
           }
           onClick={submit}
         >
-          作成してリクエストを送る
+          {t('split.submit')}
         </Button>
       </div>
 
-      <Sheet open={picking} onClose={() => setPicking(false)} title="メンバーを追加">
+      <Sheet open={picking} onClose={() => setPicking(false)} title={t('split.addMemberTitle')}>
         <ProfilePicker
           autoFocus
           exclude={members.map((m) => m.id)}

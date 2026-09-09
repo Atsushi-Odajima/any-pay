@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
+import { useT } from '@/shared/i18n';
 
 interface Props {
   open: boolean;
@@ -12,6 +13,7 @@ interface Props {
 
 /** 下から出るボトムシート */
 export function Sheet({ open, onClose, title, children, dismissible = true }: Props) {
+  const t = useT();
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -30,7 +32,7 @@ export function Sheet({ open, onClose, title, children, dismissible = true }: Pr
     >
       <button
         type="button"
-        aria-label="閉じる"
+        aria-label={t('ui.close')}
         className="absolute inset-0 bg-black/70"
         onClick={dismissible ? onClose : undefined}
       />
@@ -47,7 +49,7 @@ export function Sheet({ open, onClose, title, children, dismissible = true }: Pr
             {dismissible && (
               <button
                 type="button"
-                aria-label="閉じる"
+                aria-label={t('ui.close')}
                 onClick={onClose}
                 className="rounded-full p-1.5 hover:bg-ink-700"
               >

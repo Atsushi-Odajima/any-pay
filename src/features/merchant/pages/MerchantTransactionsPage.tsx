@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, EmptyState, PageLoading } from '@/shared/ui';
 import { currentMonthKey, formatDate, monthLabel, monthRange, shiftMonth } from '@/shared/lib/date';
+import { useT } from '@/shared/i18n';
 import { useMerchantContext, useMerchantTransactions } from '../hooks';
 import { MerchantTxRow } from '../components/MerchantTxRow';
 
 export function MerchantTransactionsPage() {
+  const t = useT();
   const { merchant } = useMerchantContext();
   const [month, setMonth] = useState(currentMonthKey());
   const range = useMemo(() => monthRange(month), [month]);
@@ -25,7 +27,7 @@ export function MerchantTransactionsPage() {
       <div className="flex items-center justify-between">
         <button
           type="button"
-          aria-label="前の月"
+          aria-label={t('merchant.tx.prevMonth')}
           onClick={() => setMonth((m) => shiftMonth(m, -1))}
           className="rounded-full p-2 hover:bg-ink-800"
         >
@@ -34,7 +36,7 @@ export function MerchantTransactionsPage() {
         <span className="font-semibold">{monthLabel(month)}</span>
         <button
           type="button"
-          aria-label="次の月"
+          aria-label={t('merchant.tx.nextMonth')}
           disabled={month >= currentMonthKey()}
           onClick={() => setMonth((m) => shiftMonth(m, 1))}
           className="rounded-full p-2 hover:bg-ink-800 disabled:opacity-30"
@@ -45,7 +47,7 @@ export function MerchantTransactionsPage() {
       {txs.isPending ? (
         <PageLoading />
       ) : groups.length === 0 ? (
-        <EmptyState title="この月の決済はありません" />
+        <EmptyState title={t('merchant.tx.emptyMonth')} />
       ) : (
         groups.map(([date, rows]) => (
           <section key={date}>

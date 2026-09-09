@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { PageLoading, toast } from '@/shared/ui';
+import { tr } from '@/shared/i18n';
 import { parsePayload } from '../payload';
 import { routeForPayload } from '../routing';
 
@@ -16,7 +17,7 @@ export function ScanRedirectPage() {
       if (!to) throw new Error();
       navigate(to, { replace: true });
     } catch {
-      toast.error('対応していないQRコードです');
+      toast.error(tr('pay.unsupportedQr'));
       navigate('/pay', { replace: true });
     }
   }, [params, navigate]);

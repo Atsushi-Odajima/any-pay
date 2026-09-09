@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 export type { Session };
 import { supabase } from '@/shared/lib/supabase';
+import { tr } from '@/shared/i18n';
 import type { Tables } from '@/types/database';
 
 export type Profile = Omit<Tables<'profiles'>, 'pin_hash'> & { has_pin: boolean };
@@ -23,7 +24,7 @@ export async function sendOtp(phone: string): Promise<void> {
 export async function verifyOtp(phone: string, token: string): Promise<Session> {
   const { data, error } = await supabase.auth.verifyOtp({ phone, token, type: 'sms' });
   if (error) throw error;
-  if (!data.session) throw new Error('セッションを取得できませんでした');
+  if (!data.session) throw new Error(tr('errors.sessionMissing'));
   return data.session;
 }
 
@@ -34,7 +35,7 @@ export async function signInWithPassword(id: string, password: string): Promise<
   const email = `${id.trim().toLowerCase()}@${ADMIN_EMAIL_DOMAIN}`;
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
-  if (!data.session) throw new Error('セッションを取得できませんでした');
+  if (!data.session) throw new Error(tr('errors.sessionMissing'));
   return data.session;
 }
 

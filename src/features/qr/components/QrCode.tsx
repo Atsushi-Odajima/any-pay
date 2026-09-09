@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { cn } from '@/shared/lib/cn';
 import { Skeleton } from '@/shared/ui';
+import { useT } from '@/shared/i18n';
 
 export function QrCode({
   value,
@@ -15,6 +16,7 @@ export function QrCode({
   label?: string;
 }) {
   // value ごとの生成結果を保持し、value が変わったら古い画像は表示しない
+  const t = useT();
   const [rendered, setRendered] = useState<{ value: string; src: string } | null>(null);
   useEffect(() => {
     if (!value) return;
@@ -43,7 +45,13 @@ export function QrCode({
       }
     >
       {src ? (
-        <img src={src} width={size} height={size} alt={label ?? 'QRコード'} className="block" />
+        <img
+          src={src}
+          width={size}
+          height={size}
+          alt={label ?? t('pay.qrLabel')}
+          className="block"
+        />
       ) : (
         <Skeleton className="h-full w-full bg-neutral-200" />
       )}
