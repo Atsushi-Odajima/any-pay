@@ -89,9 +89,18 @@ export const manualsEn: Manual[] = [
             type: 'steps',
             items: [
               'Tap "Top up" on the home screen.',
-              'Choose a method (bank account / credit card / convenience store). In the demo every method is instant.',
-              'Enter the amount and tap "Top up".',
-              'The completion screen appears and your balance is updated.',
+              'Choose a method: bank account (direct debit) / credit card / convenience store / e-money. The provider (sandbox / Stripe test mode) is shown under each method.',
+              'Enter the amount and tap "Continue with the provider" (or "Get a payment code" for convenience store).',
+              'Review and approve on the provider page (direct-debit consent, card form or wallet approval).',
+              'You return to the "Top-up status" screen in the app. Once the provider\'s confirmation arrives, it switches to the completion screen and your balance is credited.',
+            ],
+          },
+          {
+            type: 'list',
+            items: [
+              'Convenience store payments issue a payment code. Tap "Open the payment page" to pay on the terminal simulator.',
+              'You can cancel before approving with "Cancel". If the provider declines, the status shows "Failed" and your balance is unchanged.',
+              'The status updates automatically, and a "Topped up" notification arrives on completion.',
             ],
           },
           {
@@ -104,7 +113,11 @@ export const manualsEn: Manual[] = [
           },
           {
             type: 'note',
-            text: 'No real deposit takes place. Where Stripe test payments are enabled, you can also try a top-up with a test card via "Card (Stripe)".',
+            text: 'Providers are a sandbox (simulated) or Stripe test mode. No real deposit takes place.',
+          },
+          {
+            type: 'note',
+            text: 'If the top-up API is unreachable, the method list shows "Demo · instant" and the balance is credited immediately.',
           },
         ],
       },
@@ -744,7 +757,7 @@ export const manualsEn: Manual[] = [
             type: 'list',
             items: [
               'Frontend: pushing to the branch triggers an automatic Cloudflare Pages build and deploy.',
-              'Database: pushing changes under supabase/ runs the "Supabase deploy" workflow, which applies migrations and config.',
+              'Database and Edge Functions: pushing changes under supabase/ runs the "Supabase deploy" workflow, which applies migrations, auth config and the Edge Functions (top-up API).',
               'CI: type check, lint, Vitest, SQL tests and the build run automatically.',
               'Migrations are added as new files only; existing files are never edited.',
               'Environment variables: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Cloudflare Pages.',
@@ -792,6 +805,47 @@ export const manualsEn: Manual[] = [
         ],
       },
       {
+        id: 'gateway',
+        title: 'Operating the top-up API (Charge Gateway)',
+        blocks: [
+          {
+            type: 'p',
+            text: 'Top-ups flow as request → approval on the provider → signed webhook → ledger posting. Providers are pluggable behind an abstraction; the bundled sandbox (simulated provider) and Stripe test mode are available.',
+          },
+          {
+            type: 'list',
+            items: [
+              'Components: the Edge Functions charge-methods (available methods), charge-create (creates the request and calls the provider), charge-webhook/<provider> (verifies confirmations and posts to the ledger) and sandbox-gateway (simulated provider).',
+              'Secrets: SANDBOX_API_KEY / SANDBOX_WEBHOOK_SECRET are generated automatically by the Actions workflow on first deploy. APP_ORIGIN can be overridden as a repository variable. For Stripe, add STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET as GitHub Secrets.',
+              'Deployment: pushing changes under supabase/ runs the "Supabase deploy" workflow, which sets the secrets and deploys all four functions every time.',
+              "Inspecting state: the charge_requests table in the Table Editor (RLS hides other users' rows; admins use the SQL Editor). provider_ref is the provider-side ID and failure_code the failure reason.",
+              'Webhook redelivery: multiple confirmations for the same request still produce one transaction. Try "Resend webhook" on the sandbox result page.',
+              'Adding a real provider: implement ChargeProvider (createPayment / parseWebhook / methods) under supabase/functions/_shared/gateway/providers and register it in registry.ts.',
+            ],
+          },
+          {
+            type: 'table',
+            headers: ['Status', 'Meaning'],
+            rows: [
+              ['pending', 'Awaiting provider approval. The user can cancel'],
+              ['processing', 'Being processed by the provider (e.g. awaiting a store payment)'],
+              ['completed', 'Posted to the ledger; transaction_id holds the transaction'],
+              [
+                'failed',
+                'Declined by the provider, or could not be posted (e.g. balance cap). Balance unchanged',
+              ],
+              ['cancelled', 'Cancelled by the user or the provider'],
+              ['expired', 'Expired. A payment confirmation arriving afterwards is still posted'],
+            ],
+          },
+          {
+            type: 'note',
+            tone: 'warn',
+            text: 'Posting happens only after the webhook signature is verified, never from the app\'s "success" return. Failed requests never affect the balance.',
+          },
+        ],
+      },
+      {
         id: 'stripe',
         title: 'Stripe test payments (optional)',
         blocks: [
@@ -799,15 +853,15 @@ export const manualsEn: Manual[] = [
             type: 'steps',
             items: [
               'Get an API key and webhook signing secret from a Stripe test account.',
-              'Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET as Supabase Edge Function secrets.',
-              'Run the "Supabase deploy" workflow with deploy_functions enabled.',
-              'Register a webhook endpoint in Stripe (stripe-webhook, event checkout.session.completed).',
-              'Set VITE_STRIPE_ENABLED=true in Cloudflare Pages.',
+              'Add STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET as GitHub Secrets.',
+              'Push a change under supabase/ or run the "Supabase deploy" workflow; it registers the secrets and deploys the functions.',
+              'Register a webhook endpoint in Stripe (https://<ref>.supabase.co/functions/v1/charge-webhook/stripe, events checkout.session.completed / async_payment_succeeded / async_payment_failed / expired).',
+              'The top-up method list now shows card / convenience store / PayPay under "Stripe test mode".',
             ],
           },
           {
             type: 'p',
-            text: 'Redelivered webhooks are not double-counted because the Checkout Session ID is used as the idempotency key.',
+            text: "Redelivered webhooks are not double-counted thanks to the Checkout Session ID and the request's idempotency key.",
           },
         ],
       },

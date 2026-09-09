@@ -1,56 +1,52 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Landmark, CreditCard, Store, Check, ExternalLink } from 'lucide-react';
-import { AmountInput, Button, Card, ErrorMessage, ListRow, PageHeader } from '@/shared/ui';
+import { Landmark, CreditCard, Store, Wallet, Check, ExternalLink } from 'lucide-react';
+import {
+  AmountInput,
+  Button,
+  Card,
+  ErrorMessage,
+  ListRow,
+  PageHeader,
+  Skeleton,
+} from '@/shared/ui';
 import { formatYen, LIMITS } from '@/shared/lib/money';
 import { newIdempotencyKey } from '@/shared/lib/idempotency';
 import { vibrate } from '@/shared/platform/haptics';
 import { currentOrigin, navigateExternal } from '@/shared/platform/print';
-import { env } from '@/shared/lib/env';
-import { useT } from '@/shared/i18n';
-import type { ChargeMethod } from '../api';
-import { useCharge, useMyWallet, useStripeCheckout } from '../hooks';
+import { useLocale, useT } from '@/shared/i18n';
+import { LEGACY_MENU, menuFromSpecs, type ChargeMenuItem } from '../chargeMethods';
+import { useCharge, useChargeMethods, useCreateChargeRequest, useMyWallet } from '../hooks';
 
-type Method = ChargeMethod | 'stripe';
 type Step = 'method' | 'amount' | 'confirm';
+
+const ICON: Record<string, typeof Landmark> = {
+  bank_debit: Landmark,
+  bank: Landmark,
+  card: CreditCard,
+  konbini: Store,
+  convenience: Store,
+  wallet: Wallet,
+  paypay: Wallet,
+};
 
 export function ChargePage() {
   const t = useT();
+  const [locale] = useLocale();
   const navigate = useNavigate();
   const wallet = useMyWallet();
+  const methods = useChargeMethods();
   const charge = useCharge();
-  const stripe = useStripeCheckout();
+  const create = useCreateChargeRequest();
   const [step, setStep] = useState<Step>('method');
-  const [method, setMethod] = useState<Method>('bank');
+  const [item, setItem] = useState<ChargeMenuItem | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
   // 確認画面に入るたびに1つだけ生成し、リトライでは同じキーを使う
   const idempotencyKey = useMemo(() => newIdempotencyKey('charge'), []);
 
-  const methods: Array<{
-    value: Method;
-    label: string;
-    description: string;
-    icon: typeof Landmark;
-  }> = [
-    { value: 'bank', label: t('charge.bank'), description: t('charge.instant'), icon: Landmark },
-    { value: 'card', label: t('charge.card'), description: t('charge.instant'), icon: CreditCard },
-    {
-      value: 'convenience',
-      label: t('charge.convenience'),
-      description: t('charge.instant'),
-      icon: Store,
-    },
-    ...(env.stripeEnabled
-      ? [
-          {
-            value: 'stripe' as const,
-            label: t('charge.stripe'),
-            description: t('charge.stripeSub'),
-            icon: ExternalLink,
-          },
-        ]
-      : []),
-  ];
+  const gatewayAvailable = !!methods.data && methods.data.length > 0;
+  const menu: ChargeMenuItem[] = gatewayAvailable ? menuFromSpecs(methods.data) : LEGACY_MENU;
 
   const remainingCap = wallet.data
     ? LIMITS.balanceMax - wallet.data.balance_cache
@@ -66,21 +62,48 @@ export function ChargePage() {
             ? t('charge.balanceCap', { amount: formatYen(LIMITS.balanceMax) })
             : undefined;
 
+  const methodLabel = (m: ChargeMenuItem) => t(`charge.methods.${m.method}`);
+  const providerLabel = (m: ChargeMenuItem) => t(`charge.providers.${m.provider}`);
+  const flowLabel = (m: ChargeMenuItem) =>
+    m.flow === 'instant'
+      ? t('charge.instant')
+      : m.flow === 'instructions'
+        ? t('charge.flowInstructions')
+        : t('charge.flowRedirect');
+
   const submit = () => {
-    if (amount === null || amountError) return;
-    if (method === 'stripe') {
-      stripe.mutate(
-        { amount, origin: currentOrigin() },
-        { onSuccess: (url) => navigateExternal(url), onError: () => vibrate('error') },
+    if (amount === null || amountError || !item) return;
+    if (item.legacy) {
+      charge.mutate(
+        { amount, method: item.legacy, idempotencyKey },
+        {
+          onSuccess: (tx) => {
+            vibrate('success');
+            navigate(`/complete/${tx.id}`, { replace: true });
+          },
+          onError: () => vibrate('error'),
+        },
       );
       return;
     }
-    charge.mutate(
-      { amount, method, idempotencyKey },
+    create.mutate(
       {
-        onSuccess: (tx) => {
-          vibrate('success');
-          navigate(`/complete/${tx.id}`, { replace: true });
+        amount,
+        channel: item.channel,
+        provider: item.provider,
+        method: item.method,
+        idempotencyKey,
+        origin: currentOrigin(),
+        locale,
+      },
+      {
+        onSuccess: ({ request, redirectUrl, flow }) => {
+          if (flow === 'redirect' && redirectUrl) {
+            setRedirecting(true);
+            navigateExternal(redirectUrl);
+            return;
+          }
+          navigate(`/charge/pending/${request.id}`, { replace: true });
         },
         onError: () => vibrate('error'),
       },
@@ -93,21 +116,37 @@ export function ChargePage() {
       {step === 'method' && (
         <div className="px-4">
           <p className="mb-3 text-sm text-mist">{t('charge.chooseMethod')}</p>
-          <Card className="p-0">
-            {methods.map((m) => (
-              <ListRow
-                key={m.value}
-                icon={<m.icon className="h-5 w-5" />}
-                title={m.label}
-                subtitle={m.description}
-                onClick={() => {
-                  setMethod(m.value);
-                  setStep('amount');
-                }}
-              />
-            ))}
-          </Card>
-          <p className="mt-4 text-xs text-ink-400">{t('charge.demoNote')}</p>
+          {methods.isPending ? (
+            <Card className="flex flex-col gap-3">
+              <Skeleton className="h-10" />
+              <Skeleton className="h-10" />
+              <Skeleton className="h-10" />
+            </Card>
+          ) : (
+            <Card className="p-0">
+              {menu.map((m) => {
+                const Icon = ICON[m.method] ?? Wallet;
+                return (
+                  <ListRow
+                    key={m.key}
+                    icon={<Icon className="h-5 w-5" />}
+                    title={methodLabel(m)}
+                    subtitle={`${providerLabel(m)} · ${flowLabel(m)}`}
+                    onClick={() => {
+                      setItem(m);
+                      setStep('amount');
+                    }}
+                  />
+                );
+              })}
+            </Card>
+          )}
+          {!methods.isPending && !gatewayAvailable && (
+            <p className="mt-3 text-xs text-warn">{t('charge.gatewayUnavailable')}</p>
+          )}
+          <p className="mt-4 text-xs text-ink-400">
+            {gatewayAvailable ? t('charge.apiNote') : t('charge.demoNote')}
+          </p>
         </div>
       )}
       {step === 'amount' && (
@@ -136,13 +175,16 @@ export function ChargePage() {
           </Button>
         </form>
       )}
-      {step === 'confirm' && amount !== null && (
+      {step === 'confirm' && amount !== null && item && (
         <div className="flex flex-1 flex-col gap-4 px-4">
           <Card>
             <dl className="divide-y divide-ink-700 text-sm">
               <div className="flex justify-between py-2">
                 <dt className="text-mist">{t('charge.method')}</dt>
-                <dd>{methods.find((m) => m.value === method)?.label}</dd>
+                <dd className="text-right">
+                  <span className="block">{methodLabel(item)}</span>
+                  <span className="block text-xs text-mist">{providerLabel(item)}</span>
+                </dd>
               </div>
               <div className="flex justify-between py-2">
                 <dt className="text-mist">{t('charge.amount')}</dt>
@@ -150,15 +192,22 @@ export function ChargePage() {
               </div>
             </dl>
           </Card>
-          <ErrorMessage error={charge.error ?? stripe.error} />
+          {!item.legacy && <p className="text-xs text-mist">{t('charge.confirmApiNote')}</p>}
+          <ErrorMessage error={charge.error ?? create.error} />
           <Button
             size="lg"
             full
-            icon={<Check className="h-5 w-5" />}
-            loading={charge.isPending || stripe.isPending}
+            icon={
+              item.legacy ? <Check className="h-5 w-5" /> : <ExternalLink className="h-5 w-5" />
+            }
+            loading={charge.isPending || create.isPending || redirecting}
             onClick={submit}
           >
-            {method === 'stripe' ? t('charge.stripeSubmit') : t('charge.submit')}
+            {item.legacy
+              ? t('charge.submit')
+              : item.flow === 'instructions'
+                ? t('charge.submitInstructions')
+                : t('charge.submitRedirect')}
           </Button>
         </div>
       )}

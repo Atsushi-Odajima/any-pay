@@ -116,3 +116,12 @@
 - テスト：`tests/unit/guide.test.ts`（両言語で説明書 ID・節 ID・ブロック構成が一致、節 ID の一意性、表の列数、空文字なし）
 - 判断メモ：Markdown ではなく型付きデータにしたのは、日英の構造ずれをテストで検出でき、既存の UI 部品・印刷 CSS をそのまま使えるため。管理者向け説明書は全ユーザーに表示する（デモのため。パスワードは記載しない）
 - 手動確認：その他 → 説明書 → 各説明書を開く → 目次タップで節へ移動 → 右上「印刷」で印刷プレビューが白黒になる → 言語を EN に切り替えると英語版になる
+
+## チャージ API（Charge Gateway：銀行連携 / クレジット / その他電子決済）
+- 完了内容：`0011_charge_gateway.sql`（`charge_requests`：入金リクエストと状態、`create_charge_request`（ユーザー・上限・冪等・未完了 5 件まで）、`cancel_charge_request`（本人・pending のみ）、`attach_charge_provider` / `complete_charge_request` / `fail_charge_request`（service_role。記帳は `_post_transaction`、冪等キー `charge_request:<id>`）、`sandbox_payments`（模擬プロバイダの状態。service_role のみ）、Realtime）。Edge Functions：`charge-methods`（利用可能な方式）、`charge-create`（リクエスト → プロバイダ API → 紐づけ）、`charge-webhook/:provider`（署名検証 → 状態遷移）、`sandbox-gateway`（銀行口座振替 / カード / コンビニ / ウォレットを模擬。REST API + 承認画面 + HMAC 署名付き webhook + 再送）。プロバイダ抽象層 `_shared/gateway`（`ChargeProvider`：sandbox / stripe）。フロント：チャージ画面を API 一覧から構成（未接続時は即時反映デモにフォールバック）、処理状況画面 `/charge/pending/:id`（ステップ表示・払込番号・キャンセル・Realtime + ポーリング）、通知 `charge_completed` / `charge_failed`
+- 旧 `stripe-checkout` / `stripe-webhook` は Stripe プロバイダとして統合（カード / コンビニ / PayPay）。`VITE_STRIPE_ENABLED` は廃止（secrets の有無で `charge-methods` が決める）
+- テスト：SQL `phase11_charge_gateway.test.sql`（作成・冪等・検証、RLS、attach → complete の記帳と再送、拒否 / キャンセル / provider_ref 不一致 / 期限切れ後の入金、未完了上限と自動期限切れ、記帳時の上限超過は failed、台帳整合）。Deno `npm run functions:check` / `functions:test`（署名、イベント正規化、承認画面）。CI に functions ジョブを追加
+- デプロイ：Actions「Supabase deploy」が secrets（SANDBOX_* は未設定なら自動生成、APP_ORIGIN）を登録し、4 つの Function を毎回デプロイする（`deploy_functions` 入力は廃止）。`supabase/**` の push で実行
+- 判断メモ：「フロントの成功戻りではなく webhook で記帳」「業務エラーは 200 / 一時障害は 500」「記帳不能な確定通知は failed にして通知」を採用（実プロバイダと同じ運用にし、説明しやすい）。サンドボックスは同一プロジェクトの Function だが、アプリの表に触れず HTTP と署名付き webhook だけで通信させ「外部システム」として扱う
+- 手動確認：チャージ → 「銀行口座（口座振替）」→ 金額 → 「プロバイダで続ける」→ Any Bank の画面で「同意して引き落とす」→ アプリの処理状況画面 → 完了画面。結果画面の「通知を再送する」で二重計上されないことを履歴で確認。コンビニ払いは払込番号 → 「支払いページを開く」→ 端末シミュレーターで支払い
+- 人間の作業：なし（push で自動デプロイ）。Stripe を使う場合は GitHub Secrets に STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET を追加し、Stripe に webhook エンドポイントを登録
