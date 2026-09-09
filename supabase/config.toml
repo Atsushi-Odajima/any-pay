@@ -11,7 +11,7 @@ max_rows = 1000
 [db]
 port = 54322
 shadow_port = 54320
-major_version = 15
+major_version = 17
 
 [db.seed]
 enabled = true
@@ -26,8 +26,8 @@ port = 54323
 
 [auth]
 enabled = true
-site_url = "http://localhost:5173"
-additional_redirect_urls = ["https://localhost:5173"]
+site_url = "https://any-pay.pages.dev"
+additional_redirect_urls = ["http://localhost:5173", "https://any-pay.pages.dev"]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 enable_signup = true

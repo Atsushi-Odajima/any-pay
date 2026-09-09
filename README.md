@@ -15,7 +15,7 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 
 | | |
 |---|---|
-| URL | （Cloudflare Pages にデプロイ後に記載） |
+| URL | https://any-pay.pages.dev （Cloudflare Pages。環境変数設定後に有効） |
 | ログイン | 電話番号 + 認証コード（Supabase の **Test OTP**。SMS は送られません） |
 | デモアカウント | 下表。認証コードはすべて `123456` |
 
@@ -169,12 +169,31 @@ npm run test:e2e                                    # Playwright（要 Supabase�
 - 残高不足、上限超過、失効 / 使用済み / 期限切れトークン、非オーナーの決済、20 回/分
 - 割り勘の検証、返金の逆仕訳、クーポンの補填仕訳、PIN ロックと決済前ゲート、突合
 
-## デプロイ（Cloudflare Pages）
+## デプロイ
 
-- Build command: `npm run build` / Build output: `dist`
-- 環境変数: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
-- SPA フォールバックは `public/_redirects`（`/* /index.html 200`）で対応済み
-- PWA として「ホーム画面に追加」できます（manifest / Service Worker / アイコン同梱）
+### Supabase（GitHub Actions で自動反映）
+
+`.github/workflows/supabase.yml` が `supabase/**` の変更を本番プロジェクト（`tyrddhwgiasurpchpkhn`）へ反映します。GitHub リポジトリの **Settings → Secrets and variables → Actions** に次を登録すると有効になります（未登録のときはスキップ）。
+
+| Secret | 取得場所 |
+|---|---|
+| `SUPABASE_ACCESS_TOKEN` | https://supabase.com/dashboard/account/tokens で「Generate new token」 |
+| `SUPABASE_DB_PASSWORD` | プロジェクト作成時の DB パスワード（Project Settings → Database → Reset database password でも可） |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | 任意（Stripe テスト決済を使う場合） |
+
+ワークフローがやること：`supabase db push`（マイグレーション）→ `supabase config push`（Phone 認証・Test OTP などの Auth 設定）→ 型生成と手書き `database.ts` の差分を artifact に保存。
+**Actions → Supabase deploy → Run workflow** で `seed` にチェックを入れて実行すると `seed.sql`（デモアカウント・加盟店・取引）が投入されます（初回のみ推奨）。`deploy_functions` で Stripe の Edge Functions をデプロイします。
+
+`supabase config push` が Test OTP を反映できなかった場合は、ダッシュボードの **Authentication → Providers → Phone** を有効化し、**Test OTPs** に `819000000001`〜`819000000003`, `819000000011`, `819000000012` を `123456` で手動登録してください。
+
+### Cloudflare Pages
+
+- ダッシュボード：https://dash.cloudflare.com/9724db1aafeaa4cbd55dc98f7c44f9fe/pages/view/any-pay
+- Build command: `npm run build` / Build output: `dist` / Node は `.node-version`（22）を参照
+- 環境変数（Production / Preview 両方）: `VITE_SUPABASE_URL=https://tyrddhwgiasurpchpkhn.supabase.co`, `VITE_SUPABASE_ANON_KEY=<Project Settings → API の anon public key>`
+- Production branch をこのリポジトリの公開ブランチに合わせる（`main` に merge して `main` を指定するのが分かりやすい）
+- SPA フォールバックは `public/_redirects`（`/* /index.html 200`）で対応済み。PWA として「ホーム画面に追加」できます
+- Supabase 側の **Authentication → URL Configuration** に Pages の URL（`https://any-pay.pages.dev` など）を Site URL として登録
 
 ## Stripe テスト決済でチャージ（任意）
 
