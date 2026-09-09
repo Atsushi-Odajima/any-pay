@@ -5,15 +5,21 @@ import Stripe from 'npm:stripe@17';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', { apiVersion: '2024-12-18.acacia' });
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
+  apiVersion: '2024-12-18.acacia',
+});
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
     const authHeader = req.headers.get('Authorization') ?? '';
-    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      {
+        global: { headers: { Authorization: authHeader } },
+      },
+    );
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData.user) {
       return json({ error: 'NOT_AUTHENTICATED' }, 401);
@@ -22,7 +28,10 @@ Deno.serve(async (req) => {
     if (!Number.isInteger(amount) || amount! < 100 || amount! > 100_000) {
       return json({ error: 'INVALID_AMOUNT' }, 400);
     }
-    const base = origin && /^https?:\/\//.test(origin) ? origin : (Deno.env.get('APP_ORIGIN') ?? 'http://localhost:5173');
+    const base =
+      origin && /^https?:\/\//.test(origin)
+        ? origin
+        : (Deno.env.get('APP_ORIGIN') ?? 'http://localhost:5173');
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       client_reference_id: userData.user.id,

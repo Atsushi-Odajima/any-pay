@@ -4,3 +4,4 @@ dev-dist
 src/types/database.ts
 *.sql
 package-lock.json
+*.md

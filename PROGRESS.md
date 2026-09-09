@@ -3,7 +3,19 @@
 > iPhone から読む前提で簡潔に。各フェーズ終了時に更新。
 
 ## 現在地
-- Phase 8 まで完了（Phase 9 Capacitor は将来）。残りは人間の作業（§11：Supabase プロジェクト作成・Test OTP・Cloudflare Pages・Stripe secrets）
+- Phase 8 まで完了（Phase 9 Capacitor は将来）。Supabase プロジェクト（`tyrddhwgiasurpchpkhn`）と Cloudflare Pages（`any-pay`）は作成済み。反映は GitHub Actions に自動化済みで、残りは下の「人間の作業チェックリスト」のみ
+
+## 人間の作業チェックリスト（2026-09-09 時点）
+1. GitHub → Settings → Secrets and variables → Actions に `SUPABASE_ACCESS_TOKEN`（https://supabase.com/dashboard/account/tokens）と `SUPABASE_DB_PASSWORD` を登録 → Actions「Supabase deploy」を **Run workflow（seed にチェック）** で実行 → マイグレーション・Auth 設定・デモデータが入る
+2. Supabase ダッシュボード → Authentication → Providers → Phone が有効で、Test OTPs に 5 番号が入っているか確認（`config push` が効かなかった場合は手動登録）
+3. Cloudflare Pages → Settings → Environment variables に `VITE_SUPABASE_URL` と `VITE_SUPABASE_ANON_KEY`（Supabase → Project Settings → API）を設定。Production branch を公開ブランチに合わせて再デプロイ
+4. Supabase → Authentication → URL Configuration の Site URL を Pages の URL に
+5. （任意）Stripe：Secrets に `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` → 「Supabase deploy」を `deploy_functions` で実行 → Stripe に webhook 登録 → Pages の環境変数に `VITE_STRIPE_ENABLED=true`
+
+## 自動化メモ（このセッションでできたこと・できなかったこと）
+- この実行環境には Supabase / Cloudflare の鍵がなく、`*.supabase.co` と Cloudflare API への通信もネットワークポリシーで遮断されているため、マイグレーション適用・Test OTP 登録・Pages デプロイは直接実行できなかった
+- 代わりに `.github/workflows/ci.yml`（typecheck / lint / format / Vitest / SQL テスト / build）と `.github/workflows/supabase.yml`（db push / config push / seed / functions deploy / 型差分）を追加。SQL テストは GitHub ランナー同梱の PostgreSQL で動く（非 root 経路も確認済み）
+- Cloudflare Pages 用に `.node-version`（22。Vite 8 は Node 20+ 必須）を追加。`config.toml` の `site_url` と `.env.example` の URL を実プロジェクトに合わせた
 
 ## 環境メモ（このセッションの制約）
 - Docker / Supabase CLI が使えない環境のため、`supabase init` は `supabase/config.toml` を手書きで代替

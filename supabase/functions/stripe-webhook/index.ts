@@ -5,7 +5,9 @@
 import Stripe from 'npm:stripe@17';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', { apiVersion: '2024-12-18.acacia' });
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
+  apiVersion: '2024-12-18.acacia',
+});
 const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET') ?? '';
 
 Deno.serve(async (req) => {
@@ -26,7 +28,10 @@ Deno.serve(async (req) => {
     if (!userId || !amount || session.payment_status !== 'paid') {
       return new Response('ignored', { status: 200 });
     }
-    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
     const { error } = await admin.rpc('charge_wallet_for', {
       p_user_id: userId,
       p_amount: amount,
