@@ -1,0 +1,11 @@
+{
+  "nodeModulesDir": "none",
+  "lock": false,
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["deno.window"]
+  },
+  "test": {
+    "include": ["**/*_test.ts"]
+  }
+}

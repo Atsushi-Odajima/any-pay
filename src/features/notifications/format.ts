@@ -13,6 +13,8 @@ type Data = {
   remaining?: number;
   creator_name?: string;
   memo?: string;
+  method?: string;
+  code?: string;
 };
 
 /** 通知の表示文言を現在の言語で組み立てる（data に十分な情報が無い古い通知はサーバーの title を使う） */
@@ -70,6 +72,22 @@ export function describeNotification(n: Pick<Notification, 'type' | 'title' | 'b
               : typeof d.remaining === 'number'
                 ? tr('notifications.splitRemaining', { n: d.remaining })
                 : n.body,
+        };
+      }
+      break;
+    case 'charge_completed':
+      if (amount) {
+        return {
+          title: tr('notifications.chargeCompleted', { amount }),
+          body: d.method ? tr(`charge.methods.${d.method}`) : n.body,
+        };
+      }
+      break;
+    case 'charge_failed':
+      if (amount) {
+        return {
+          title: tr('notifications.chargeFailed', { amount }),
+          body: d.code ? tr(`errors.${d.code}`) : n.body,
         };
       }
       break;

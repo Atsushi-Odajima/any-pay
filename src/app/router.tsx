@@ -16,7 +16,6 @@ import { HomePage } from '@/features/wallet/pages/HomePage';
 import { ChargePage } from '@/features/wallet/pages/ChargePage';
 import { WithdrawPage } from '@/features/wallet/pages/WithdrawPage';
 import { CompletePage } from '@/features/wallet/pages/CompletePage';
-import { StripeReturnPage } from '@/features/wallet/pages/StripeReturnPage';
 import { HistoryPage } from '@/features/history/pages/HistoryPage';
 import { TransactionDetailPage } from '@/features/history/pages/TransactionDetailPage';
 import { PayPage } from '@/features/qr/pages/PayPage';
@@ -92,6 +91,10 @@ const GuideIndexPage = lazyPage(
   'GuideIndexPage',
 );
 const GuidePage = lazyPage(() => import('@/features/guide/pages/GuidePage'), 'GuidePage');
+const ChargePendingPage = lazyPage(
+  () => import('@/features/wallet/pages/ChargePendingPage'),
+  'ChargePendingPage',
+);
 
 /** 名前付き export のページを React.lazy で遅延読み込みし、Suspense で包む */
 function lazyPage(loader: () => Promise<Record<string, unknown>>, name: string): ComponentType {
@@ -162,7 +165,7 @@ export const router = createBrowserRouter([
                     children: [
                       { path: '/complete/:id', element: <CompletePage /> },
                       { path: '/scan', element: <ScanRedirectPage /> },
-                      { path: '/charge/stripe/return', element: <StripeReturnPage /> },
+                      { path: '/charge/pending/:id', element: <ChargePendingPage /> },
                       { path: '/pay/confirm/:mode/:id', element: <PaymentConfirmPage /> },
                     ],
                   },

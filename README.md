@@ -8,6 +8,7 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 - RLS による行レベルのアクセス制御。クライアントは金銭系テーブルに書き込めない
 - ワンタイム QR（60 秒・1 回限り）、動的 QR（5 分）、静的 QR（印刷）
 - サーバー側の PIN ゲート、クーポンの補填仕訳、返金の逆仕訳、台帳の突合
+- チャージ API：銀行連携（口座振替）/ クレジット / コンビニ / 電子マネー をプロバイダ抽象層で扱い、署名付き webhook で確定してから記帳（サンドボックス + Stripe テストモード）
 
 > **実際のお金は一切動きません。** 残高はすべて架空で、資金決済法・犯罪収益移転防止法などの要件は対象外です。
 
@@ -33,7 +34,7 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 
 ## 機能一覧
 
-**ユーザー**：電話番号 OTP ログイン / オンボーディング（ID・表示名）/ ホーム（残高・ポイント・直近取引・未読バッジ）/ 支払う（ユーザー提示 QR の自動更新・スキャン）/ 決済確認（店名・金額・クーポン・PIN / 生体認証）/ チャージ（銀行・カード・コンビニ ※UI のみ）/ 送る（ID 検索・受取 QR）/ 受け取る / 割り勘（按分・支払い状況）/ 履歴（月別・種別・取引後残高）/ 明細 / クーポン（獲得・利用）/ ポイント履歴 / 通知（Realtime）/ 設定（プロフィール・PIN・生体認証・出金・店舗登録）/ 表示言語（日本語 ⇄ English）/ 説明書（ユーザー・加盟店・管理者向け、日英、印刷対応）
+**ユーザー**：電話番号 OTP ログイン / オンボーディング（ID・表示名）/ ホーム（残高・ポイント・直近取引・未読バッジ）/ 支払う（ユーザー提示 QR の自動更新・スキャン）/ 決済確認（店名・金額・クーポン・PIN / 生体認証）/ チャージ（銀行口座振替・クレジット・コンビニ・電子マネーを API 経由：サンドボックス / Stripe テスト。処理状況画面で確定通知を待つ）/ 送る（ID 検索・受取 QR）/ 受け取る / 割り勘（按分・支払い状況）/ 履歴（月別・種別・取引後残高）/ 明細 / クーポン（獲得・利用）/ ポイント履歴 / 通知（Realtime）/ 設定（プロフィール・PIN・生体認証・出金・店舗登録）/ 表示言語（日本語 ⇄ English）/ 説明書（ユーザー・加盟店・管理者向け、日英、印刷対応）
 
 **加盟店**：店舗登録 / 店舗ホーム（本日売上・Realtime で即時反映）/ 決済受付（動的 QR 提示・ユーザー QR 読み取り）/ 決済一覧・明細・返金 / 静的 QR 印刷（A4）/ クーポン作成 / 出金
 
@@ -44,7 +45,7 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 | フロント | React 19 + Vite + TypeScript（strict）、React Router v7、TanStack Query、Zustand（UI 状態のみ）、Tailwind CSS v4、lucide-react、react-hook-form + zod |
 | PWA | vite-plugin-pwa（manifest / Service Worker / オフラインシェル） |
 | QR | 読み取り `BarcodeDetector`（対応環境）→ `@zxing/browser`、生成 `qrcode` |
-| バックエンド | Supabase：Auth（Phone OTP）/ Postgres / RLS / RPC（PL/pgSQL, security definer）/ Realtime |
+| バックエンド | Supabase：Auth（Phone OTP）/ Postgres / RLS / RPC（PL/pgSQL, security definer）/ Realtime / Edge Functions（Deno：チャージ API・サンドボックス・webhook） |
 | テスト | Vitest（純粋ロジック）、SQL テスト（RPC・制約・RLS をローカル PostgreSQL で検証）、Playwright（決済フロー 1 本） |
 | デプロイ | Cloudflare Pages（フロント）、Supabase Free Tier |
 
@@ -139,11 +140,12 @@ WebAuthn（Face ID / Touch ID）は端末ローカルの再認証ゲートで、
 | 実装している | 割り切り（デモのため未実装 / 対象外） |
 |---|---|
 | RLS 全テーブル有効、`anon` キーのみフロントに配置、`service_role` は Edge Functions のみ | KYC（本人確認）、犯収法・資金決済法対応 |
-| 金銭系テーブルはクライアント書き込み不可（RPC のみ） | 実際の入出金（銀行・カード・コンビニは UI のみ。Stripe はテストモード） |
+| 金銭系テーブルはクライアント書き込み不可（RPC のみ） | 実際の入出金（チャージはサンドボックス / Stripe テストモード経由。出金は台帳のみ） |
 | ワンタイム QR 60 秒 / 動的 QR 5 分 / 使用済み即無効 | 出金手数料、送金手数料 |
 | 上限：チャージ 100,000 円/回、残高 1,000,000 円、送金 50,000 円/回、決済 20 回/分 | 不正検知、デバイス管理、多要素の本格運用 |
 | PIN のサーバー側ハッシュ照合・5 回ロック・決済前ゲート | ポイントでの支払い |
 | 台帳合計 0 の DB 制約、追記専用、突合 RPC | Web Push（抽象層のみ。iOS はホーム画面追加時のみ動作） |
+| チャージは webhook の署名・タイムスタンプ検証後にのみ記帳。冪等・再送安全 | 実在の銀行 API 契約、与信、チャージバック、KYC 連携 |
 | Realtime は本人行・自店行のみ購読 | 監査ログの長期保管、バックアップ運用 |
 
 ## 5 分で動かす
@@ -179,6 +181,13 @@ npm run test:e2e                                    # Playwright（要 Supabase�
 - 残高不足、上限超過、失効 / 使用済み / 期限切れトークン、非オーナーの決済、20 回/分
 - 割り勘の検証、返金の逆仕訳、クーポンの補填仕訳、PIN ロックと決済前ゲート、突合
 - 通知 `data` の補完（店名・支払者・メモ・残人数・ポイント）と日本語 title の互換
+- チャージ API：入金リクエストの作成・冪等・上限、状態遷移（attach → complete / fail / cancel）、webhook 再送で二重計上なし、記帳時の上限超過は failed、RLS（他人の行不可視・sandbox 表不可）
+
+```bash
+npm run functions:check && npm run functions:test    # Edge Functions（Deno）：型チェックと純粋ロジックのテスト
+```
+
+Edge Functions のテストは webhook 署名（HMAC・タイムスタンプ・定数時間比較）、Stripe / サンドボックスのイベント正規化、サンドボックス承認画面の描画を対象にしています（`supabase/functions/**/*_test.ts`）。
 
 ## デプロイ
 
@@ -206,18 +215,62 @@ npm run test:e2e                                    # Playwright（要 Supabase�
 - SPA フォールバックは `public/_redirects`（`/* /index.html 200`）で対応済み。PWA として「ホーム画面に追加」できます
 - Supabase 側の **Authentication → URL Configuration** に Pages の URL（`https://any-pay.pages.dev` など）を Site URL として登録
 
-## Stripe テスト決済でチャージ（任意）
+## チャージ API（Charge Gateway）— 銀行連携 / クレジット / その他電子決済
 
-Stripe のテストモードで「本物の決済フロー → webhook → 台帳反映」を試せます（実際の請求は発生しません）。
+実際の入金プロバイダと同じ流れ（**リクエスト作成 → プロバイダで承認 → 署名付き webhook → 記帳**）を、プロバイダ抽象層（`supabase/functions/_shared/gateway`）で実装しています。第三者のアカウントなしで端から端まで動かせるよう、外部プロバイダを模擬する **サンドボックス**（`sandbox-gateway`）を同梱し、実 API の例として **Stripe テストモード** も同じ抽象層に載せています。
 
-1. Stripe のテスト用 API キーと webhook 署名シークレットを Supabase の secrets に登録
-   ```bash
-   supabase secrets set STRIPE_SECRET_KEY=sk_test_... STRIPE_WEBHOOK_SECRET=whsec_... APP_ORIGIN=https://<your-app>
-   supabase functions deploy stripe-checkout
-   supabase functions deploy stripe-webhook --no-verify-jwt   # Stripe からの呼び出しには JWT が付かない
-   ```
-2. Stripe ダッシュボード → Webhooks に `https://<project-ref>.functions.supabase.co/stripe-webhook` を登録し、イベント `checkout.session.completed` を選択
-3. `.env` に `VITE_STRIPE_ENABLED=true` を設定すると、チャージ方法に「カード（Stripe テスト決済）」が現れます。テストカード `4242 4242 4242 4242` で決済すると webhook が `charge_wallet_for()`（`service_role` 専用 RPC）を呼び、Checkout Session id を冪等キーにするため **webhook が再送されても二重計上されません**
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as ユーザー（PWA）
+  participant C as charge-create（Edge Function）
+  participant DB as Postgres（RPC / RLS）
+  participant P as プロバイダ（sandbox-gateway / Stripe）
+  participant W as charge-webhook（Edge Function）
+  U->>C: amount, channel, provider, method, idempotencyKey
+  C->>DB: create_charge_request（ユーザー JWT。上限・冪等性を検査）
+  C->>P: POST /v1/payments（API キー）
+  P-->>C: id, checkout_url / instructions
+  C->>DB: attach_charge_provider（service_role）
+  C-->>U: redirectUrl → プロバイダの承認画面へ
+  U->>P: 承認 / 拒否
+  P->>W: webhook（X-Sandbox-Signature = t, HMAC-SHA256）
+  W->>W: 署名・タイムスタンプ検証
+  W->>DB: complete_charge_request（service_role）→ _post_transaction（treasury → user）
+  P-->>U: return_url（/charge/pending/:id）
+  DB-->>U: Realtime UPDATE → 完了画面
+```
+
+| チャネル | 方式（method） | プロバイダ | フロー |
+|---|---|---|---|
+| 銀行連携 `bank` | 口座振替 `bank_debit` | sandbox（Any Bank） | 承認画面へリダイレクト → webhook |
+| クレジット `card` | `card` | sandbox（Any Card Gateway）/ Stripe | 承認画面 → webhook |
+| その他電子決済 `emoney` | コンビニ払い `konbini` | sandbox（端末シミュレーター）/ Stripe | 払込番号を発行 → 支払い → webhook（非同期） |
+| その他電子決済 `emoney` | ウォレット `wallet` / `paypay` | sandbox（Any Wallet）/ Stripe | 承認画面 → webhook |
+
+**状態遷移**：`pending`（承認待ち）→ `processing`（プロバイダ側で処理中・払込待ち）→ `completed` / `failed` / `cancelled` / `expired`。記帳は `completed` に遷移する瞬間だけで、`failed` 以下では残高は変わりません。
+
+**設計ポイント**
+
+- **記帳はプロバイダの確定通知の後**。フロントの「成功」戻りは信用せず、webhook の署名（HMAC-SHA256・タイムスタンプ許容 5 分・定数時間比較）を検証してから `complete_charge_request` を呼ぶ
+- **冪等**：`charge_requests` は `(user_id, idempotency_key)` で一意、記帳の冪等キーは `charge_request:<id>`。webhook が再送されても取引は 1 件（サンドボックスの結果画面に「通知を再送する」ボタンがあり、その場で確認できる）
+- **業務エラーと一時障害を分ける**：`CHARGE_NOT_PENDING` などのコードは 200 で受理してログに残し（再送しても解決しない）、DB 接続などの一時障害は 500 を返してプロバイダに再送させる
+- **記帳できない確定通知**（残高上限超過など）は例外にせず `failed` + `failure_code` にして通知する
+- **RLS**：クライアントは自分の `charge_requests` の SELECT と pending のキャンセルだけ。状態遷移と記帳は service_role の RPC のみ。`sandbox_payments` は「外部プロバイダの DB」に相当し、service_role 以外はアクセス不可
+- **利用できる方式は secrets で決まる**：`charge-methods` が有効なプロバイダの一覧を返し、フロントはそれからメニューを組み立てる。Edge Functions に接続できない環境では即時反映のデモ方式（`charge_wallet`）にフォールバックする
+
+**エンドポイント**
+
+| Function | 認証 | 役割 |
+|---|---|---|
+| `GET charge-methods` | ユーザー JWT | 利用できる `provider × method` の一覧 |
+| `POST charge-create` | ユーザー JWT | 入金リクエスト作成 → プロバイダ API → 承認画面 URL / 払込番号 |
+| `POST charge-webhook/:provider` | 署名（JWT なし） | 確定通知の検証と状態遷移・記帳 |
+| `sandbox-gateway` | API キー / 署名 | 模擬プロバイダ。`GET /` で API 仕様、`POST /v1/payments`、`GET /checkout/:id`（承認画面）、`POST /v1/payments/:id/simulate`（自動テスト用） |
+
+**実在のプロバイダへの差し替え**：`ChargeProvider`（`createPayment` / `parseWebhook` / `methods`）を実装して `registry.ts` に登録し、secrets を追加するだけです。銀行の口座振替 API なら `createPayment` で口座連携の同意 URL を返し、`parseWebhook` で銀行の署名方式を検証します。Stripe 実装（`providers/stripe.ts`）がそのひな形です。
+
+**設定**：Actions「Supabase deploy」が `SANDBOX_API_KEY` / `SANDBOX_WEBHOOK_SECRET` を初回に自動生成して登録し、4 つの Function をデプロイします（`APP_ORIGIN` は Variables で上書き可）。Stripe を使う場合は GitHub Secrets に `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` を追加し、Stripe 側の webhook エンドポイントに `https://<ref>.supabase.co/functions/v1/charge-webhook/stripe`（`checkout.session.completed` / `async_payment_succeeded` / `async_payment_failed` / `expired`）を登録すると、チャージ画面にカード / コンビニ / PayPay（Stripe）が現れます。webhook が再送されても Checkout Session の ID と `charge_request:<id>` の冪等キーで二重計上されません。
 
 ## iOS アプリ化の計画（Capacitor）
 
@@ -226,8 +279,8 @@ Stripe のテストモードで「本物の決済フロー → webhook → 台�
 ## ディレクトリ構成
 
 ```
-supabase/migrations/   0001_schema … 0010_notification_i18n_data（追記のみ）
-supabase/functions/    Edge Functions（stripe-checkout / stripe-webhook）
+supabase/migrations/   0001_schema … 0011_charge_gateway（追記のみ）
+supabase/functions/    Edge Functions：charge-methods / charge-create / charge-webhook / sandbox-gateway、_shared/gateway（プロバイダ抽象層）
 supabase/seed.sql      デモデータ
 src/app/               ルーター・Provider・レイアウト・ガード
 src/features/          auth / wallet / qr / payment / transfer / history / merchant / rewards / notifications / security / admin / guide（説明書）

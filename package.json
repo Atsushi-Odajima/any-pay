@@ -17,7 +17,9 @@
     "test:sql": "bash tests/sql/run.sh",
     "test:e2e": "playwright test",
     "gen:types": "supabase gen types typescript --linked --schema public > src/types/database.ts",
-    "gen:icons": "node scripts/gen-icons.mjs"
+    "gen:icons": "node scripts/gen-icons.mjs",
+    "functions:check": "deno check --config supabase/functions/deno.json supabase/functions/*/index.ts",
+    "functions:test": "deno test --config supabase/functions/deno.json supabase/functions"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

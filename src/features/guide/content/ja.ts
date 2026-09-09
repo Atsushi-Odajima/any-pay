@@ -89,9 +89,18 @@ export const manualsJa: Manual[] = [
             type: 'steps',
             items: [
               'ホームの「チャージ」をタップします。',
-              '方法を選びます（銀行口座 / クレジットカード / コンビニ）。デモではどれも即時に反映されます。',
-              '金額を入力し「チャージする」をタップします。',
-              '完了画面が表示され、残高に反映されます。',
+              '方法を選びます：銀行口座（口座振替）/ クレジットカード / コンビニ払い / 電子マネー。各方法の下に接続先（サンドボックス / Stripe テスト決済）が表示されます。',
+              '金額を入力し「プロバイダで続ける」（コンビニ払いは「払込番号を発行する」）をタップします。',
+              'プロバイダの画面（口座振替の同意画面、カード入力画面、ウォレットの承認画面）で内容を確認し、承認します。',
+              'アプリの「チャージの処理状況」画面に戻ります。プロバイダからの確定通知が届くと自動で完了画面に切り替わり、残高に反映されます。',
+            ],
+          },
+          {
+            type: 'list',
+            items: [
+              'コンビニ払いは払込番号が発行されます。「支払いページを開く」から端末シミュレーターで支払うと反映されます。',
+              '承認前であれば「キャンセルする」で取り消せます。プロバイダ側で拒否した場合は「失敗」と表示され、残高は変わりません。',
+              '処理状況は自動で更新され、完了すると通知にも「チャージしました」が届きます。',
             ],
           },
           {
@@ -104,7 +113,11 @@ export const manualsJa: Manual[] = [
           },
           {
             type: 'note',
-            text: '実際の入金は行われません。Stripe のテスト決済が有効な環境では「カード（Stripe）」でテストカードによるチャージも試せます。',
+            text: '接続先はサンドボックス（模擬プロバイダ）または Stripe のテストモードで、実際の入金は行われません。',
+          },
+          {
+            type: 'note',
+            text: 'チャージ API に接続できない環境では、方法一覧に「デモ · 即時反映」と表示され、その場で残高に反映されます。',
           },
         ],
       },
@@ -756,7 +769,7 @@ export const manualsJa: Manual[] = [
             type: 'list',
             items: [
               'フロント：ブランチに push すると Cloudflare Pages が自動でビルド・公開します。',
-              'データベース：supabase/ 配下を変更して push すると、Actions「Supabase deploy」がマイグレーションと設定を反映します。',
+              'データベースと Edge Functions：supabase/ 配下を変更して push すると、Actions「Supabase deploy」がマイグレーション・Auth 設定・Edge Functions（チャージ API）を反映します。',
               'CI：型チェック・Lint・Vitest・SQL テスト・ビルドが自動で実行されます。',
               'マイグレーションは新しいファイルの追加のみ行い、既存ファイルは編集しません。',
               '環境変数：Cloudflare Pages に VITE_SUPABASE_URL と VITE_SUPABASE_ANON_KEY を設定します。',
@@ -801,6 +814,44 @@ export const manualsJa: Manual[] = [
         ],
       },
       {
+        id: 'gateway',
+        title: 'チャージ API（Charge Gateway）の運用',
+        blocks: [
+          {
+            type: 'p',
+            text: 'チャージは「入金リクエスト → プロバイダで承認 → 署名付き webhook → 記帳」の流れで処理されます。プロバイダは抽象層で差し替え可能で、同梱のサンドボックス（模擬プロバイダ）と Stripe テストモードが使えます。',
+          },
+          {
+            type: 'list',
+            items: [
+              '構成：Edge Functions の charge-methods（利用可能な方式）、charge-create（リクエスト作成とプロバイダ呼び出し）、charge-webhook/<provider>（確定通知の検証と記帳）、sandbox-gateway（模擬プロバイダ）。',
+              'secrets：SANDBOX_API_KEY / SANDBOX_WEBHOOK_SECRET は Actions が初回に自動生成します。APP_ORIGIN は Variables で上書きできます。Stripe を使う場合は STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET を GitHub Secrets に追加します。',
+              'デプロイ：supabase/ 配下を push すると Actions「Supabase deploy」が secrets を登録し、4 つの Function を毎回デプロイします。',
+              '状態の確認：Table Editor の charge_requests（本人以外は RLS で不可視。管理者は SQL Editor から）。provider_ref がプロバイダ側の ID、failure_code が失敗理由です。',
+              'webhook の再送：同じリクエストに確定通知が複数回来ても取引は 1 件です。サンドボックスの結果画面「通知を再送する」で確認できます。',
+              '実プロバイダの追加：supabase/functions/_shared/gateway/providers に ChargeProvider（createPayment / parseWebhook / methods）を実装し、registry.ts に登録します。',
+            ],
+          },
+          {
+            type: 'table',
+            headers: ['状態', '意味'],
+            rows: [
+              ['pending', 'プロバイダの承認待ち。ユーザーがキャンセルできる'],
+              ['processing', 'プロバイダ側で処理中（払込待ちなど）'],
+              ['completed', '記帳済み。transaction_id に取引が入る'],
+              ['failed', 'プロバイダの拒否、または記帳不能（残高上限など）。残高は変わらない'],
+              ['cancelled', 'ユーザーまたはプロバイダ側の取消'],
+              ['expired', '期限切れ。期限後に入金通知が来た場合は記帳される'],
+            ],
+          },
+          {
+            type: 'note',
+            tone: 'warn',
+            text: '記帳は webhook の署名検証後にのみ行われ、フロントからの「成功」戻りでは行われません。failed のリクエストは残高に影響しません。',
+          },
+        ],
+      },
+      {
         id: 'stripe',
         title: 'Stripe テスト決済（任意）',
         blocks: [
@@ -808,15 +859,15 @@ export const manualsJa: Manual[] = [
             type: 'steps',
             items: [
               'Stripe のテストアカウントで API キーと webhook の署名シークレットを取得します。',
-              'Supabase の Edge Function secrets に STRIPE_SECRET_KEY と STRIPE_WEBHOOK_SECRET を設定します。',
-              'Actions「Supabase deploy」を deploy_functions を有効にして実行します。',
-              'Stripe に webhook エンドポイント（stripe-webhook、イベント checkout.session.completed）を登録します。',
-              'Cloudflare Pages に VITE_STRIPE_ENABLED=true を設定します。',
+              'GitHub Secrets に STRIPE_SECRET_KEY と STRIPE_WEBHOOK_SECRET を追加します。',
+              'supabase/ 配下を push するか Actions「Supabase deploy」を実行すると、secrets の登録と Function のデプロイが行われます。',
+              'Stripe に webhook エンドポイント（https://<ref>.supabase.co/functions/v1/charge-webhook/stripe、イベント checkout.session.completed / async_payment_succeeded / async_payment_failed / expired）を登録します。',
+              'チャージ画面の方法一覧に「Stripe テスト決済」のカード / コンビニ払い / PayPay が表示されます。',
             ],
           },
           {
             type: 'p',
-            text: 'webhook が再送されても、Checkout Session の ID を冪等キーにしているため二重計上されません。',
+            text: 'webhook が再送されても、Checkout Session の ID と入金リクエストの冪等キーにより二重計上されません。',
           },
         ],
       },

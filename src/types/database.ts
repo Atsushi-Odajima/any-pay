@@ -14,6 +14,91 @@ export type Database = {
   }
   public: {
     Tables: {
+      charge_requests: {
+        Row: {
+          amount: number
+          channel: string
+          completed_at: string | null
+          created_at: string
+          expires_at: string
+          failure_code: string | null
+          id: string
+          idempotency_key: string
+          instructions: Json | null
+          metadata: Json
+          method: string
+          provider: string
+          provider_ref: string | null
+          redirect_url: string | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          channel: string
+          completed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          failure_code?: string | null
+          id?: string
+          idempotency_key: string
+          instructions?: Json | null
+          metadata?: Json
+          method: string
+          provider: string
+          provider_ref?: string | null
+          redirect_url?: string | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          channel?: string
+          completed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          failure_code?: string | null
+          id?: string
+          idempotency_key?: string
+          instructions?: Json | null
+          metadata?: Json
+          method?: string
+          provider?: string
+          provider_ref?: string | null
+          redirect_url?: string | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charge_requests_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charge_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charge_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           discount_type: string
@@ -410,6 +495,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sandbox_payments: {
+        Row: {
+          amount: number
+          channel: string
+          created_at: string
+          currency: string
+          expires_at: string
+          id: string
+          instructions: Json | null
+          method: string
+          paid_at: string | null
+          reference: string | null
+          return_url: string
+          status: string
+          updated_at: string
+          webhook_log: Json
+          webhook_url: string
+        }
+        Insert: {
+          amount: number
+          channel: string
+          created_at?: string
+          currency?: string
+          expires_at: string
+          id: string
+          instructions?: Json | null
+          method: string
+          paid_at?: string | null
+          reference?: string | null
+          return_url: string
+          status?: string
+          updated_at?: string
+          webhook_log?: Json
+          webhook_url: string
+        }
+        Update: {
+          amount?: number
+          channel?: string
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          id?: string
+          instructions?: Json | null
+          method?: string
+          paid_at?: string | null
+          reference?: string | null
+          return_url?: string
+          status?: string
+          updated_at?: string
+          webhook_log?: Json
+          webhook_url?: string
+        }
+        Relationships: []
       }
       split_members: {
         Row: {
@@ -924,6 +1063,59 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      attach_charge_provider: {
+        Args: {
+          p_expires_at?: string
+          p_instructions?: Json
+          p_provider_ref: string
+          p_redirect_url?: string
+          p_request_id: string
+          p_status?: string
+        }
+        Returns: {
+          amount: number
+          channel: string
+          completed_at: string | null
+          created_at: string
+          expires_at: string
+          failure_code: string | null
+          id: string
+          idempotency_key: string
+          instructions: Json | null
+          metadata: Json
+          method: string
+          provider: string
+          provider_ref: string | null
+          redirect_url: string | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+      }
+      cancel_charge_request: {
+        Args: { p_request_id: string }
+        Returns: {
+          amount: number
+          channel: string
+          completed_at: string | null
+          created_at: string
+          expires_at: string
+          failure_code: string | null
+          id: string
+          idempotency_key: string
+          instructions: Json | null
+          metadata: Json
+          method: string
+          provider: string
+          provider_ref: string | null
+          redirect_url: string | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+      }
       charge_wallet: {
         Args: { p_amount: number; p_idempotency_key: string; p_method: string }
         Returns: {
@@ -992,6 +1184,81 @@ export type Database = {
           to: "user_coupons"
           isOneToOne: true
           isSetofReturn: false
+        }
+      }
+      complete_charge_request: {
+        Args: { p_payload?: Json; p_provider_ref?: string; p_request_id: string }
+        Returns: {
+          amount: number
+          channel: string
+          completed_at: string | null
+          created_at: string
+          expires_at: string
+          failure_code: string | null
+          id: string
+          idempotency_key: string
+          instructions: Json | null
+          metadata: Json
+          method: string
+          provider: string
+          provider_ref: string | null
+          redirect_url: string | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+      }
+      create_charge_request: {
+        Args: {
+          p_amount: number
+          p_channel: string
+          p_idempotency_key: string
+          p_method: string
+          p_provider: string
+        }
+        Returns: {
+          amount: number
+          channel: string
+          completed_at: string | null
+          created_at: string
+          expires_at: string
+          failure_code: string | null
+          id: string
+          idempotency_key: string
+          instructions: Json | null
+          metadata: Json
+          method: string
+          provider: string
+          provider_ref: string | null
+          redirect_url: string | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+      }
+      fail_charge_request: {
+        Args: { p_code?: string; p_payload?: Json; p_request_id: string }
+        Returns: {
+          amount: number
+          channel: string
+          completed_at: string | null
+          created_at: string
+          expires_at: string
+          failure_code: string | null
+          id: string
+          idempotency_key: string
+          instructions: Json | null
+          metadata: Json
+          method: string
+          provider: string
+          provider_ref: string | null
+          redirect_url: string | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
         }
       }
       create_payment_request: {

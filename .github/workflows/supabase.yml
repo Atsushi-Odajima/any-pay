@@ -4,8 +4,10 @@ name: Supabase deploy
 # 必要な GitHub Secrets（Settings → Secrets and variables → Actions）:
 #   SUPABASE_ACCESS_TOKEN  https://supabase.com/dashboard/account/tokens で発行
 #   SUPABASE_DB_PASSWORD   プロジェクト作成時の DB パスワード（Project Settings → Database でリセット可）
-#   STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET（任意。Phase 8 を使う場合）
-# Secrets が未設定のときはジョブをスキップする。
+#   STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET（任意。Stripe テスト決済でチャージする場合）
+#   SANDBOX_API_KEY / SANDBOX_WEBHOOK_SECRET（任意。未設定なら初回に自動生成して登録する）
+# Variables（任意）: APP_ORIGIN（フロントの URL。既定 https://any-pay.pages.dev）
+# Secrets が未設定のときはジョブをスキップする。Edge Functions は毎回デプロイする。
 
 on:
   push:
@@ -17,10 +19,6 @@ on:
     inputs:
       seed:
         description: 'seed.sql を投入する（デモデータ。初回のみ推奨）'
-        type: boolean
-        default: false
-      deploy_functions:
-        description: 'Edge Functions（Stripe）をデプロイする'
         type: boolean
         default: false
       commit_types:
@@ -81,14 +79,49 @@ jobs:
         continue-on-error: true
         run: supabase config push --yes
 
-      - name: Deploy Edge Functions (Stripe)
-        if: steps.secrets.outputs.ok == 'true' && github.event_name == 'workflow_dispatch' && inputs.deploy_functions
+      # チャージ API（charge-*）とサンドボックス（sandbox-gateway）、Stripe 用の secrets
+      - name: Set Edge Function secrets
+        if: steps.secrets.outputs.ok == 'true'
+        env:
+          GH_SANDBOX_API_KEY: ${{ secrets.SANDBOX_API_KEY }}
+          GH_SANDBOX_WEBHOOK_SECRET: ${{ secrets.SANDBOX_WEBHOOK_SECRET }}
+          GH_STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          GH_STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          APP_ORIGIN: ${{ vars.APP_ORIGIN || 'https://any-pay.pages.dev' }}
         run: |
-          supabase functions deploy stripe-checkout
-          supabase functions deploy stripe-webhook --no-verify-jwt
-          if [ -n "${{ secrets.STRIPE_SECRET_KEY }}" ]; then
-            supabase secrets set STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET }}"
+          existing="$(supabase secrets list 2>/dev/null || true)"
+          set_secret() {
+            # GitHub Secret があればそれを、無ければ未登録のときだけ乱数を生成して登録する
+            name="$1"; value="$2"
+            if [ -n "$value" ]; then
+              supabase secrets set "$name=$value"
+            elif ! printf '%s' "$existing" | grep -q "$name"; then
+              supabase secrets set "$name=$(openssl rand -hex 32)"
+            fi
+          }
+          set_secret SANDBOX_API_KEY "$GH_SANDBOX_API_KEY"
+          set_secret SANDBOX_WEBHOOK_SECRET "$GH_SANDBOX_WEBHOOK_SECRET"
+          supabase secrets set "APP_ORIGIN=$APP_ORIGIN"
+          if [ -n "$GH_STRIPE_SECRET_KEY" ]; then
+            supabase secrets set "STRIPE_SECRET_KEY=$GH_STRIPE_SECRET_KEY" "STRIPE_WEBHOOK_SECRET=$GH_STRIPE_WEBHOOK_SECRET"
           fi
+
+      - name: Deploy Edge Functions (Charge Gateway / Sandbox)
+        if: steps.secrets.outputs.ok == 'true'
+        run: |
+          supabase functions deploy charge-methods
+          supabase functions deploy charge-create
+          supabase functions deploy charge-webhook --no-verify-jwt
+          supabase functions deploy sandbox-gateway --no-verify-jwt
+
+      # デプロイ確認：サンドボックスの公開エンドポイント（認証不要）が応答するか
+      - name: Smoke test (sandbox-gateway)
+        if: steps.secrets.outputs.ok == 'true'
+        run: |
+          url="https://$SUPABASE_PROJECT_ID.supabase.co/functions/v1/sandbox-gateway"
+          body="$(curl -sS --max-time 30 "$url")"
+          echo "$body"
+          echo "$body" | grep -q '"Any Pay Sandbox Gateway"'
 
       # 生成した型を手書きの src/types/database.ts と突き合わせ、差分を artifact として残す
       - name: Generate types and diff

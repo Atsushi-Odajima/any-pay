@@ -33,7 +33,16 @@ export function parseMeta(json: Json): TxMeta {
   return r.success ? r.data : {};
 }
 
-const CHARGE_METHODS = new Set(['bank', 'card', 'convenience', 'stripe']);
+const CHARGE_METHODS = new Set([
+  'bank',
+  'card',
+  'convenience',
+  'stripe',
+  'bank_debit',
+  'konbini',
+  'wallet',
+  'paypay',
+]);
 
 export function chargeMethodLabel(method: string | undefined): string | undefined {
   if (!method) return undefined;
