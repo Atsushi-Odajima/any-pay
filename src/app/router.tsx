@@ -1,11 +1,12 @@
 import { lazy, Suspense, type ComponentType } from 'react';
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Outlet } from 'react-router';
 import { PageLoading } from '@/shared/ui';
 import { isSupabaseConfigured } from '@/shared/lib/env';
 import { TabLayout } from './layouts/TabLayout';
 import { PlainLayout } from './layouts/PlainLayout';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ConfigErrorPage } from './pages/ConfigErrorPage';
+import { ErrorPage } from './pages/ErrorPage';
 import { RequireAuth, RequireNoProfile, RequireProfile } from './guards';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { OnboardingPage } from '@/features/auth/pages/OnboardingPage';
@@ -99,80 +100,84 @@ function lazyPage(loader: () => Promise<Record<string, unknown>>, name: string):
   };
 }
 
-export const router = createBrowserRouter(
-  isSupabaseConfigured
-    ? [
-        {
-          element: <PlainLayout />,
-          children: [{ path: '/login', element: <LoginPage /> }],
-        },
-        {
-          element: <RequireAuth />,
-          children: [
-            {
-              element: <RequireNoProfile />,
-              children: [
-                {
-                  element: <PlainLayout />,
-                  children: [{ path: '/onboarding', element: <OnboardingPage /> }],
-                },
-              ],
-            },
-            {
-              element: <RequireProfile />,
-              children: [
-                {
-                  element: <TabLayout />,
-                  children: [
-                    { path: '/', element: <HomePage /> },
-                    { path: '/pay', element: <PayPage /> },
-                    { path: '/merchant/register', element: <MerchantRegisterPage /> },
-                    { path: '/send', element: <SendPage /> },
-                    { path: '/receive', element: <ReceivePage /> },
-                    { path: '/split', element: <SplitListPage /> },
-                    { path: '/split/new', element: <SplitCreatePage /> },
-                    { path: '/split/:id', element: <SplitDetailPage /> },
-                    { path: '/history', element: <HistoryPage /> },
-                    { path: '/history/:id', element: <TransactionDetailPage /> },
-                    { path: '/charge', element: <ChargePage /> },
-                    { path: '/settings/withdraw', element: <WithdrawPage /> },
-                    { path: '/more', element: <MorePage /> },
-                    { path: '/settings/profile', element: <ProfilePage /> },
-                    { path: '/settings/security', element: <SecurityPage /> },
-                    { path: '/settings/security/pin', element: <PinSetupPage /> },
-                    { path: '/rewards/coupons', element: <CouponsPage /> },
-                    { path: '/rewards/points', element: <PointsPage /> },
-                    { path: '/notifications', element: <NotificationsPage /> },
-                    { path: '/admin/reconcile', element: <ReconcilePage /> },
-                  ],
-                },
-                {
-                  element: <PlainLayout />,
-                  children: [
-                    { path: '/complete/:id', element: <CompletePage /> },
-                    { path: '/scan', element: <ScanRedirectPage /> },
-                    { path: '/charge/stripe/return', element: <StripeReturnPage /> },
-                    { path: '/pay/confirm/:mode/:id', element: <PaymentConfirmPage /> },
-                  ],
-                },
-                {
-                  path: '/merchant',
-                  element: <MerchantLayout />,
-                  children: [
-                    { index: true, element: <MerchantHomePage /> },
-                    { path: 'accept', element: <MerchantAcceptRoute /> },
-                    { path: 'transactions', element: <MerchantTransactionsPage /> },
-                    { path: 'transactions/:id', element: <MerchantTransactionDetailPage /> },
-                    { path: 'qr', element: <MerchantStaticQrPage /> },
-                    { path: 'coupons', element: <MerchantCouponsPage /> },
-                    { path: 'withdraw', element: <MerchantWithdrawPage /> },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        { path: '*', element: <NotFoundPage /> },
-      ]
-    : [{ path: '*', element: <ConfigErrorPage /> }],
-);
+export const router = createBrowserRouter([
+  {
+    element: <Outlet />,
+    errorElement: <ErrorPage />,
+    children: isSupabaseConfigured
+      ? [
+          {
+            element: <PlainLayout />,
+            children: [{ path: '/login', element: <LoginPage /> }],
+          },
+          {
+            element: <RequireAuth />,
+            children: [
+              {
+                element: <RequireNoProfile />,
+                children: [
+                  {
+                    element: <PlainLayout />,
+                    children: [{ path: '/onboarding', element: <OnboardingPage /> }],
+                  },
+                ],
+              },
+              {
+                element: <RequireProfile />,
+                children: [
+                  {
+                    element: <TabLayout />,
+                    children: [
+                      { path: '/', element: <HomePage /> },
+                      { path: '/pay', element: <PayPage /> },
+                      { path: '/merchant/register', element: <MerchantRegisterPage /> },
+                      { path: '/send', element: <SendPage /> },
+                      { path: '/receive', element: <ReceivePage /> },
+                      { path: '/split', element: <SplitListPage /> },
+                      { path: '/split/new', element: <SplitCreatePage /> },
+                      { path: '/split/:id', element: <SplitDetailPage /> },
+                      { path: '/history', element: <HistoryPage /> },
+                      { path: '/history/:id', element: <TransactionDetailPage /> },
+                      { path: '/charge', element: <ChargePage /> },
+                      { path: '/settings/withdraw', element: <WithdrawPage /> },
+                      { path: '/more', element: <MorePage /> },
+                      { path: '/settings/profile', element: <ProfilePage /> },
+                      { path: '/settings/security', element: <SecurityPage /> },
+                      { path: '/settings/security/pin', element: <PinSetupPage /> },
+                      { path: '/rewards/coupons', element: <CouponsPage /> },
+                      { path: '/rewards/points', element: <PointsPage /> },
+                      { path: '/notifications', element: <NotificationsPage /> },
+                      { path: '/admin/reconcile', element: <ReconcilePage /> },
+                    ],
+                  },
+                  {
+                    element: <PlainLayout />,
+                    children: [
+                      { path: '/complete/:id', element: <CompletePage /> },
+                      { path: '/scan', element: <ScanRedirectPage /> },
+                      { path: '/charge/stripe/return', element: <StripeReturnPage /> },
+                      { path: '/pay/confirm/:mode/:id', element: <PaymentConfirmPage /> },
+                    ],
+                  },
+                  {
+                    path: '/merchant',
+                    element: <MerchantLayout />,
+                    children: [
+                      { index: true, element: <MerchantHomePage /> },
+                      { path: 'accept', element: <MerchantAcceptRoute /> },
+                      { path: 'transactions', element: <MerchantTransactionsPage /> },
+                      { path: 'transactions/:id', element: <MerchantTransactionDetailPage /> },
+                      { path: 'qr', element: <MerchantStaticQrPage /> },
+                      { path: 'coupons', element: <MerchantCouponsPage /> },
+                      { path: 'withdraw', element: <MerchantWithdrawPage /> },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          { path: '*', element: <NotFoundPage /> },
+        ]
+      : [{ path: '*', element: <ConfigErrorPage /> }],
+  },
+]);
