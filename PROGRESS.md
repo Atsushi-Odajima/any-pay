@@ -153,3 +153,7 @@
 
 ## ロゴの反映（仕様書・説明書）
 - `docs/spec` の仕様書 4 点の表紙（先頭）に `docs/logo.png` を追加。アプリ内説明書の一覧と各説明書の冒頭にロゴを表示（印刷時も表紙として出る）
+
+## ブランドバー（全画面の左上にロゴ + Any Pay）
+- `shared/ui/BrandBar.tsx` を TabLayout / PlainLayout / MerchantLayout の先頭に配置（sticky、セーフエリアの余白もここで確保、印刷時は非表示）。PageHeader と加盟店ヘッダーの固定位置はブランドバーの下（2.75rem + safe-top）に変更し、各ページの safe-top 余白を撤去
+- 説明書ページの表紙ロゴは印刷時のみ表示（画面上はブランドバーのロゴ）

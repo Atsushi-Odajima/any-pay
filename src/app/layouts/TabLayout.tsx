@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router';
 import { Home, QrCode, Send, History, Menu } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
+import { BrandBar } from '@/shared/ui';
 import { useT } from '@/shared/i18n';
 
 const TABS = [
@@ -15,6 +16,7 @@ export function TabLayout() {
   const t = useT();
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
+      <BrandBar />
       <main className="flex-1 pb-[calc(4.5rem+var(--safe-bottom))]">
         <Outlet />
       </main>

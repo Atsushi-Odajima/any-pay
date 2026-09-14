@@ -13,7 +13,7 @@ export function PageHeader({ title, back, right }: Props) {
   const navigate = useNavigate();
   const t = useT();
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-2 bg-canvas/90 px-2 backdrop-blur no-print">
+    <header className="sticky top-[calc(2.75rem+var(--safe-top))] z-10 flex h-14 items-center gap-2 bg-canvas/90 px-2 backdrop-blur no-print">
       {back ? (
         <button
           type="button"

@@ -61,7 +61,7 @@ export function PayPage() {
 
   return (
     <div className="flex min-h-[calc(100dvh-4.5rem)] flex-col">
-      <header className="flex items-center gap-3 px-4 pt-[calc(0.75rem+var(--safe-top))] pb-2">
+      <header className="flex items-center gap-3 px-4 pt-2 pb-2">
         <div>
           <p className="text-xs text-muted">{t('pay.balanceFrom')}</p>
           <p className="text-2xl font-bold tracking-tight">
