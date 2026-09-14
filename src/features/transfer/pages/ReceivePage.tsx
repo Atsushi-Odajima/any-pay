@@ -19,11 +19,11 @@ export function ReceivePage() {
     <>
       <PageHeader title={t('receive.title')} back="/send" />
       <div className="flex flex-col items-center gap-5 px-4 pb-6 pt-4">
-        <p className="text-sm text-mist">{t('receive.hint')}</p>
+        <p className="text-sm text-muted">{t('receive.hint')}</p>
         <QrCode value={payload} size={220} label={t('receive.qrLabel')} />
         <div className="text-center">
           <p className="text-lg font-semibold">{profile.data.display_name}</p>
-          <p className="font-mono text-mist">@{handle}</p>
+          <p className="font-mono text-muted">@{handle}</p>
         </div>
         <div className="flex w-full gap-3">
           <Button

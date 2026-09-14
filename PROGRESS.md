@@ -131,3 +131,10 @@
 - 説明書（アプリ内）はオペレーター向けの使い方に絞り、管理者向けの「チャージ API」節から実装詳細（プロバイダ追加手順など）を外して仕様書へ誘導
 - 仕様書の `payment.pending`（確定待ち）イベントに合わせ、サンドボックスのイベント正規化に `payment.pending → processing` を追加
 - README に仕様書へのリンクを追加
+
+## ブランド刷新（ロゴ・白×オレンジのライトテーマ）
+- 完了内容：ロゴを作成（オレンジのグラデーション角丸四角に幾何学的な小文字 "a"。カウンターを角丸四角にして QR のモジュールを暗示）。`src/shared/ui/Logo.tsx`（マーク + ワードマーク "Any Pay"）、`public/favicon.svg`、PWA アイコン（192 / 512 / maskable / apple-touch）を SVG から生成、`docs/logo.png`。ログイン画面・支払う画面の QR カード・静的 QR 印刷に配置
+- テーマ：黒基調（ink / lime）から白×オレンジへ。`src/index.css` の意味付きトークンに全面置換（brand `#FF6B1A` / canvas / surface / surface-2 / surface-3 / line / fg / muted / faint、danger / success / warn は白背景向けに調整）。`color-scheme: light`、`theme-color` と manifest をオレンジ / 白に
+- 主要部品：Card（白＋細い枠線＋薄い影）、Button（primary はオレンジ＋影、secondary / outline / ghost は白基調）、Segmented / LanguageToggle（薄いグレーのトラックに白 or オレンジのピル）、残高カード（オレンジのグラデーションに白文字）、ホームの「支払う」は黒ボタンで対比、入金額は success（緑）で表示
+- 検証：全 26 画面をスクリーンショットで確認（日本語）。型・Lint・Vitest・キー整合すべて通過
+- 判断メモ：色クラスは「意味付きトークン」だけに統一し、今後のテーマ変更を CSS 変数の差し替えで済むようにした

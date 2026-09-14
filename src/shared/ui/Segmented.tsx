@@ -12,7 +12,7 @@ export function Segmented<T extends string>({
   className?: string;
 }) {
   return (
-    <div className={cn('flex rounded-xl bg-ink-800 p-1', className)} role="tablist">
+    <div className={cn('flex rounded-xl bg-surface-2 p-1', className)} role="tablist">
       {options.map((o) => (
         <button
           key={o.value}
@@ -22,7 +22,7 @@ export function Segmented<T extends string>({
           onClick={() => onChange(o.value)}
           className={cn(
             'flex-1 rounded-lg py-2 text-sm font-medium transition-colors',
-            value === o.value ? 'bg-ink-600 text-white' : 'text-mist hover:text-white',
+            value === o.value ? 'bg-surface text-fg shadow-sm' : 'text-muted hover:text-fg',
           )}
         >
           {o.label}

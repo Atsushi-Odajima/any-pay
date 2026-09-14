@@ -58,8 +58,8 @@ export function QrScanner({ onResult, once = true, paused = false }: Props) {
 
   if (!supported || errorKey) {
     return (
-      <div className="flex flex-col gap-3 rounded-2xl bg-ink-800 p-4">
-        <div className="flex items-center gap-2 text-sm text-mist">
+      <div className="flex flex-col gap-3 rounded-2xl bg-surface p-4">
+        <div className="flex items-center gap-2 text-sm text-muted">
           <CameraOff className="h-4 w-4" />
           {t(errorKey ?? 'scanner.noCamera')}
         </div>
@@ -88,7 +88,7 @@ export function QrScanner({ onResult, once = true, paused = false }: Props) {
     <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-black">
       <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-[62%] w-[62%] rounded-2xl border-2 border-lime/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]" />
+        <div className="h-[62%] w-[62%] rounded-2xl border-2 border-brand/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]" />
       </div>
     </div>
   );

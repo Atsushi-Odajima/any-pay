@@ -31,14 +31,14 @@ export function GuidePage() {
       />
       <article className="print-doc px-4 pb-8">
         <h1 className="hidden text-2xl font-bold print:block">{manual.title}</h1>
-        <p className="text-sm text-mist print:text-black">{manual.subtitle}</p>
+        <p className="text-sm text-muted print:text-black">{manual.subtitle}</p>
 
-        <nav aria-label={t('guide.toc')} className="mt-4 rounded-2xl bg-ink-800 p-4 print:hidden">
-          <p className="mb-2 text-xs font-semibold text-mist">{t('guide.toc')}</p>
+        <nav aria-label={t('guide.toc')} className="mt-4 rounded-2xl bg-surface-2 p-4 print:hidden">
+          <p className="mb-2 text-xs font-semibold text-muted">{t('guide.toc')}</p>
           <ol className="flex flex-col gap-1.5">
             {manual.sections.map((s, i) => (
               <li key={s.id}>
-                <a href={`#${s.id}`} className="text-sm text-lime">
+                <a href={`#${s.id}`} className="text-sm text-brand">
                   {i + 1}. {s.title}
                 </a>
               </li>
@@ -53,7 +53,7 @@ export function GuidePage() {
             className="mt-8 flex scroll-mt-16 flex-col gap-3 print:break-inside-avoid"
           >
             <h2 className="text-base font-bold print:text-black">
-              <span className="mr-2 text-lime print:text-black">{i + 1}.</span>
+              <span className="mr-2 text-brand print:text-black">{i + 1}.</span>
               {s.title}
             </h2>
             {s.blocks.map((b, j) => (
@@ -62,9 +62,7 @@ export function GuidePage() {
           </section>
         ))}
 
-        <p className="mt-10 text-center text-xs text-ink-400 print:text-black">
-          {t('guide.footer')}
-        </p>
+        <p className="mt-10 text-center text-xs text-faint print:text-black">{t('guide.footer')}</p>
       </article>
     </>
   );

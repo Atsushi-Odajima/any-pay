@@ -22,7 +22,7 @@ export function MerchantTxRow({ tx, showDate = true }: { tx: Transaction; showDa
       title={
         <span className="flex items-center gap-2">
           {meta.payer_name ?? t('merchant.tx.customer')}
-          {meta.payer_handle && <span className="text-xs text-mist">@{meta.payer_handle}</span>}
+          {meta.payer_handle && <span className="text-xs text-muted">@{meta.payer_handle}</span>}
           {tx.status === 'refunded' && <Badge tone="warn">{t('merchant.tx.refunded')}</Badge>}
         </span>
       }
@@ -34,7 +34,7 @@ export function MerchantTxRow({ tx, showDate = true }: { tx: Transaction; showDa
         .filter(Boolean)
         .join(' · ')}
       right={
-        <span className={`font-semibold tabular-nums ${isRefund ? 'text-danger' : 'text-lime'}`}>
+        <span className={`font-semibold tabular-nums ${isRefund ? 'text-danger' : 'text-success'}`}>
           {isRefund ? '-' : '+'}
           {formatYen(tx.amount)}
         </span>

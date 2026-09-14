@@ -22,17 +22,17 @@ export function MerchantLayout() {
   if (!merchant.data) return <Navigate to="/merchant/register" replace />;
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 bg-ink/90 px-2 backdrop-blur no-print">
+      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 bg-canvas/90 px-2 backdrop-blur no-print">
         <NavLink
           to="/more"
           aria-label={t('merchant.toUser')}
-          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-ink-800"
+          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface-2"
         >
           <ArrowLeft className="h-5 w-5" />
         </NavLink>
         <div className="min-w-0 flex-1">
           <p className="truncate text-base font-semibold">{merchant.data.name}</p>
-          <p className="text-[11px] text-mist">{t('merchant.dashboard')}</p>
+          <p className="text-[11px] text-muted">{t('merchant.dashboard')}</p>
         </div>
       </header>
       <nav
@@ -47,7 +47,7 @@ export function MerchantLayout() {
             className={({ isActive }) =>
               cn(
                 'flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium',
-                isActive ? 'bg-lime text-ink' : 'bg-ink-800 text-mist',
+                isActive ? 'bg-brand text-white' : 'bg-surface-2 text-muted',
               )
             }
           >

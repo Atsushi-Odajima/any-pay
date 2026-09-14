@@ -64,9 +64,9 @@ export function ChargePendingPage() {
       <PageHeader title={t('charge.pending.title')} back="/" />
       <div className="flex flex-1 flex-col gap-4 px-4 pb-6">
         <Card className="text-center">
-          <p className="text-xs text-mist">{t(`charge.methods.${r.method}`)}</p>
+          <p className="text-xs text-muted">{t(`charge.methods.${r.method}`)}</p>
           <p className="mt-1 text-3xl font-bold">{formatYen(r.amount)}</p>
-          <p className="mt-1 text-xs text-mist">{t(`charge.providers.${r.provider}`)}</p>
+          <p className="mt-1 text-xs text-muted">{t(`charge.providers.${r.provider}`)}</p>
           <div className="mt-3">
             <Badge tone={step.failed ? 'danger' : r.status === 'completed' ? 'success' : 'warn'}>
               {t(`charge.pending.status.${r.status}`)}
@@ -88,7 +88,7 @@ export function ChargePendingPage() {
                       done && 'bg-success/20 text-success',
                       active && 'bg-warn/20 text-warn',
                       failed && 'bg-danger/20 text-danger',
-                      !done && !active && !failed && 'bg-ink-700 text-ink-400',
+                      !done && !active && !failed && 'bg-surface-2 text-faint',
                     )}
                   >
                     {done ? (
@@ -99,12 +99,12 @@ export function ChargePendingPage() {
                       <Clock className="h-4 w-4" />
                     )}
                   </span>
-                  <span className={cn(!done && !active && !failed && 'text-mist')}>{label}</span>
+                  <span className={cn(!done && !active && !failed && 'text-muted')}>{label}</span>
                 </li>
               );
             })}
           </ol>
-          {open && <p className="mt-3 text-xs text-mist">{t('charge.pending.waiting')}</p>}
+          {open && <p className="mt-3 text-xs text-muted">{t('charge.pending.waiting')}</p>}
           {result === 'declined' && open && (
             <p className="mt-2 text-xs text-warn">{t('charge.pending.resultDeclined')}</p>
           )}
@@ -115,13 +115,13 @@ export function ChargePendingPage() {
 
         {instructions && (
           <Card>
-            <p className="mb-2 text-xs font-semibold text-mist">
+            <p className="mb-2 text-xs font-semibold text-muted">
               {t('charge.pending.instructions')}
             </p>
-            <dl className="divide-y divide-ink-700 text-sm">
+            <dl className="divide-y divide-line text-sm">
               {Object.entries(instructions).map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-3 py-2">
-                  <dt className="text-mist">{t(`charge.instructions.${k}`)}</dt>
+                  <dt className="text-muted">{t(`charge.instructions.${k}`)}</dt>
                   <dd className="text-right font-medium break-all">
                     {k === 'expires_at' && typeof v === 'string' ? formatDateTime(v) : String(v)}
                   </dd>
@@ -163,7 +163,7 @@ export function ChargePendingPage() {
               {t('common.home')}
             </Button>
           </Link>
-          <p className="text-center text-[11px] text-ink-400">
+          <p className="text-center text-[11px] text-faint">
             {t('charge.pending.requestId')}: {r.id}
           </p>
         </div>

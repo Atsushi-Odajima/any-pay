@@ -246,7 +246,6 @@ export const en: Dict = {
   pay: {
     balanceFrom: 'Pay from balance',
     charge: 'Top up',
-    brand: 'ANY PAY',
     balanceBadge: 'Balance',
     qrLabel: 'Payment QR code',
     issueFailed: 'Could not issue a QR code',

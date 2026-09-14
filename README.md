@@ -1,3 +1,5 @@
+<p align="center"><img src="./docs/logo.png" alt="Any Pay" width="360"></p>
+
 # Any Pay — QRコード決済アプリ（ポートフォリオ / PWA）
 
 PayPay / d払い に相当する QR コード決済アプリを、Web アプリ（PWA）として実装したポートフォリオです。
@@ -48,6 +50,7 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 | バックエンド | Supabase：Auth（Phone OTP）/ Postgres / RLS / RPC（PL/pgSQL, security definer）/ Realtime / Edge Functions（Deno：チャージ API・サンドボックス・webhook） |
 | テスト | Vitest（純粋ロジック）、SQL テスト（RPC・制約・RLS をローカル PostgreSQL で検証）、Playwright（決済フロー 1 本） |
 | デプロイ | Cloudflare Pages（フロント）、Supabase Free Tier |
+| ブランド / UI | 白×オレンジ（`#FF6B1A`）のライトテーマ。ロゴは角丸四角に幾何学的な "a"（`src/shared/ui/Logo.tsx`、`public/favicon.svg`、PWA アイコン） |
 
 ## 構成図
 

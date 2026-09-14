@@ -44,7 +44,7 @@ export function TransactionRow({
     <ListRow
       icon={<Icon className="h-5 w-5" />}
       title={
-        <span className={cn(tx.status === 'refunded' && 'text-mist line-through')}>{title}</span>
+        <span className={cn(tx.status === 'refunded' && 'text-muted line-through')}>{title}</span>
       }
       subtitle={[time, subtitle].filter(Boolean).join(' · ')}
       right={
@@ -52,13 +52,13 @@ export function TransactionRow({
           <span
             className={cn(
               'block font-semibold tabular-nums',
-              amount > 0 ? 'text-lime' : 'text-white',
+              amount > 0 ? 'text-success' : 'text-fg',
             )}
           >
             {formatYen(amount, { sign: true })}
           </span>
           {balanceAfter !== undefined && (
-            <span className="block text-[11px] tabular-nums text-mist">
+            <span className="block text-[11px] tabular-nums text-muted">
               {t('history.balanceAfterShort', { amount: formatYen(balanceAfter) })}
             </span>
           )}

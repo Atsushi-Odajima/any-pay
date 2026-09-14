@@ -15,3 +15,4 @@ export { Segmented } from './Segmented';
 export { ToastContainer } from './ToastContainer';
 export { toast } from './toast';
 export { LanguageToggle } from './LanguageToggle';
+export { Logo, LogoMark } from './Logo';

@@ -34,7 +34,7 @@ export function PinPad({ value, onChange, maxLength = 6, disabled, onComplete }:
             aria-label={t('security.gate.deleteOne')}
             disabled={disabled}
             onClick={() => onChange(value.slice(0, -1))}
-            className="flex h-14 items-center justify-center rounded-2xl text-mist hover:bg-ink-700 active:bg-ink-600"
+            className="flex h-14 items-center justify-center rounded-2xl text-muted hover:bg-surface-2 active:bg-surface-3"
           >
             <Delete className="h-6 w-6" />
           </button>
@@ -45,7 +45,7 @@ export function PinPad({ value, onChange, maxLength = 6, disabled, onComplete }:
             disabled={disabled}
             onClick={() => push(k)}
             className={cn(
-              'h-14 rounded-2xl bg-ink-700 text-2xl font-semibold hover:bg-ink-600 active:bg-ink-500',
+              'h-14 rounded-2xl bg-surface-2 text-2xl font-semibold hover:bg-surface-3 active:bg-line',
               disabled && 'opacity-50',
             )}
           >
@@ -78,10 +78,10 @@ export function PinDots({
           className={cn(
             'h-3.5 w-3.5 rounded-full border transition-colors',
             i < length
-              ? 'border-lime bg-lime'
+              ? 'border-brand bg-brand'
               : i < min
-                ? 'border-ink-400'
-                : 'border-ink-600 border-dashed',
+                ? 'border-line'
+                : 'border-line border-dashed',
           )}
         />
       ))}

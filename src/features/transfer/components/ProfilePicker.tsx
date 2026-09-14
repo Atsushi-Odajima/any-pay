@@ -32,11 +32,11 @@ export function ProfilePicker({
         onChange={(e) => setQuery(e.target.value)}
       />
       {query.trim() === '' ? (
-        <p className="flex items-center gap-1 text-xs text-mist">
+        <p className="flex items-center gap-1 text-xs text-muted">
           <Search className="h-3.5 w-3.5" /> {t('picker.hint')}
         </p>
       ) : results.isPending ? (
-        <div className="flex justify-center py-4 text-mist">
+        <div className="flex justify-center py-4 text-muted">
           <Spinner />
         </div>
       ) : list.length === 0 ? (

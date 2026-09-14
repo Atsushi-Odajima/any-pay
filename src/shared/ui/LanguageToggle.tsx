@@ -6,7 +6,7 @@ export function LanguageToggle({ className }: { className?: string }) {
   const [locale, setLocale] = useLocale();
   return (
     <div
-      className={cn('inline-flex rounded-full bg-ink-800 p-0.5 text-xs font-semibold', className)}
+      className={cn('inline-flex rounded-full bg-surface-2 p-0.5 text-xs font-semibold', className)}
       role="group"
       aria-label="Language"
     >
@@ -18,7 +18,7 @@ export function LanguageToggle({ className }: { className?: string }) {
           onClick={() => setLocale(l)}
           className={cn(
             'rounded-full px-2.5 py-1 transition-colors',
-            locale === l ? 'bg-lime text-ink' : 'text-mist hover:text-white',
+            locale === l ? 'bg-brand text-white' : 'text-muted hover:text-fg',
           )}
         >
           {l === 'ja' ? '日本語' : 'EN'}

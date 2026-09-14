@@ -34,8 +34,8 @@ export function CompletePage() {
   return (
     <div className="flex flex-1 flex-col items-center px-6 pt-[calc(4rem+var(--safe-top))] pb-8 text-center">
       <div className="relative mb-6">
-        <span className="absolute inset-0 rounded-full bg-lime/40 animate-ring" />
-        <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-lime text-ink animate-pop">
+        <span className="absolute inset-0 rounded-full bg-brand/40 animate-ring" />
+        <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-brand text-white animate-pop">
           <Check className="h-12 w-12" strokeWidth={3} />
         </div>
       </div>
@@ -43,8 +43,8 @@ export function CompletePage() {
       {tx.data && (
         <>
           <p className="mt-4 text-4xl font-bold tracking-tight">{formatYen(tx.data.amount)}</p>
-          {state.subtitle && <p className="mt-2 text-sm text-mist">{state.subtitle}</p>}
-          <p className="mt-2 text-xs text-mist">
+          {state.subtitle && <p className="mt-2 text-sm text-muted">{state.subtitle}</p>}
+          <p className="mt-2 text-xs text-muted">
             {formatDateTime(tx.data.completed_at ?? tx.data.created_at)}
           </p>
         </>

@@ -67,7 +67,7 @@ export function SplitCreatePage() {
 
         <div>
           <div className="mb-2 flex items-center">
-            <p className="text-sm text-mist">{t('split.members')}</p>
+            <p className="text-sm text-muted">{t('split.members')}</p>
             <Button
               size="sm"
               variant="ghost"
@@ -81,17 +81,17 @@ export function SplitCreatePage() {
           </div>
           <Card className="flex flex-col gap-2 p-3">
             {members.length === 0 && (
-              <p className="py-2 text-center text-sm text-mist">{t('split.addMembers')}</p>
+              <p className="py-2 text-center text-sm text-muted">{t('split.addMembers')}</p>
             )}
             {members.map((m) => (
               <div key={m.id} className="flex items-center gap-2">
                 <Avatar name={m.display_name} url={m.avatar_url} size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{m.display_name}</p>
-                  <p className="text-xs text-mist">@{m.handle}</p>
+                  <p className="text-xs text-muted">@{m.handle}</p>
                 </div>
-                <span className="flex h-10 w-32 items-center gap-1 rounded-lg border border-ink-600 bg-ink-900 px-2 focus-within:border-lime">
-                  <span className="text-sm text-mist">¥</span>
+                <span className="flex h-10 w-32 items-center gap-1 rounded-lg border border-line bg-canvas px-2 focus-within:border-brand">
+                  <span className="text-sm text-muted">¥</span>
                   <input
                     inputMode="numeric"
                     aria-label={t('split.amountOf', { name: m.display_name })}
@@ -107,7 +107,7 @@ export function SplitCreatePage() {
                   type="button"
                   aria-label={t('split.remove')}
                   onClick={() => setMembers((ms) => ms.filter((x) => x.id !== m.id))}
-                  className="rounded-full p-1.5 text-mist hover:bg-ink-700"
+                  className="rounded-full p-1.5 text-muted hover:bg-surface-2"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -123,7 +123,7 @@ export function SplitCreatePage() {
             </Button>
           </Card>
           {members.length > 0 && (
-            <p className={`mt-2 text-xs ${mismatch ? 'text-danger' : 'text-mist'}`}>
+            <p className={`mt-2 text-xs ${mismatch ? 'text-danger' : 'text-muted'}`}>
               {t('split.memberSum', { sum: formatYen(memberSum) })}{' '}
               {total !== null && t('split.totalOf', { total: formatYen(total) })}
               {mismatch && t('split.mismatch')}

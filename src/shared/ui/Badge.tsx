@@ -3,8 +3,8 @@ import { cn } from '@/shared/lib/cn';
 
 type Tone = 'neutral' | 'lime' | 'danger' | 'success' | 'warn';
 const TONE: Record<Tone, string> = {
-  neutral: 'bg-ink-600 text-mist',
-  lime: 'bg-lime/15 text-lime',
+  neutral: 'bg-surface-3 text-muted',
+  lime: 'bg-brand/15 text-brand',
   danger: 'bg-danger/15 text-danger',
   success: 'bg-success/15 text-success',
   warn: 'bg-warn/15 text-warn',

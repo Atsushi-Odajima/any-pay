@@ -58,7 +58,7 @@ export function NotificationsPage() {
               return (
                 <ListRow
                   key={n.id}
-                  icon={<Bell className={cn('h-5 w-5', n.read_at === null && 'text-lime')} />}
+                  icon={<Bell className={cn('h-5 w-5', n.read_at === null && 'text-brand')} />}
                   title={<span className={cn(n.read_at === null && 'font-semibold')}>{title}</span>}
                   subtitle={[formatDateTime(n.created_at), body].filter(Boolean).join(' · ')}
                   to={linkFor(n)}

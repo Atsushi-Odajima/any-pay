@@ -126,15 +126,15 @@ export function CouponCard({
   const t = useT();
   const body = (
     <Card
-      className={`flex items-center gap-3 border ${selected ? 'border-lime' : 'border-transparent'} ${used ? 'opacity-50' : ''}`}
+      className={`flex items-center gap-3 border ${selected ? 'border-brand' : 'border-transparent'} ${used ? 'opacity-50' : ''}`}
     >
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-lime-900 text-lime">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-100 text-brand">
         {coupon.merchant_id ? <Store className="h-6 w-6" /> : <Globe className="h-6 w-6" />}
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate font-semibold">{coupon.title}</p>
-        <p className="text-sm text-lime">{describeDiscount(coupon)}</p>
-        <p className="text-xs text-mist">
+        <p className="text-sm text-brand">{describeDiscount(coupon)}</p>
+        <p className="text-xs text-muted">
           {coupon.merchant_id
             ? (coupon.merchant?.name ?? t('coupons.storeOnly'))
             : t('coupons.allStores')}{' '}
@@ -143,7 +143,7 @@ export function CouponCard({
         </p>
       </div>
       {action}
-      {selected && <Check className="h-5 w-5 text-lime" />}
+      {selected && <Check className="h-5 w-5 text-brand" />}
     </Card>
   );
   if (onClick) {

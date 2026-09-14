@@ -42,33 +42,33 @@ export function ReconcilePage() {
         {stats.data && (
           <Card>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <dt className="text-mist">{t('admin.wallets')}</dt>
+              <dt className="text-muted">{t('admin.wallets')}</dt>
               <dd className="text-right tabular-nums">{stats.data.wallets}</dd>
-              <dt className="text-mist">{t('admin.transactions')}</dt>
+              <dt className="text-muted">{t('admin.transactions')}</dt>
               <dd className="text-right tabular-nums">{stats.data.transactions}</dd>
-              <dt className="text-mist">{t('admin.ledgerRows')}</dt>
+              <dt className="text-muted">{t('admin.ledgerRows')}</dt>
               <dd className="text-right tabular-nums">{stats.data.ledger_entries}</dd>
-              <dt className="text-mist">{t('admin.ledgerSum')}</dt>
+              <dt className="text-muted">{t('admin.ledgerSum')}</dt>
               <dd
-                className={`text-right tabular-nums ${stats.data.ledger_sum === 0 ? 'text-lime' : 'text-danger'}`}
+                className={`text-right tabular-nums ${stats.data.ledger_sum === 0 ? 'text-brand' : 'text-danger'}`}
               >
                 {formatYen(stats.data.ledger_sum)}
               </dd>
-              <dt className="text-mist">{t('admin.treasury')}</dt>
+              <dt className="text-muted">{t('admin.treasury')}</dt>
               <dd className="text-right tabular-nums">{formatYen(stats.data.treasury_balance)}</dd>
-              <dt className="text-mist">{t('admin.userTotal')}</dt>
+              <dt className="text-muted">{t('admin.userTotal')}</dt>
               <dd className="text-right tabular-nums">
                 {formatYen(stats.data.user_balance_total)}
               </dd>
             </dl>
-            <p className="mt-3 text-xs text-mist">{t('admin.note')}</p>
+            <p className="mt-3 text-xs text-muted">{t('admin.note')}</p>
           </Card>
         )}
         {reconcile.isPending ? (
           <PageLoading label={t('admin.checking')} />
         ) : reconcile.data && reconcile.data.length === 0 ? (
           <EmptyState
-            icon={<ShieldCheck className="h-10 w-10 text-lime" />}
+            icon={<ShieldCheck className="h-10 w-10 text-brand" />}
             title={t('admin.noMismatch')}
             description={t('admin.noMismatchSub')}
           />
@@ -81,17 +81,17 @@ export function ReconcilePage() {
             {reconcile.data.map((r) => (
               <div
                 key={r.wallet_id}
-                className="flex items-center gap-3 border-t border-ink-700 px-4 py-3 text-sm"
+                className="flex items-center gap-3 border-t border-line px-4 py-3 text-sm"
               >
                 <div className="min-w-0 flex-1">
                   <p className="font-mono text-xs">{r.wallet_id}</p>
-                  <p className="text-xs text-mist">
+                  <p className="text-xs text-muted">
                     <Badge>{r.kind}</Badge> {r.owner_handle ? `@${r.owner_handle}` : 'system'}
                   </p>
                 </div>
                 <div className="text-right tabular-nums">
                   <p>cache {formatYen(r.balance_cache)}</p>
-                  <p className="text-mist">ledger {formatYen(r.ledger_sum)}</p>
+                  <p className="text-muted">ledger {formatYen(r.ledger_sum)}</p>
                   <p className="text-danger">diff {formatYen(r.diff, { sign: true })}</p>
                 </div>
               </div>

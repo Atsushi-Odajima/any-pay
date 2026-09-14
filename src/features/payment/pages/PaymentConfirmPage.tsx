@@ -135,21 +135,21 @@ export function PaymentConfirmPage() {
       <PageHeader title={t('payment.confirmTitle')} back="/pay" />
       <div className="flex flex-1 flex-col gap-4 px-4 pb-6">
         <Card className="flex items-center gap-3">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ink-700">
-            <Store className="h-6 w-6 text-lime" />
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-2">
+            <Store className="h-6 w-6 text-brand" />
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-lg font-semibold">{merchantName}</p>
-            {merchantCategory && <p className="text-xs text-mist">{merchantCategory}</p>}
+            {merchantCategory && <p className="text-xs text-muted">{merchantCategory}</p>}
           </div>
           {statusBadge && <Badge tone={requestClosed ? 'danger' : 'lime'}>{statusBadge}</Badge>}
         </Card>
 
         {mode === 'request' ? (
           <div className="py-4 text-center">
-            <p className="text-sm text-mist">{t('payment.amountLabel')}</p>
+            <p className="text-sm text-muted">{t('payment.amountLabel')}</p>
             <p className="mt-1 text-5xl font-bold tracking-tight">{formatYen(fixedAmount ?? 0)}</p>
-            {request.data?.memo && <p className="mt-2 text-sm text-mist">{request.data.memo}</p>}
+            {request.data?.memo && <p className="mt-2 text-sm text-muted">{request.data.memo}</p>}
           </div>
         ) : (
           <AmountInput
@@ -164,14 +164,14 @@ export function PaymentConfirmPage() {
         <button
           type="button"
           onClick={() => setCouponSheet(true)}
-          className="flex items-center gap-3 rounded-2xl bg-ink-800 px-4 py-3 text-left hover:bg-ink-700"
+          className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3 text-left hover:bg-surface-2"
         >
-          <Ticket className="h-5 w-5 text-lime" />
+          <Ticket className="h-5 w-5 text-brand" />
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-medium">
               {selectedCoupon ? selectedCoupon.coupon.title : t('payment.useCoupon')}
             </span>
-            <span className="block text-xs text-mist">
+            <span className="block text-xs text-muted">
               {selectedCoupon
                 ? discount > 0
                   ? `-${formatYen(discount)}`
@@ -187,18 +187,18 @@ export function PaymentConfirmPage() {
           <dl className="flex flex-col gap-1 text-sm">
             {discount > 0 && (
               <>
-                <div className="flex justify-between text-mist">
+                <div className="flex justify-between text-muted">
                   <dt>{t('payment.amount')}</dt>
                   <dd>{formatYen(payAmount)}</dd>
                 </div>
-                <div className="flex justify-between text-lime">
+                <div className="flex justify-between text-brand">
                   <dt>{t('payment.discount')}</dt>
                   <dd>-{formatYen(discount)}</dd>
                 </div>
               </>
             )}
             <div className="flex justify-between">
-              <dt className="text-mist">{t('payment.balanceAfter')}</dt>
+              <dt className="text-muted">{t('payment.balanceAfter')}</dt>
               <dd className={insufficient ? 'text-danger' : ''}>
                 {formatYen(balance)} → {formatYen(Math.max(0, balance - finalAmount))}
               </dd>
@@ -207,7 +207,7 @@ export function PaymentConfirmPage() {
         </Card>
 
         {mode === 'request' && !requestClosed && (
-          <p className="flex items-center justify-center gap-1 text-xs text-mist">
+          <p className="flex items-center justify-center gap-1 text-xs text-muted">
             <Clock className="h-3.5 w-3.5" /> {t('payment.dynamicValid')}
           </p>
         )}
@@ -234,7 +234,7 @@ export function PaymentConfirmPage() {
       >
         <div className="flex max-h-[60dvh] flex-col gap-2 overflow-y-auto">
           {coupons.length === 0 && (
-            <p className="py-4 text-center text-sm text-mist">{t('payment.noCouponForStore')}</p>
+            <p className="py-4 text-center text-sm text-muted">{t('payment.noCouponForStore')}</p>
           )}
           {coupons.map((uc) => (
             <CouponCard

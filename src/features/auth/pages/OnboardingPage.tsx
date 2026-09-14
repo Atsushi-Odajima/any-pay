@@ -19,7 +19,7 @@ export function OnboardingPage() {
         <LanguageToggle />
       </div>
       <h1 className="text-2xl font-bold">{t('onboarding.title')}</h1>
-      <p className="mt-2 mb-8 text-sm text-mist">{t('onboarding.lead')}</p>
+      <p className="mt-2 mb-8 text-sm text-muted">{t('onboarding.lead')}</p>
       <form
         className="flex flex-col gap-4"
         onSubmit={form.handleSubmit((v) =>

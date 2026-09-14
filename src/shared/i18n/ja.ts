@@ -249,7 +249,6 @@ export const ja = {
   pay: {
     balanceFrom: '残高から支払う',
     charge: 'チャージ',
-    brand: 'ANY PAY',
     balanceBadge: '残高払い',
     qrLabel: '支払い用QRコード',
     issueFailed: 'QRを発行できませんでした',

@@ -61,7 +61,7 @@ export function PinGate({
       title={t('security.gate.title')}
     >
       <div className="flex flex-col gap-5">
-        <p className="flex items-center justify-center gap-1 text-sm text-mist">
+        <p className="flex items-center justify-center gap-1 text-sm text-muted">
           <Lock className="h-4 w-4" /> {t('security.gate.lead')}
         </p>
         <PinDots length={pin.length} />
@@ -76,7 +76,7 @@ export function PinGate({
         >
           {t('security.gate.confirm')}
         </Button>
-        <Link to="/settings/security" className="text-center text-xs text-mist underline">
+        <Link to="/settings/security" className="text-center text-xs text-muted underline">
           {t('security.gate.forgot')}
         </Link>
       </div>

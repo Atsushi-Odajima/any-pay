@@ -52,9 +52,9 @@ export function SplitDetailPage() {
       <PageHeader title={t('split.title')} back="/split" />
       <div className="flex flex-col gap-4 px-4 pb-6">
         <div className="py-2 text-center">
-          <p className="text-sm text-mist">{s.memo ?? t('split.fallback')}</p>
+          <p className="text-sm text-muted">{s.memo ?? t('split.fallback')}</p>
           <p className="mt-1 text-4xl font-bold tracking-tight">{formatYen(s.total_amount)}</p>
-          <p className="mt-1 text-xs text-mist">
+          <p className="mt-1 text-xs text-muted">
             {formatDateTime(s.created_at)} ·{' '}
             {isCreator
               ? t('split.createdByYou')
@@ -125,7 +125,7 @@ export function SplitDetailPage() {
                 <>
                   {m.profile?.display_name ?? t('common.unknown')}
                   {m.user_id === userId && (
-                    <span className="ml-1 text-xs text-mist">{t('split.you')}</span>
+                    <span className="ml-1 text-xs text-muted">{t('split.you')}</span>
                   )}
                 </>
               }

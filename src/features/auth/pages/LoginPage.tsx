@@ -3,8 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Navigate } from 'react-router';
-import { Smartphone, KeyRound } from 'lucide-react';
-import { Button, ErrorMessage, Input, LanguageToggle, Segmented } from '@/shared/ui';
+import { Button, ErrorMessage, Input, LanguageToggle, Logo, Segmented } from '@/shared/ui';
 import { useT } from '@/shared/i18n';
 import { normalizePhone, formatPhoneForDisplay } from '../phone';
 import { useSendOtp, useSession, useSignInWithPassword, useVerifyOtp } from '../hooks';
@@ -46,11 +45,9 @@ export function LoginPage() {
         <LanguageToggle />
       </div>
       <div className="mb-8">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-lime text-ink">
-          {mode === 'phone' ? <Smartphone className="h-7 w-7" /> : <KeyRound className="h-7 w-7" />}
-        </div>
+        <Logo size={44} className="mb-5" />
         <h1 className="text-2xl font-bold">{t('login.title')}</h1>
-        <p className="mt-2 text-sm text-mist">
+        <p className="mt-2 text-sm text-muted">
           {mode === 'phone' ? t('login.phoneLead') : t('login.passwordLead')}
         </p>
       </div>
@@ -129,9 +126,9 @@ export function LoginPage() {
           className="flex flex-col gap-4"
           onSubmit={otpForm.handleSubmit((v) => verifyOtp.mutate({ phone, token: v.token }))}
         >
-          <p className="text-sm text-mist">
+          <p className="text-sm text-muted">
             {t('login.codeSentTo')}{' '}
-            <span className="font-mono text-white">{formatPhoneForDisplay(phone)}</span>
+            <span className="font-mono text-fg">{formatPhoneForDisplay(phone)}</span>
           </p>
           <Input
             label={t('login.code')}
@@ -160,7 +157,7 @@ export function LoginPage() {
         </form>
       )}
 
-      <p className="mt-auto pt-10 text-center text-xs text-ink-400">{t('common.demoNote')}</p>
+      <p className="mt-auto pt-10 text-center text-xs text-faint">{t('common.demoNote')}</p>
     </div>
   );
 }

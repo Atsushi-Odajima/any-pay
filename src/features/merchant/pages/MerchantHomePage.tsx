@@ -39,8 +39,8 @@ export function MerchantHomePage() {
 
   return (
     <div className="flex flex-col gap-4 px-4 pb-6">
-      <Card className="bg-gradient-to-br from-ink-700 to-ink-800">
-        <div className="flex items-center gap-1 text-xs text-mist">
+      <Card className="border-brand/20 bg-brand-50">
+        <div className="flex items-center gap-1 text-xs text-muted">
           <TrendingUp className="h-3.5 w-3.5" /> {t('merchant.home.todaySales')}{' '}
           {summary.data && (
             <span>{t('merchant.home.since', { date: formatDate(summary.data.since) })}</span>
@@ -49,7 +49,7 @@ export function MerchantHomePage() {
         {summary.data ? (
           <>
             <p className="mt-1 text-4xl font-bold tracking-tight">{formatYen(summary.data.net)}</p>
-            <div className="mt-2 flex gap-4 text-xs text-mist">
+            <div className="mt-2 flex gap-4 text-xs text-muted">
               <span>{t('merchant.home.count', { n: summary.data.count })}</span>
               {summary.data.refund_count > 0 && (
                 <span>
@@ -65,7 +65,7 @@ export function MerchantHomePage() {
           <Skeleton className="mt-2 h-10 w-40" />
         )}
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-mist">{t('merchant.home.storeBalance')}</span>
+          <span className="text-muted">{t('merchant.home.storeBalance')}</span>
           <span className="font-semibold">
             {merchantWallet ? formatYen(merchantWallet.balance_cache) : '—'}
           </span>
@@ -74,15 +74,18 @@ export function MerchantHomePage() {
 
       <Link
         to="/merchant/accept"
-        className="flex h-16 items-center justify-center gap-3 rounded-3xl bg-lime text-lg font-bold text-ink active:bg-lime-600"
+        className="flex h-16 items-center justify-center gap-3 rounded-3xl bg-brand text-lg font-bold text-white active:bg-brand-600"
       >
         <ScanLine className="h-6 w-6" /> {t('merchant.home.accept')}
       </Link>
 
       <section>
         <div className="mb-2 flex items-center">
-          <h2 className="text-sm font-semibold text-mist">{t('merchant.home.recent')}</h2>
-          <Link to="/merchant/transactions" className="ml-auto flex items-center text-xs text-mist">
+          <h2 className="text-sm font-semibold text-muted">{t('merchant.home.recent')}</h2>
+          <Link
+            to="/merchant/transactions"
+            className="ml-auto flex items-center text-xs text-muted"
+          >
             {t('merchant.home.seeAll')} <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>

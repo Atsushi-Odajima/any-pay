@@ -49,7 +49,7 @@ export function MerchantWithdrawPage() {
       }}
     >
       <Card>
-        <p className="text-xs text-mist">{t('merchant.withdraw.available')}</p>
+        <p className="text-xs text-muted">{t('merchant.withdraw.available')}</p>
         <p className="text-2xl font-bold">{formatYen(balance)}</p>
       </Card>
       <AmountInput value={amount} onChange={setAmount} error={error} autoFocus />
@@ -61,7 +61,7 @@ export function MerchantWithdrawPage() {
       >
         {t('merchant.withdraw.all')}
       </Button>
-      <p className="text-xs text-ink-400">{t('merchant.withdraw.demoNote')}</p>
+      <p className="text-xs text-faint">{t('merchant.withdraw.demoNote')}</p>
       <ErrorMessage error={withdraw.error} />
       <Button
         type="submit"

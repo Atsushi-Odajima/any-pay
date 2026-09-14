@@ -127,7 +127,7 @@ function DynamicQrFlow({
   const closed = !r || r.status !== 'open' || secondsLeft === 0;
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-sm text-mist">{t('merchant.accept.showToCustomer')}</p>
+      <p className="text-sm text-muted">{t('merchant.accept.showToCustomer')}</p>
       <p className="text-4xl font-bold tracking-tight">{formatYen(r?.amount ?? amount ?? 0)}</p>
       <div className="relative">
         <QrCode
@@ -142,9 +142,9 @@ function DynamicQrFlow({
           </div>
         )}
       </div>
-      <p className="font-mono text-xs text-mist">
+      <p className="font-mono text-xs text-muted">
         {closed ? '—' : t('merchant.accept.remaining', { time: formatCountdown(secondsLeft) })}
-        <span className="ml-2 text-ink-400">{t('merchant.accept.valid5min')}</span>
+        <span className="ml-2 text-faint">{t('merchant.accept.valid5min')}</span>
       </p>
       <ErrorMessage error={cancel.error} />
       <div className="flex w-full gap-3">
@@ -202,7 +202,7 @@ function ScanTokenFlow({
             }
           }}
         />
-        <p className="text-center text-xs text-mist">{t('merchant.accept.readHint')}</p>
+        <p className="text-center text-xs text-muted">{t('merchant.accept.readHint')}</p>
       </div>
     );
   }
@@ -220,7 +220,7 @@ function ScanTokenFlow({
       }}
     >
       <Card className="flex items-center gap-2 text-sm">
-        <Check className="h-4 w-4 text-lime" /> {t('merchant.accept.readOk')}
+        <Check className="h-4 w-4 text-brand" /> {t('merchant.accept.readOk')}
       </Card>
       <AmountInput
         value={amount}
@@ -260,15 +260,15 @@ function AcceptDone({ tx, onNext }: { tx: Transaction; onNext: () => void }) {
   return (
     <div className="flex flex-col items-center gap-4 px-6 pt-10 text-center">
       <div className="relative">
-        <span className="absolute inset-0 rounded-full bg-lime/40 animate-ring" />
-        <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-lime text-ink animate-pop">
+        <span className="absolute inset-0 rounded-full bg-brand/40 animate-ring" />
+        <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-brand text-white animate-pop">
           <Check className="h-12 w-12" strokeWidth={3} />
         </div>
       </div>
       <h2 className="text-xl font-bold">{t('merchant.accept.done')}</h2>
       <p className="text-4xl font-bold tracking-tight">{formatYen(tx.amount)}</p>
       {meta.payer_name && (
-        <p className="text-sm text-mist">
+        <p className="text-sm text-muted">
           {meta.payer_name}
           {meta.payer_handle ? ` (@${meta.payer_handle})` : ''}
         </p>
