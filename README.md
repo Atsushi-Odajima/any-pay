@@ -50,7 +50,7 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 | バックエンド | Supabase：Auth（Phone OTP）/ Postgres / RLS / RPC（PL/pgSQL, security definer）/ Realtime / Edge Functions（Deno：チャージ API・サンドボックス・webhook） |
 | テスト | Vitest（純粋ロジック）、SQL テスト（RPC・制約・RLS をローカル PostgreSQL で検証）、Playwright（決済フロー 1 本） |
 | デプロイ | Cloudflare Pages（フロント）、Supabase Free Tier |
-| ブランド / UI | 白×オレンジ（`#FF6B1A`）のライトテーマ。ロゴは前傾した APY モノグラム + 青（`#2F6BFF`）の丸（`src/shared/ui/Logo.tsx`、`public/favicon.svg`、PWA アイコン） |
+| ブランド / UI | 白×オレンジ（`#FF6B1A`）のライトテーマ。ロゴは直立・幅広の APY モノグラム + 中央下の青（`#2F6BFF`）の丸（`src/shared/ui/Logo.tsx`、`public/favicon.svg`、PWA アイコン） |
 
 ## 構成図
 
