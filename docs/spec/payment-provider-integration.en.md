@@ -1,3 +1,5 @@
+<p align="center"><img src="../logo.png" alt="Any Pay" width="260"></p>
+
 # Any Pay Payment Provider Integration Specification (Balance Top-ups)
 
 Audience: engineers at payment service providers (PSPs) offering Any Pay balance top-ups via credit card, bank connectivity (direct debit / bank transfer) or other electronic payments (convenience store, e-money, wallets)

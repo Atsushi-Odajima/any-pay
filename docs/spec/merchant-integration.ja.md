@@ -1,3 +1,5 @@
+<p align="center"><img src="../logo.png" alt="Any Pay" width="260"></p>
+
 # Any Pay 加盟店向け 連携仕様書
 
 対象：加盟店の POS / レジ / 店舗システムを Any Pay と接続する開発者

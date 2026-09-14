@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { ShieldCheck, Store, User } from 'lucide-react';
-import { Card, ListRow, PageHeader } from '@/shared/ui';
+import { Card, ListRow, Logo, PageHeader } from '@/shared/ui';
 import { useT } from '@/shared/i18n';
 import { useManuals, type ManualId } from '../content';
 
@@ -17,6 +17,9 @@ export function GuideIndexPage() {
     <>
       <PageHeader title={t('guide.title')} back="/more" />
       <div className="flex flex-col gap-4 px-4 pb-6">
+        <div className="flex justify-center py-3">
+          <Logo size={48} />
+        </div>
         <p className="text-sm text-muted">{t('guide.lead')}</p>
         <Card className="p-0">
           {manuals.map((m) => (
