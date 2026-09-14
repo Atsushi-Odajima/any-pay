@@ -1,11 +1,21 @@
 import { cn } from '@/shared/lib/cn';
 
 /**
- * Any Pay のロゴマーク。オレンジのスクワークル（角丸四角）に、幾何学的な小文字 "a"
- * （円形のボウル + 右のステム）。カウンター（穴）を角丸の四角にして QR のモジュールを暗示する。
- * public/favicon.svg / icons と同じ図形
+ * Any Pay のロゴマーク：AP モノグラム + 青いピリオド。
+ * オレンジのグラデーション角丸四角に白い「A」「P」（丸いストローク）、右下に青（#2F6BFF）の丸を
+ * ピリオドとして置いてアクセントにする。public/favicon.svg / PWA アイコンと同じ図形。
+ * `onLight` は白地に置く版（文字がオレンジ、背景なし）
  */
-export function LogoMark({ size = 40, className }: { size?: number; className?: string }) {
+export function LogoMark({
+  size = 40,
+  onLight = false,
+  className,
+}: {
+  size?: number;
+  onLight?: boolean;
+  className?: string;
+}) {
+  const letter = onLight ? '#ff6b1a' : '#ffffff';
   return (
     <svg
       width={size}
@@ -15,21 +25,29 @@ export function LogoMark({ size = 40, className }: { size?: number; className?: 
       aria-label="Any Pay"
       className={cn('shrink-0', className)}
     >
-      <defs>
-        <linearGradient id="ap-logo-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ff8a3d" />
-          <stop offset="1" stopColor="#ff5a0f" />
-        </linearGradient>
-        <mask id="ap-logo-m">
-          <rect width="100" height="100" fill="#fff" />
-          <rect x="33" y="42" width="26" height="26" rx="8" fill="#000" />
-        </mask>
-      </defs>
-      <rect width="100" height="100" rx="26" fill="url(#ap-logo-g)" />
-      <g fill="#fff" mask="url(#ap-logo-m)">
-        <circle cx="46" cy="55" r="26.5" />
-        <rect x="61.5" y="28.5" width="11" height="53" rx="5.5" />
+      {!onLight && (
+        <>
+          <defs>
+            <linearGradient id="ap-logo-g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#ff8a3d" />
+              <stop offset="1" stopColor="#ff5a0f" />
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx="26" fill="url(#ap-logo-g)" />
+        </>
+      )}
+      <g
+        transform="translate(-4 0)"
+        fill="none"
+        stroke={letter}
+        strokeWidth="11"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M19 76 L38 27 L57 76 M27 59 H49" />
+        <path d="M66 76 V26 H72 a13 13 0 0 1 0 26 H66" />
       </g>
+      <circle cx="89" cy="70" r="6.5" fill="#2f6bff" />
     </svg>
   );
 }
@@ -38,15 +56,17 @@ export function LogoMark({ size = 40, className }: { size?: number; className?: 
 export function Logo({
   size = 32,
   wordmark = true,
+  onLight = false,
   className,
 }: {
   size?: number;
   wordmark?: boolean;
+  onLight?: boolean;
   className?: string;
 }) {
   return (
     <span className={cn('inline-flex items-center gap-2.5', className)}>
-      <LogoMark size={size} />
+      <LogoMark size={size} onLight={onLight} />
       {wordmark && (
         <span
           className="font-bold tracking-tight text-fg"
