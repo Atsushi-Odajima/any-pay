@@ -85,7 +85,7 @@ export function SecurityPage() {
                 aria-checked={biometricsEnabled}
                 disabled={bioAvailable === false}
                 onClick={toggleBiometrics}
-                className={`relative h-7 w-12 rounded-full transition-colors ${biometricsEnabled ? 'bg-lime' : 'bg-ink-500'} disabled:opacity-40`}
+                className={`relative h-7 w-12 rounded-full transition-colors ${biometricsEnabled ? 'bg-brand' : 'bg-line'} disabled:opacity-40`}
               >
                 <span
                   className={`absolute top-0.5 h-6 w-6 rounded-full bg-white transition-all ${biometricsEnabled ? 'left-[22px]' : 'left-0.5'}`}
@@ -95,8 +95,8 @@ export function SecurityPage() {
             chevron={false}
           />
         </Card>
-        <Card className="flex gap-3 text-xs text-mist">
-          <ShieldCheck className="h-5 w-5 shrink-0 text-lime" />
+        <Card className="flex gap-3 text-xs text-muted">
+          <ShieldCheck className="h-5 w-5 shrink-0 text-brand" />
           <p>{t('security.note')}</p>
         </Card>
       </div>

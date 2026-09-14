@@ -38,7 +38,7 @@ export function TransactionDetailPage() {
       <PageHeader title={t('history.detail')} back />
       <div className="flex flex-col gap-4 px-4 pb-6">
         <div className="py-4 text-center">
-          <p className="text-sm text-mist">{title}</p>
+          <p className="text-sm text-muted">{title}</p>
           <p className="mt-1 text-4xl font-bold tracking-tight">
             {primary ? formatYen(primary.amount, { sign: true }) : formatYen(tx.data.amount)}
           </p>
@@ -58,7 +58,7 @@ export function TransactionDetailPage() {
         </div>
 
         <Card>
-          <dl className="divide-y divide-ink-700 text-sm">
+          <dl className="divide-y divide-line text-sm">
             <Row label={t('history.type')} value={txTypeLabel(tx.data.type)} />
             <Row
               label={t('history.dateTime')}
@@ -97,10 +97,10 @@ export function TransactionDetailPage() {
 
         {myLines.length > 1 && (
           <Card>
-            <p className="mb-2 text-xs text-mist">{t('history.ledgerMine')}</p>
+            <p className="mb-2 text-xs text-muted">{t('history.ledgerMine')}</p>
             {myLines.map((l) => (
               <div key={l.id} className="flex justify-between py-1 text-sm">
-                <span className="font-mono text-xs text-mist">{l.wallet_id.slice(0, 8)}…</span>
+                <span className="font-mono text-xs text-muted">{l.wallet_id.slice(0, 8)}…</span>
                 <span>
                   {formatYen(l.amount, { sign: true })} → {formatYen(l.balance_after)}
                 </span>
@@ -116,7 +116,7 @@ export function TransactionDetailPage() {
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 py-2">
-      <dt className="shrink-0 text-mist">{label}</dt>
+      <dt className="shrink-0 text-muted">{label}</dt>
       <dd className="text-right break-all">{value}</dd>
     </div>
   );

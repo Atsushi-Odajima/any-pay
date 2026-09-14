@@ -23,8 +23,8 @@ export function MerchantRegisterPage() {
     <>
       <PageHeader title={t('merchant.register.title')} back="/more" />
       <div className="flex flex-col gap-4 px-4">
-        <div className="flex items-center gap-3 rounded-2xl bg-ink-800 p-4 text-sm text-mist">
-          <Store className="h-6 w-6 shrink-0 text-lime" />
+        <div className="flex items-center gap-3 rounded-2xl bg-surface p-4 text-sm text-muted">
+          <Store className="h-6 w-6 shrink-0 text-brand" />
           {t('merchant.register.lead')}
         </div>
         <form

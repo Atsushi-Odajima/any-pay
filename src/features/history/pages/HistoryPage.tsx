@@ -47,7 +47,7 @@ export function HistoryPage() {
           type="button"
           aria-label={t('history.prevMonth')}
           onClick={() => setMonth((m) => shiftMonth(m, -1))}
-          className="rounded-full p-2 hover:bg-ink-800"
+          className="rounded-full p-2 hover:bg-surface-2"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -57,7 +57,7 @@ export function HistoryPage() {
           aria-label={t('history.nextMonth')}
           disabled={month >= currentMonthKey()}
           onClick={() => setMonth((m) => shiftMonth(m, 1))}
-          className="rounded-full p-2 hover:bg-ink-800 disabled:opacity-30"
+          className="rounded-full p-2 hover:bg-surface-2 disabled:opacity-30"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -70,7 +70,7 @@ export function HistoryPage() {
             onClick={() => setType(f.value)}
             className={cn(
               'shrink-0 rounded-full border px-3 py-1 text-xs transition-colors',
-              type === f.value ? 'border-lime bg-lime/10 text-lime' : 'border-ink-600 text-mist',
+              type === f.value ? 'border-brand bg-brand/10 text-brand' : 'border-line text-muted',
             )}
           >
             {f.label}
@@ -85,7 +85,7 @@ export function HistoryPage() {
         ) : (
           groups.map(([date, rows]) => (
             <section key={date}>
-              <h2 className="mb-1 px-1 text-xs font-semibold text-mist">{date}</h2>
+              <h2 className="mb-1 px-1 text-xs font-semibold text-muted">{date}</h2>
               <Card className="p-0">
                 {rows.map((line) => (
                   <TransactionRow

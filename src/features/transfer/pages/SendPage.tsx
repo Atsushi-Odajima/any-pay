@@ -116,7 +116,7 @@ function SendFlow({
               type="button"
               aria-label={t('send.scanAria')}
               onClick={() => setStep('scan')}
-              className="rounded-full p-2 hover:bg-ink-800"
+              className="rounded-full p-2 hover:bg-surface-2"
             >
               <ScanLine className="h-5 w-5" />
             </button>
@@ -130,15 +130,15 @@ function SendFlow({
             <div className="grid grid-cols-2 gap-3">
               <Link
                 to="/receive"
-                className="flex items-center gap-2 rounded-2xl bg-ink-800 p-4 text-sm font-medium hover:bg-ink-700"
+                className="flex items-center gap-2 rounded-2xl bg-surface p-4 text-sm font-medium hover:bg-surface-2"
               >
-                <Download className="h-5 w-5 text-lime" /> {t('send.receive')}
+                <Download className="h-5 w-5 text-brand" /> {t('send.receive')}
               </Link>
               <Link
                 to="/split"
-                className="flex items-center gap-2 rounded-2xl bg-ink-800 p-4 text-sm font-medium hover:bg-ink-700"
+                className="flex items-center gap-2 rounded-2xl bg-surface p-4 text-sm font-medium hover:bg-surface-2"
               >
-                <Users className="h-5 w-5 text-lime" /> {t('send.split')}
+                <Users className="h-5 w-5 text-brand" /> {t('send.split')}
               </Link>
             </div>
             <ProfilePicker
@@ -186,7 +186,7 @@ function SendFlow({
             <Avatar name={to.display_name} url={to.avatar_url} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold">{to.display_name}</p>
-              <p className="text-xs text-mist">@{to.handle}</p>
+              <p className="text-xs text-muted">@{to.handle}</p>
             </div>
             {step === 'amount' && (
               <Button size="sm" variant="ghost" onClick={() => setStep('pick')}>
@@ -219,7 +219,7 @@ function SendFlow({
               onChange={(e) => setMemo(e.target.value)}
               maxLength={100}
             />
-            <p className="text-xs text-mist">
+            <p className="text-xs text-muted">
               {t('send.balance', { balance: formatYen(balance) })}
             </p>
             <Button type="submit" size="lg" full disabled={amount === null || !!amountError}>
@@ -231,13 +231,13 @@ function SendFlow({
         {step === 'confirm' && to && amount !== null && (
           <>
             <div className="py-4 text-center">
-              <p className="text-sm text-mist">{t('send.amount')}</p>
+              <p className="text-sm text-muted">{t('send.amount')}</p>
               <p className="mt-1 text-5xl font-bold tracking-tight">{formatYen(amount)}</p>
-              {memo && <p className="mt-2 text-sm text-mist">“{memo}”</p>}
+              {memo && <p className="mt-2 text-sm text-muted">“{memo}”</p>}
             </div>
             <Card>
               <div className="flex justify-between text-sm">
-                <span className="text-mist">{t('send.balanceAfter')}</span>
+                <span className="text-muted">{t('send.balanceAfter')}</span>
                 <span>{formatYen(balance - amount)}</span>
               </div>
             </Card>

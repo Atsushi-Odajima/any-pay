@@ -20,7 +20,7 @@ export function TabLayout() {
       </main>
       <nav
         aria-label={t('nav.main')}
-        className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-md border-t border-ink-700 bg-ink/95 backdrop-blur no-print"
+        className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-md border-t border-line bg-canvas/95 backdrop-blur no-print"
         style={{ paddingBottom: 'var(--safe-bottom)' }}
       >
         <ul className="flex h-16 items-stretch">
@@ -32,7 +32,7 @@ export function TabLayout() {
                 className={({ isActive }) =>
                   cn(
                     'flex h-full flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors',
-                    isActive ? 'text-lime' : 'text-mist hover:text-white',
+                    isActive ? 'text-brand' : 'text-muted hover:text-fg',
                   )
                 }
               >

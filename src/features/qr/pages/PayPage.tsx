@@ -3,7 +3,7 @@ import { RefreshCw, ScanLine, QrCode as QrIcon, Plus, ChevronRight } from 'lucid
 import { useMyProfile } from '@/features/auth/hooks';
 import { useMyWallet } from '@/features/wallet/hooks';
 import { useNotificationStream } from '@/features/notifications/hooks';
-import { Button, ErrorMessage, toast } from '@/shared/ui';
+import { Button, ErrorMessage, toast, Logo } from '@/shared/ui';
 import { formatYen } from '@/shared/lib/money';
 import { cn } from '@/shared/lib/cn';
 import { useT } from '@/shared/i18n';
@@ -63,16 +63,16 @@ export function PayPage() {
     <div className="flex min-h-[calc(100dvh-4.5rem)] flex-col">
       <header className="flex items-center gap-3 px-4 pt-[calc(0.75rem+var(--safe-top))] pb-2">
         <div>
-          <p className="text-xs text-mist">{t('pay.balanceFrom')}</p>
+          <p className="text-xs text-muted">{t('pay.balanceFrom')}</p>
           <p className="text-2xl font-bold tracking-tight">
             {wallet.data ? formatYen(wallet.data.balance_cache) : '—'}
           </p>
         </div>
         <Link
           to="/charge"
-          className="ml-auto flex items-center gap-1 rounded-full bg-ink-700 px-3 py-1.5 text-xs font-semibold text-white"
+          className="ml-auto flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1.5 text-xs font-semibold text-fg"
         >
-          <Plus className="h-3.5 w-3.5 text-lime" /> {t('pay.charge')}
+          <Plus className="h-3.5 w-3.5 text-brand" /> {t('pay.charge')}
         </Link>
       </header>
 
@@ -80,17 +80,15 @@ export function PayPage() {
         <div className="flex flex-1 flex-col items-center gap-4 px-4 pb-4">
           <section
             key={token.data?.token ?? 'pending'}
-            className="w-full rounded-3xl bg-white p-5 text-ink shadow-[0_10px_40px_rgba(0,0,0,0.35)] animate-fade-up"
+            className="w-full rounded-3xl border border-line bg-white p-5 text-fg shadow-[0_12px_32px_rgba(20,20,30,0.10)] animate-fade-up"
           >
             <div className="mb-3 flex items-center">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold tracking-widest text-neutral-500">
-                  {t('pay.brand')}
-                </p>
+                <Logo size={22} />
                 <p className="truncate text-base font-bold">{profile.data?.display_name ?? '—'}</p>
                 <p className="truncate text-xs text-neutral-500">@{profile.data?.handle ?? ''}</p>
               </div>
-              <span className="ml-auto rounded-full bg-lime px-2.5 py-1 text-[11px] font-bold text-ink">
+              <span className="ml-auto rounded-full bg-brand px-2.5 py-1 text-[11px] font-bold text-white">
                 {t('pay.balanceBadge')}
               </span>
             </div>
@@ -123,7 +121,7 @@ export function PayPage() {
                 <div
                   className={cn(
                     'h-full rounded-full transition-[width] duration-1000 ease-linear',
-                    urgent ? 'bg-danger' : 'bg-lime-600',
+                    urgent ? 'bg-danger' : 'bg-brand-600',
                   )}
                   style={{ width: `${progress}%` }}
                 />
@@ -145,7 +143,7 @@ export function PayPage() {
                 <button
                   type="button"
                   onClick={() => token.refetch()}
-                  className="ml-auto flex items-center gap-1 rounded-full px-2 py-1 font-semibold text-ink hover:bg-neutral-100"
+                  className="ml-auto flex items-center gap-1 rounded-full px-2 py-1 font-semibold text-fg hover:bg-neutral-100"
                 >
                   <RefreshCw className={cn('h-3.5 w-3.5', token.isFetching && 'animate-spin')} />{' '}
                   {t('pay.refresh')}
@@ -154,26 +152,26 @@ export function PayPage() {
             </div>
           </section>
 
-          <p className="px-2 text-center text-xs text-mist">{t('pay.showHint')}</p>
+          <p className="px-2 text-center text-xs text-muted">{t('pay.showHint')}</p>
           <ErrorMessage error={token.error} />
 
           <Link
             to="/history"
-            className="flex w-full items-center rounded-2xl bg-ink-800 px-4 py-3 text-sm"
+            className="flex w-full items-center rounded-2xl bg-surface px-4 py-3 text-sm"
           >
             <span>{t('pay.recentPayments')}</span>
-            <ChevronRight className="ml-auto h-4 w-4 text-ink-400" />
+            <ChevronRight className="ml-auto h-4 w-4 text-faint" />
           </Link>
         </div>
       ) : (
         <div className="flex flex-1 flex-col gap-3 px-4 pb-4">
           <QrScanner onResult={onScan} />
-          <p className="text-center text-xs text-mist">{t('pay.scanHint')}</p>
+          <p className="text-center text-xs text-muted">{t('pay.scanHint')}</p>
         </div>
       )}
 
       <div className="sticky bottom-[calc(4.5rem+var(--safe-bottom))] flex justify-center px-4 pb-3 pt-1">
-        <div className="flex w-full max-w-xs rounded-full bg-ink-800 p-1 shadow-lg" role="tablist">
+        <div className="flex w-full max-w-xs rounded-full bg-surface p-1 shadow-lg" role="tablist">
           <button
             type="button"
             role="tab"
@@ -181,7 +179,7 @@ export function PayPage() {
             onClick={() => setMode('show')}
             className={cn(
               'flex flex-1 items-center justify-center gap-1.5 rounded-full py-2.5 text-sm font-semibold transition-colors',
-              mode === 'show' ? 'bg-lime text-ink' : 'text-mist',
+              mode === 'show' ? 'bg-brand text-white' : 'text-muted',
             )}
           >
             <QrIcon className="h-4 w-4" /> {t('pay.showQr')}
@@ -193,7 +191,7 @@ export function PayPage() {
             onClick={() => setMode('scan')}
             className={cn(
               'flex flex-1 items-center justify-center gap-1.5 rounded-full py-2.5 text-sm font-semibold transition-colors',
-              mode === 'scan' ? 'bg-lime text-ink' : 'text-mist',
+              mode === 'scan' ? 'bg-brand text-white' : 'text-muted',
             )}
           >
             <ScanLine className="h-4 w-4" /> {t('pay.scan')}

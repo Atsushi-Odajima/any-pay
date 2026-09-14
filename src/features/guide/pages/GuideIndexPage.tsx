@@ -17,7 +17,7 @@ export function GuideIndexPage() {
     <>
       <PageHeader title={t('guide.title')} back="/more" />
       <div className="flex flex-col gap-4 px-4 pb-6">
-        <p className="text-sm text-mist">{t('guide.lead')}</p>
+        <p className="text-sm text-muted">{t('guide.lead')}</p>
         <Card className="p-0">
           {manuals.map((m) => (
             <ListRow
@@ -29,7 +29,7 @@ export function GuideIndexPage() {
             />
           ))}
         </Card>
-        <p className="text-xs text-ink-400">{t('guide.printHint')}</p>
+        <p className="text-xs text-faint">{t('guide.printHint')}</p>
       </div>
     </>
   );

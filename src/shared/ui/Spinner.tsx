@@ -27,7 +27,7 @@ export function Spinner({
 export function PageLoading({ label }: { label?: string }) {
   const t = useT();
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-mist">
+    <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted">
       <Spinner size="lg" />
       <span className="text-sm">{label ?? t('common.loading')}</span>
     </div>

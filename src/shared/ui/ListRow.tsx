@@ -18,21 +18,21 @@ export function ListRow({ icon, title, subtitle, right, to, onClick, chevron, cl
   const body = (
     <>
       {icon && (
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink-700 text-mist">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-2 text-muted">
           {icon}
         </span>
       )}
       <span className="min-w-0 flex-1">
         <span className="block truncate font-medium">{title}</span>
-        {subtitle && <span className="block truncate text-xs text-mist">{subtitle}</span>}
+        {subtitle && <span className="block truncate text-xs text-muted">{subtitle}</span>}
       </span>
       {right && <span className="shrink-0 text-right">{right}</span>}
-      {(chevron ?? (to || onClick)) && <ChevronRight className="h-4 w-4 shrink-0 text-ink-400" />}
+      {(chevron ?? (to || onClick)) && <ChevronRight className="h-4 w-4 shrink-0 text-faint" />}
     </>
   );
   const cls = cn(
     'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
-    (to || onClick) && 'hover:bg-ink-700 active:bg-ink-700',
+    (to || onClick) && 'hover:bg-surface-2 active:bg-surface-2',
     className,
   );
   if (to) {

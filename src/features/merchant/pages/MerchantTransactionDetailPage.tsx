@@ -49,7 +49,7 @@ export function MerchantTransactionDetailPage() {
       <PageHeader title={t('merchant.tx.detail')} back="/merchant/transactions" />
       <div className="flex flex-col gap-4 px-4 pb-6">
         <div className="py-2 text-center">
-          <p className="text-sm text-mist">
+          <p className="text-sm text-muted">
             {d.type === 'refund' ? t('merchant.tx.refund') : t('merchant.tx.sale')}
           </p>
           <p className="mt-1 text-4xl font-bold tracking-tight">
@@ -66,7 +66,7 @@ export function MerchantTransactionDetailPage() {
           </div>
         </div>
         <Card>
-          <dl className="divide-y divide-ink-700 text-sm">
+          <dl className="divide-y divide-line text-sm">
             <Row label={t('merchant.tx.type')} value={txTypeLabel(d.type)} />
             <Row
               label={t('merchant.tx.dateTime')}
@@ -103,7 +103,7 @@ export function MerchantTransactionDetailPage() {
                 value={
                   <button
                     type="button"
-                    className="font-mono text-xs text-lime"
+                    className="font-mono text-xs text-brand"
                     onClick={() => navigate(`/merchant/transactions/${meta.refund_transaction_id}`)}
                   >
                     {meta.refund_transaction_id.slice(0, 8)}…
@@ -117,7 +117,7 @@ export function MerchantTransactionDetailPage() {
                 value={
                   <button
                     type="button"
-                    className="font-mono text-xs text-lime"
+                    className="font-mono text-xs text-brand"
                     onClick={() => navigate(`/merchant/transactions/${meta.refund_of}`)}
                   >
                     {meta.refund_of.slice(0, 8)}…
@@ -149,7 +149,7 @@ export function MerchantTransactionDetailPage() {
         onClose={() => setConfirm(false)}
         title={t('merchant.tx.refundConfirmTitle')}
       >
-        <p className="text-sm text-mist">
+        <p className="text-sm text-muted">
           {t('merchant.tx.refundConfirmBody', { amount: formatYen(d.amount) })}
         </p>
         <ErrorMessage error={refund.error} className="mt-3" />
@@ -181,7 +181,7 @@ export function MerchantTransactionDetailPage() {
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 py-2">
-      <dt className="shrink-0 text-mist">{label}</dt>
+      <dt className="shrink-0 text-muted">{label}</dt>
       <dd className="text-right break-all">{value}</dd>
     </div>
   );

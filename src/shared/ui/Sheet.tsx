@@ -33,16 +33,16 @@ export function Sheet({ open, onClose, title, children, dismissible = true }: Pr
       <button
         type="button"
         aria-label={t('ui.close')}
-        className="absolute inset-0 bg-black/70"
+        className="absolute inset-0 bg-black/40"
         onClick={dismissible ? onClose : undefined}
       />
       <div
         className={cn(
-          'relative w-full max-w-md rounded-t-3xl bg-ink-800 px-5 pt-3 animate-fade-up',
+          'relative w-full max-w-md rounded-t-3xl bg-surface px-5 pt-3 animate-fade-up',
           'pb-[calc(1.25rem+var(--safe-bottom))]',
         )}
       >
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-500" />
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" />
         {(title || dismissible) && (
           <div className="mb-3 flex items-center">
             <h2 className="flex-1 text-base font-semibold">{title}</h2>
@@ -51,7 +51,7 @@ export function Sheet({ open, onClose, title, children, dismissible = true }: Pr
                 type="button"
                 aria-label={t('ui.close')}
                 onClick={onClose}
-                className="rounded-full p-1.5 hover:bg-ink-700"
+                className="rounded-full p-1.5 hover:bg-surface-2"
               >
                 <X className="h-5 w-5" />
               </button>

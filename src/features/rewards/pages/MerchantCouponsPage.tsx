@@ -75,7 +75,7 @@ export function MerchantCouponsPage() {
                 <button
                   type="button"
                   aria-label={t('common.delete')}
-                  className="rounded-full p-2 text-mist hover:bg-ink-700 hover:text-danger"
+                  className="rounded-full p-2 text-muted hover:bg-surface-2 hover:text-danger"
                   onClick={() =>
                     remove.mutate(c.id, {
                       onSuccess: () => toast.success(t('coupons.merchant.deleted')),

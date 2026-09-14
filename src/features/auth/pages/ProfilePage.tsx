@@ -25,7 +25,7 @@ export function ProfilePage() {
       <PageHeader title={t('profile.title')} back="/more" />
       <div className="flex flex-col items-center gap-2 py-6">
         <Avatar name={profile.data.display_name} url={profile.data.avatar_url} size="lg" />
-        <p className="text-sm text-mist">@{profile.data.handle}</p>
+        <p className="text-sm text-muted">@{profile.data.handle}</p>
       </div>
       <form
         className="flex flex-col gap-4 px-4"

@@ -34,7 +34,7 @@ export function MorePage() {
             <Avatar name={profile.data.display_name} url={profile.data.avatar_url} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold">{profile.data.display_name}</p>
-              <p className="truncate text-xs text-mist">@{profile.data.handle}</p>
+              <p className="truncate text-xs text-muted">@{profile.data.handle}</p>
             </div>
             {profile.data.role !== 'user' && <Badge tone="lime">{profile.data.role}</Badge>}
           </Card>

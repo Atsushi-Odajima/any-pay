@@ -13,13 +13,13 @@ export function PageHeader({ title, back, right }: Props) {
   const navigate = useNavigate();
   const t = useT();
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-2 bg-ink/90 px-2 backdrop-blur no-print">
+    <header className="sticky top-0 z-10 flex h-14 items-center gap-2 bg-canvas/90 px-2 backdrop-blur no-print">
       {back ? (
         <button
           type="button"
           aria-label={t('ui.back')}
           onClick={() => (typeof back === 'string' ? navigate(back) : navigate(-1))}
-          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-ink-800"
+          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface-2"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>

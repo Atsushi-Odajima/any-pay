@@ -19,8 +19,8 @@ export function ErrorPage() {
         <AlertTriangle className="h-8 w-8" />
       </span>
       <h1 className="text-xl font-bold">{t('pages.errorTitle')}</h1>
-      <p className="text-sm text-mist">{t('pages.errorLead')}</p>
-      <pre className="max-w-full overflow-x-auto rounded-xl bg-ink-800 p-3 text-left text-xs text-mist">
+      <p className="text-sm text-muted">{t('pages.errorLead')}</p>
+      <pre className="max-w-full overflow-x-auto rounded-xl bg-surface p-3 text-left text-xs text-muted">
         {message}
       </pre>
       <div className="flex w-full flex-col gap-2 pt-2">

@@ -1,20 +1,28 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-ink: #0a0a0a;
-  --color-ink-900: #0f0f0f;
-  --color-ink-800: #161616;
-  --color-ink-700: #1f1f1f;
-  --color-ink-600: #2a2a2a;
-  --color-ink-500: #3a3a3a;
-  --color-ink-400: #8a8a8a;
-  --color-mist: #a3a3a3;
-  --color-lime: #c6ff4a;
-  --color-lime-600: #a8e02f;
-  --color-lime-900: #2b3d0a;
-  --color-danger: #ff5c5c;
-  --color-success: #4ade80;
-  --color-warn: #fbbf24;
+  /* ブランド：オレンジ（Jeton 系のウォレットを意識した暖色） */
+  --color-brand: #ff6b1a;
+  --color-brand-600: #ea5a0c;
+  --color-brand-700: #c94b06;
+  --color-brand-100: #ffe3d1;
+  --color-brand-50: #fff4ec;
+  /* サーフェス：白ベース */
+  --color-canvas: #fbfaf8;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f2ee;
+  --color-surface-3: #e9e6e0;
+  --color-line: #e6e3dd;
+  /* テキスト */
+  --color-fg: #1b1b1f;
+  --color-muted: #6b6b72;
+  --color-faint: #9d9da4;
+  /* ステータス（白背景でコントラストが取れる濃さ） */
+  --color-danger: #e5484d;
+  --color-success: #16a34a;
+  --color-warn: #d97706;
+
+  --shadow-card: 0 1px 2px rgb(20 20 30 / 0.04), 0 4px 14px rgb(20 20 30 / 0.05);
 
   --font-sans:
     'Inter', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI',
@@ -58,7 +66,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
 }
@@ -66,8 +74,8 @@
 html,
 body {
   height: 100%;
-  background: var(--color-ink);
-  color: #fff;
+  background: var(--color-canvas);
+  color: var(--color-fg);
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;

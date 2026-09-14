@@ -15,11 +15,12 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANT: Record<Variant, string> = {
   primary:
-    'bg-lime text-ink hover:bg-lime-600 active:bg-lime-600 disabled:bg-ink-600 disabled:text-mist',
-  secondary: 'bg-ink-700 text-white hover:bg-ink-600 active:bg-ink-600 disabled:text-mist',
-  ghost: 'bg-transparent text-white hover:bg-ink-800 active:bg-ink-800 disabled:text-mist',
-  danger: 'bg-danger/15 text-danger hover:bg-danger/25 active:bg-danger/25',
-  outline: 'border border-ink-500 text-white hover:bg-ink-800 active:bg-ink-800 disabled:text-mist',
+    'bg-brand text-white shadow-[0_6px_18px_rgba(255,107,26,0.28)] hover:bg-brand-600 active:bg-brand-600 disabled:bg-surface-3 disabled:text-faint disabled:shadow-none',
+  secondary: 'bg-surface-2 text-fg hover:bg-surface-3 active:bg-surface-3 disabled:text-faint',
+  ghost: 'bg-transparent text-fg hover:bg-surface-2 active:bg-surface-2 disabled:text-faint',
+  danger: 'bg-danger/10 text-danger hover:bg-danger/20 active:bg-danger/20',
+  outline:
+    'border border-line bg-surface text-fg hover:bg-surface-2 active:bg-surface-2 disabled:text-faint',
 };
 const SIZE: Record<Size, string> = {
   sm: 'h-9 px-3 text-sm rounded-lg',

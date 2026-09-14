@@ -81,7 +81,7 @@ export function PinSetupPage() {
         back="/settings/security"
       />
       <div className="flex flex-col gap-6 px-4 pb-6 pt-4">
-        <p className="text-center text-sm text-mist">{title}</p>
+        <p className="text-center text-sm text-muted">{title}</p>
         <PinDots length={value.length} />
         {mismatch && (
           <p className="text-center text-sm text-danger">{t('security.setup.mismatch')}</p>
@@ -104,7 +104,7 @@ export function PinSetupPage() {
         >
           {effectiveStep === 'confirm' ? t('security.setup.submit') : t('security.setup.next')}
         </Button>
-        <p className="text-xs text-ink-400">{t('security.setup.note')}</p>
+        <p className="text-xs text-faint">{t('security.setup.note')}</p>
       </div>
     </>
   );

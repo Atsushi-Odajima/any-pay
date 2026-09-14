@@ -14,9 +14,9 @@ export function ToastContainer() {
           onClick={() => dismiss(t.id)}
           className={cn(
             'pointer-events-auto max-w-md rounded-xl px-4 py-2.5 text-sm shadow-lg animate-fade-up',
-            t.tone === 'success' && 'bg-lime text-ink',
+            t.tone === 'success' && 'bg-brand text-white',
             t.tone === 'error' && 'bg-danger text-white',
-            t.tone === 'info' && 'bg-ink-600 text-white',
+            t.tone === 'info' && 'bg-fg text-white',
           )}
         >
           {t.message}

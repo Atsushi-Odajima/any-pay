@@ -45,7 +45,7 @@ export function WithdrawPage() {
         }}
       >
         <Card>
-          <p className="text-xs text-mist">{t('withdraw.available')}</p>
+          <p className="text-xs text-muted">{t('withdraw.available')}</p>
           <p className="text-2xl font-bold">{formatYen(balance)}</p>
         </Card>
         <AmountInput value={amount} onChange={setAmount} error={error} autoFocus />
@@ -57,7 +57,7 @@ export function WithdrawPage() {
         >
           {t('withdraw.all')}
         </Button>
-        <p className="text-xs text-ink-400">{t('withdraw.demoNote')}</p>
+        <p className="text-xs text-faint">{t('withdraw.demoNote')}</p>
         <ErrorMessage error={withdraw.error} />
         <Button
           type="submit"

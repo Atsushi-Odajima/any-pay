@@ -115,7 +115,7 @@ export function ChargePage() {
       <PageHeader title={t('charge.title')} back={step === 'method' ? '/' : true} />
       {step === 'method' && (
         <div className="px-4">
-          <p className="mb-3 text-sm text-mist">{t('charge.chooseMethod')}</p>
+          <p className="mb-3 text-sm text-muted">{t('charge.chooseMethod')}</p>
           {methods.isPending ? (
             <Card className="flex flex-col gap-3">
               <Skeleton className="h-10" />
@@ -144,7 +144,7 @@ export function ChargePage() {
           {!methods.isPending && !gatewayAvailable && (
             <p className="mt-3 text-xs text-warn">{t('charge.gatewayUnavailable')}</p>
           )}
-          <p className="mt-4 text-xs text-ink-400">
+          <p className="mt-4 text-xs text-faint">
             {gatewayAvailable ? t('charge.apiNote') : t('charge.demoNote')}
           </p>
         </div>
@@ -165,7 +165,7 @@ export function ChargePage() {
             error={amountError}
             quickAmounts={[1000, 3000, 5000, 10000, 30000]}
           />
-          <p className="text-xs text-mist">
+          <p className="text-xs text-muted">
             {t('charge.currentBalance', {
               balance: wallet.data ? formatYen(wallet.data.balance_cache) : '—',
             })}
@@ -178,21 +178,21 @@ export function ChargePage() {
       {step === 'confirm' && amount !== null && item && (
         <div className="flex flex-1 flex-col gap-4 px-4">
           <Card>
-            <dl className="divide-y divide-ink-700 text-sm">
+            <dl className="divide-y divide-line text-sm">
               <div className="flex justify-between py-2">
-                <dt className="text-mist">{t('charge.method')}</dt>
+                <dt className="text-muted">{t('charge.method')}</dt>
                 <dd className="text-right">
                   <span className="block">{methodLabel(item)}</span>
-                  <span className="block text-xs text-mist">{providerLabel(item)}</span>
+                  <span className="block text-xs text-muted">{providerLabel(item)}</span>
                 </dd>
               </div>
               <div className="flex justify-between py-2">
-                <dt className="text-mist">{t('charge.amount')}</dt>
+                <dt className="text-muted">{t('charge.amount')}</dt>
                 <dd className="text-lg font-bold">{formatYen(amount)}</dd>
               </div>
             </dl>
           </Card>
-          {!item.legacy && <p className="text-xs text-mist">{t('charge.confirmApiNote')}</p>}
+          {!item.legacy && <p className="text-xs text-muted">{t('charge.confirmApiNote')}</p>}
           <ErrorMessage error={charge.error ?? create.error} />
           <Button
             size="lg"

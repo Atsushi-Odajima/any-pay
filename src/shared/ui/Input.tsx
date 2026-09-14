@@ -15,20 +15,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const inputId = id ?? rest.name;
   return (
     <label className="block" htmlFor={inputId}>
-      {label && <span className="mb-1.5 block text-sm text-mist">{label}</span>}
+      {label && <span className="mb-1.5 block text-sm text-muted">{label}</span>}
       <span
         className={cn(
-          'flex h-12 items-center gap-2 rounded-xl border bg-ink-800 px-3 transition-colors',
-          'focus-within:border-lime',
-          error ? 'border-danger' : 'border-ink-600',
+          'flex h-12 items-center gap-2 rounded-xl border bg-surface px-3 transition-colors',
+          'focus-within:border-brand',
+          error ? 'border-danger' : 'border-line',
         )}
       >
-        {prefix && <span className="text-mist">{prefix}</span>}
+        {prefix && <span className="text-muted">{prefix}</span>}
         <input
           ref={ref}
           id={inputId}
           className={cn(
-            'h-full w-full bg-transparent text-base text-white outline-none placeholder:text-ink-400',
+            'h-full w-full bg-transparent text-base text-fg outline-none placeholder:text-faint',
             className,
           )}
           {...rest}
@@ -37,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       {error ? (
         <span className="mt-1 block text-xs text-danger">{error}</span>
       ) : hint ? (
-        <span className="mt-1 block text-xs text-mist">{hint}</span>
+        <span className="mt-1 block text-xs text-muted">{hint}</span>
       ) : null}
     </label>
   );

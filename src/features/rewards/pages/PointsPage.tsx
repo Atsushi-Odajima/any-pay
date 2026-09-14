@@ -17,11 +17,11 @@ export function PointsPage() {
       <PageHeader title={t('points.title')} back="/more" />
       <div className="flex flex-col gap-4 px-4 pb-6">
         <Card className="text-center">
-          <p className="text-xs text-mist">{t('points.balance')}</p>
+          <p className="text-xs text-muted">{t('points.balance')}</p>
           <p className="mt-1 text-4xl font-bold tracking-tight">
             {balance.data === undefined ? '—' : formatPoints(balance.data)}
           </p>
-          <p className="mt-2 text-xs text-mist">{t('points.note')}</p>
+          <p className="mt-2 text-xs text-muted">{t('points.note')}</p>
         </Card>
         {entries.isPending ? (
           <PageLoading />
@@ -37,7 +37,7 @@ export function PointsPage() {
                 subtitle={formatDateTime(e.created_at)}
                 right={
                   <span
-                    className={`font-semibold tabular-nums ${e.delta > 0 ? 'text-lime' : 'text-danger'}`}
+                    className={`font-semibold tabular-nums ${e.delta > 0 ? 'text-brand' : 'text-danger'}`}
                   >
                     {e.delta > 0 ? '+' : ''}
                     {e.delta} pt
