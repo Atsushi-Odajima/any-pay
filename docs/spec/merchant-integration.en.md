@@ -1,3 +1,5 @@
+<p align="center"><img src="../logo.png" alt="Any Pay" width="260"></p>
+
 # Any Pay Merchant Integration Specification
 
 Audience: engineers connecting a merchant's POS / register / store system to Any Pay

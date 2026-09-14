@@ -1,6 +1,6 @@
 import { Navigate, useParams } from 'react-router';
 import { Printer } from 'lucide-react';
-import { Button, PageHeader } from '@/shared/ui';
+import { Button, Logo, PageHeader } from '@/shared/ui';
 import { useT } from '@/shared/i18n';
 import { printPage } from '@/shared/platform/print';
 import { isManualId, useManuals } from '../content';
@@ -30,8 +30,11 @@ export function GuidePage() {
         }
       />
       <article className="print-doc px-4 pb-8">
-        <h1 className="hidden text-2xl font-bold print:block">{manual.title}</h1>
-        <p className="text-sm text-muted print:text-black">{manual.subtitle}</p>
+        <div className="flex flex-col gap-3 pt-2 pb-2">
+          <Logo size={40} />
+          <h1 className="hidden text-2xl font-bold print:block">{manual.title}</h1>
+          <p className="text-sm text-muted print:text-black">{manual.subtitle}</p>
+        </div>
 
         <nav aria-label={t('guide.toc')} className="mt-4 rounded-2xl bg-surface-2 p-4 print:hidden">
           <p className="mb-2 text-xs font-semibold text-muted">{t('guide.toc')}</p>
