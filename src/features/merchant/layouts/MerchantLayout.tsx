@@ -1,6 +1,6 @@
 import { NavLink, Outlet, Navigate } from 'react-router';
 import { ArrowLeft, Home, ScanLine, Receipt, QrCode, Ticket, ArrowUpFromLine } from 'lucide-react';
-import { PageLoading } from '@/shared/ui';
+import { BrandBar, PageLoading } from '@/shared/ui';
 import { cn } from '@/shared/lib/cn';
 import { useT } from '@/shared/i18n';
 import { useMyMerchant } from '../hooks';
@@ -22,7 +22,8 @@ export function MerchantLayout() {
   if (!merchant.data) return <Navigate to="/merchant/register" replace />;
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 bg-canvas/90 px-2 backdrop-blur no-print">
+      <BrandBar />
+      <header className="sticky top-[calc(2.75rem+var(--safe-top))] z-10 flex h-14 items-center gap-2 bg-canvas/90 px-2 backdrop-blur no-print">
         <NavLink
           to="/more"
           aria-label={t('merchant.toUser')}

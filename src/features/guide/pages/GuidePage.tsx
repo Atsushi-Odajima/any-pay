@@ -31,7 +31,9 @@ export function GuidePage() {
       />
       <article className="print-doc px-4 pb-8">
         <div className="flex flex-col gap-3 pt-2 pb-2">
-          <Logo size={40} />
+          <div className="hidden print:block">
+            <Logo size={40} />
+          </div>
           <h1 className="hidden text-2xl font-bold print:block">{manual.title}</h1>
           <p className="text-sm text-muted print:text-black">{manual.subtitle}</p>
         </div>

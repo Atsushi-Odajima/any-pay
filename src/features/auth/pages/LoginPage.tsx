@@ -40,7 +40,7 @@ export function LoginPage() {
   if (status === 'signed_in') return <Navigate to="/" replace />;
 
   return (
-    <div className="flex flex-1 flex-col px-6 pt-[calc(2rem+var(--safe-top))] pb-8">
+    <div className="flex flex-1 flex-col px-6 pt-6 pb-8">
       <div className="mb-6 flex justify-end">
         <LanguageToggle />
       </div>

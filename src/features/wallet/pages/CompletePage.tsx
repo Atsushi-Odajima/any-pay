@@ -32,7 +32,7 @@ export function CompletePage() {
       : '';
 
   return (
-    <div className="flex flex-1 flex-col items-center px-6 pt-[calc(4rem+var(--safe-top))] pb-8 text-center">
+    <div className="flex flex-1 flex-col items-center px-6 pt-12 pb-8 text-center">
       <div className="relative mb-6">
         <span className="absolute inset-0 rounded-full bg-brand/40 animate-ring" />
         <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-brand text-white animate-pop">

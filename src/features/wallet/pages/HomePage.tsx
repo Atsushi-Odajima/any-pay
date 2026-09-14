@@ -19,7 +19,7 @@ export function HomePage() {
   const unread = useUnreadCount();
 
   return (
-    <div className="flex flex-col gap-4 px-4 pt-[calc(0.75rem+var(--safe-top))] pb-4">
+    <div className="flex flex-col gap-4 px-4 pt-2 pb-4">
       <header className="flex items-center gap-2">
         <Link to="/settings/profile" className="flex min-w-0 items-center gap-2">
           <Avatar
