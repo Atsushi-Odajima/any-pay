@@ -1,9 +1,9 @@
 import { cn } from '@/shared/lib/cn';
 
 /**
- * Any Pay のロゴマーク：AP モノグラム + 青いピリオド。
- * オレンジのグラデーション角丸四角に白い「A」「P」（丸いストローク）、右下に青（#2F6BFF）の丸を
- * ピリオドとして置いてアクセントにする。public/favicon.svg / PWA アイコンと同じ図形。
+ * Any Pay のロゴマーク：APY モノグラム + 青い丸。
+ * オレンジのグラデーション角丸四角に、8° 前傾した白い「A」「P」「Y」（均一ストローク・丸い端）と、
+ * 右下に青（#2F6BFF）の丸をピリオドとして置く。public/favicon.svg / PWA アイコンと同じ図形。
  * `onLight` は白地に置く版（文字がオレンジ、背景なし）
  */
 export function LogoMark({
@@ -37,17 +37,18 @@ export function LogoMark({
         </>
       )}
       <g
-        transform="translate(-4 0)"
+        transform="skewX(-8) translate(8 0)"
         fill="none"
         stroke={letter}
-        strokeWidth="11"
+        strokeWidth="9"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M19 76 L38 27 L57 76 M27 59 H49" />
-        <path d="M66 76 V26 H72 a13 13 0 0 1 0 26 H66" />
+        <path d="M11 72 L22 30 L33 72 M15.5 57 H28.5" />
+        <path d="M41 72 V30 H49 a10.5 10.5 0 0 1 0 21 H41" />
+        <path d="M61 30 L71.5 50 L82 30 M71.5 50 V72" />
       </g>
-      <circle cx="89" cy="70" r="6.5" fill="#2f6bff" />
+      <circle cx="91" cy="68" r="8" fill="#2f6bff" />
     </svg>
   );
 }
