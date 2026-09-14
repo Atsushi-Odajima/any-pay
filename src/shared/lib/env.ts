@@ -6,6 +6,8 @@ export const env = {
   supabaseAnonKey: raw.VITE_SUPABASE_ANON_KEY ?? '',
   appName: raw.VITE_APP_NAME ?? 'Any Pay',
   isDev: raw.DEV,
+  buildId: __BUILD_ID__,
+  buildTime: __BUILD_TIME__,
 } as const;
 
 export const isSupabaseConfigured = env.supabaseUrl !== '' && env.supabaseAnonKey !== '';

@@ -16,6 +16,7 @@ import {
 import { useMyMerchant } from '@/features/merchant/hooks';
 import { Avatar, Card, ListRow, PageHeader, Badge, LanguageToggle } from '@/shared/ui';
 import { useT } from '@/shared/i18n';
+import { env } from '@/shared/lib/env';
 import { useMyProfile, useSignOut } from '../hooks';
 
 export function MorePage() {
@@ -121,7 +122,7 @@ export function MorePage() {
           <ListRow
             icon={<Info className="h-5 w-5" />}
             title={t('more.about')}
-            subtitle={t('more.aboutSub')}
+            subtitle={`${t('more.aboutSub')} · ${t('more.build', { id: env.buildId })}`}
           />
           <ListRow
             icon={<LogOut className="h-5 w-5" />}

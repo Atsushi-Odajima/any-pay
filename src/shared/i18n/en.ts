@@ -91,6 +91,7 @@ export const en: Dict = {
     language: 'Language',
     guide: 'Guides',
     guideSub: 'How to use: users, merchants, admins',
+    build: 'Build {id}',
   },
   home: {
     recent: 'Recent activity',

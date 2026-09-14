@@ -95,6 +95,7 @@ export const ja = {
     language: '表示言語',
     guide: '説明書',
     guideSub: 'ユーザー・加盟店・管理者向けの使い方',
+    build: 'ビルド {id}',
   },
   home: {
     recent: '最近の取引',
