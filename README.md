@@ -14,6 +14,18 @@ PayPay / d払い に相当する QR コード決済アプリを、Web アプリ�
 
 > **実際のお金は一切動きません。** 残高はすべて架空で、資金決済法・犯罪収益移転防止法などの要件は対象外です。
 
+## ポートフォリオとして確認する箇所
+
+| 観点 | ソース・確認方法 |
+| --- | --- |
+| 金銭処理の正本 | [supabase/migrations](supabase/migrations) のRPC・台帳制約と [tests/sql](tests/sql) |
+| チャージ連携 | [supabase/functions](supabase/functions) のサンドボックス、Stripeテスト用adapter、Webhook処理 |
+| 画面とAPIの分離 | [src/features](src/features) / [src/shared](src/shared) |
+| 端末依存機能 | `src/shared/platform/` のカメラ・認証等の境界。ネイティブiOSアプリは別の拡張計画です。 |
+
+デモを試すにはSupabaseのAuth・DB・Functionsとフロント環境変数の設定が必要です。認証コードの入力画面だけでは決済デモは完結しません。
+Stripeはテストモードの連携例です。銀行・コンビニ等との実契約による商用決済サービスを提供しているものではありません。
+
 ## デモ
 
 | | |
